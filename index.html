@@ -291,9 +291,9 @@ button{font-family:var(--f-body);cursor:pointer}
 .cancel{background:none;border:1px solid var(--azure2);color:var(--azure2);padding:1px 10px;font-size:12px}
 .cancel:hover,.cancel:focus-visible{background:rgba(90,168,255,.2);outline:none}
 
-/* Loom of fate: the timeline (past stone, present blue threads, future runes) beside the foresight panel */
+/* Loom of fate: the timeline in three layers (past stone, present blue threads, future runes) */
 .wrap{max-width:1400px}
-.loom{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:stretch}
+.loom{display:grid;grid-template-columns:minmax(0,1fr)}
 .loom>*{min-width:0}
 .loomhead{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:0 4px 8px}
 .loomhead .ttl{display:flex;align-items:center;gap:10px}
@@ -353,29 +353,6 @@ button{font-family:var(--f-body);cursor:pointer}
 #needle::before{content:"";position:absolute;top:3px;left:50%;width:14px;height:14px;transform:translate(-50%,0) rotate(45deg);background:#fff;box-shadow:0 0 12px #9fd0ff,0 0 24px #5aa8ff}
 .card{user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .card .art b.ic{position:absolute;left:50%;top:50%;width:66px;height:58px;transform:translate(-50%,-50%);background-size:cover;background-position:center;border:2px solid #e6c472;box-shadow:0 0 0 1px #2a1d0a,0 0 14px var(--tc),0 4px 8px rgba(0,0,0,.6)}
-/* foresight panel */
-.fore{background:linear-gradient(180deg,var(--panel2),var(--panel));padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.fore h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:18px;color:var(--gold2);letter-spacing:.12em;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.fore h3 small{font-family:var(--f-latin);font-size:10px;letter-spacing:.3em;color:var(--gold);font-weight:500}
-.fore .fsub{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
-.fore .fsub b{color:var(--azure2);font-weight:700}
-.fbox{position:relative;border:1px solid var(--line2);padding:8px 12px 9px;overflow:hidden;background:rgba(0,0,0,.28)}
-.fbox::after{content:"";position:absolute;right:0;top:0;bottom:0;width:48%;background:var(--thumb) 42% 30%/cover no-repeat;opacity:.28;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);pointer-events:none}
-.fbox>*{position:relative;z-index:1}
-.fbox.before{border-color:rgba(216,67,47,.65);background:linear-gradient(90deg,rgba(80,18,12,.7),rgba(26,8,6,.6))}
-.fbox.after{border-color:rgba(120,180,255,.7);background:linear-gradient(90deg,rgba(18,46,98,.75),rgba(8,14,34,.6));box-shadow:0 0 16px rgba(90,168,255,.25)}
-.fbox.err{border-color:var(--blood)}
-.fbox h4{margin:0 0 5px;font-family:var(--f-display);font-size:14px;letter-spacing:.14em;display:flex;align-items:baseline;gap:8px}
-.fbox.before h4{color:#ffb4a5}.fbox.after h4{color:var(--azure2)}.fbox h4 small{font-family:var(--f-latin);font-size:10px;letter-spacing:.24em;opacity:.8}
-.fl{margin:0 0 4px;font-size:13px;line-height:1.45}
-.fl>b{font-family:var(--f-latin);color:var(--gold2);margin-right:4px}
-.fl>span{display:block;padding-left:12px}
-.fl .ok,.fres .ok{color:#8fe0a0}.fl .bad,.fres .bad{color:#ff9a86}
-.fres{margin-top:6px;font-size:13px;border-top:1px solid rgba(255,255,255,.14);padding-top:5px;display:flex;flex-direction:column;gap:1px}
-.fres b{font-family:var(--f-latin)}
-.fnote{font-size:12px;color:var(--muted);margin:0}
-.fgo{align-self:stretch;background:linear-gradient(180deg,#24407e,#122046);color:#f3e6c4;border:1px solid var(--azure2);padding:9px 12px;font-family:var(--f-display);font-weight:900;letter-spacing:.2em;font-size:15px;box-shadow:0 0 14px rgba(90,168,255,.35)}
-.fgo:hover,.fgo:focus-visible{box-shadow:0 0 22px rgba(90,168,255,.7);outline:none}
 
 /* Class pick: parchment banners, after kevin's mockup */
 .pickscr[hidden]{display:none}
@@ -399,9 +376,10 @@ button{font-family:var(--f-body);cursor:pointer}
 .pk-row:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(60,40,10,.25)}
 .pk-row:focus-visible{outline:2px solid var(--cc);outline-offset:3px}
 .pk-row.on{border-color:var(--cc);box-shadow:0 0 0 2px #fff8e6,0 0 0 4px var(--cc),0 0 26px color-mix(in srgb,var(--cc) 55%,transparent),0 10px 26px rgba(60,40,10,.25)}
-.pk-por{position:relative;clip-path:polygon(0 0,100% 0,89% 100%,0 100%);background:100% 0/auto 100% no-repeat color-mix(in srgb,var(--cc) 70%,#000)}
+.pk-por{position:relative;clip-path:polygon(0 0,100% 0,89% 100%,0 100%);background:color-mix(in srgb,var(--cc) 70%,#000);overflow:hidden}
+.pk-por .fig{position:absolute;top:0;bottom:0;right:0;aspect-ratio:400/275;max-width:100%;background:25% 0/cover no-repeat;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
 .pk-por::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--cc) 82%,#000) 0%,color-mix(in srgb,var(--cc) 70%,#000) 30%,color-mix(in srgb,var(--cc) 30%,transparent) 48%,transparent 62%)}
-.pk-por .em{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:96px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#f3e2b0;font-family:var(--f-latin);letter-spacing:.22em;font-size:12px;text-shadow:0 1px 3px #000}
+.pk-por .em{z-index:2;position:absolute;left:12px;top:50%;transform:translateY(-50%);width:96px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#f3e2b0;font-family:var(--f-latin);letter-spacing:.22em;font-size:12px;text-shadow:0 1px 3px #000}
 .pk-por .em svg{width:76px;height:76px;filter:drop-shadow(0 0 6px rgba(0,0,0,.6))}
 .pk-inf{padding:16px 22px 14px 8px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .pk-inf h3{margin:0;display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-weight:900;font-size:27px;letter-spacing:.14em;color:var(--cc);flex-wrap:wrap;padding-right:100px}
@@ -425,7 +403,6 @@ button{font-family:var(--f-body);cursor:pointer}
 .pk-foot button:hover,.pk-foot button:focus-visible{filter:brightness(1.15);outline:none}
 
 @media (max-width:1100px){
-  .loom{grid-template-columns:1fr}
 }
 @media (max-width:820px){
   .lanes{width:60px}
@@ -540,7 +517,6 @@ button{font-family:var(--f-body);cursor:pointer}
       <div class="hint" id="hint"></div>
       <div class="tlscroll" id="tlscroll"><div class="tlwrap" id="tlwrap"><div class="tl" id="timeline"></div><div id="needle" aria-hidden="true"></div></div></div>
     </div>
-    <aside class="fore frame" id="fore" aria-live="polite"><span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span><div id="foreBody"></div></aside>
   </section>
 
   <section class="dock" id="dock">
@@ -1220,46 +1196,16 @@ function renderBoard(){
   if(first&&sk!==scrollKey){scrollKey=sk;if(sc.scrollWidth>sc.clientWidth){const lw=document.querySelector('#timeline .lanes').offsetWidth;sc.scrollLeft=Math.max(0,first.offsetLeft-lw-70)}}
   const n=$('needle'),cs=S.resolving&&document.querySelector(`#timeline [data-b="${S.resolving}"],#timeline [data-pb="${S.resolving}"]`);
   if(cs){n.style.left=(cs.offsetLeft+cs.offsetWidth/2)+'px';n.classList.add('on')}else n.classList.remove('on');
-  renderFore(fc);
   renderHint(pend);
 }
 function renderHint(pend){
   let h=hintMsg;
   if(!h&&pend)h=HINTS[pend.tg];
   if(!h&&S.busy)h='时针正在走过本回合的 3 拍……';
-  if(!h&&!S.busy)h='亮蓝色的 3 拍会在本回合结算，右侧是它们的结果预测';
+  if(!h&&!S.busy)h='亮蓝色的 3 拍会在本回合结算，交锋一栏是它们的结果';
   const el=$('hint');
   el.className='hint'+(hintMsg?' err':pend?' pend':'');
   el.innerHTML=DIAM+`<span>${h}</span>`+(pend&&!hintMsg?'<button class="cancel" id="cancelBtn">取消</button>':'');
-}
-
-/* ---------- Foresight panel: the original future against the rewritten one ---------- */
-const esTxt=r=>r.es.length?r.es.map(e=>`${e.l} ${e.d}`).join('、'):r.st&&r.st.length?`${r.st.join('、')}（不攻击）`:'敌人不出手';
-function headFor(r,bs){
-  const t=tagOf(r),el=(bs||r).es[0]?.l||'';
-  if(!t)return esTxt(r);
-  return {'弹反':`${el}中断`,'闪身':`闪开${el}`,'残影':`${el}落空`,'吟唱打断':'吟唱被打断','屏障护住':'屏障护住吟唱','盾反':'撞上盾反','拼刀失利':`拼刀输给${el}`,'镜影吞没':'攻击被镜影吞没'}[t.t]||`${esTxt(r)} · ${t.t}`;
-}
-function outFor(r,bs){
-  const p=[];
-  if(bs&&bs.took>r.took)p.push(`<em class="ok">勇者避免 ${bs.took-r.took} 点伤害</em>`+(r.took?`，仍受 ${r.took}`:''));
-  else if(r.took>0)p.push(`<em class="bad">勇者受到 ${r.took} 点伤害</em>`+(bs&&bs.took<r.took?`（多受 ${r.took-bs.took}）`:''));
-  else if(r.es.length)p.push('<em class="ok">勇者无伤</em>');
-  if(r.net>0)p.push(`造成 ${r.net} 点伤害`+(bs&&bs.net!==r.net?`（原 ${Math.max(0,bs.net)}）`:''));
-  else if(bs&&bs.net>0)p.push(`<em class="bad">不再造成伤害</em>（原 ${bs.net}）`);
-  if(r.net<0)p.push(`敌人回复 ${-r.net}`);
-  return p.join('，')||'无事发生';
-}
-const line=(r,head,out)=>`<p class="fl"><b>${roman(r.b)}</b>${head}<span>${out}</span></p>`;
-function resLine(st){
-  const F=FL(),dh=st.hp-S.hp,de=st.ehp-S.ehp;
-  return `<div class="fres"><span>勇者 HP <b>${S.hp} → ${st.hp}</b>${dh<0?` <em class="bad">(−${-dh})</em>`:' <em class="ok">(无伤害)</em>'}</span><span>${F.lane} HP <b>${S.ehp} → ${st.ehp}</b>${de<0?` (−${-de})`:de>0?` (+${de})`:''}</span>${st.over==='win'?'<span class="ok">敌人倒下</span>':st.over==='lose'?'<span class="bad">勇者倒下</span>':''}</div>`;
-}
-function renderFore(fc){
-  const foe=`--thumb:url(img/knight.jpg)`,base=fc.base.out,bst=fc.base.st;
-  const act=base.filter(r=>r.es.length||r.took||r.net||tagOf(r));
-  $('foreBody').innerHTML=`<h3>未来预览<small>FORESIGHT</small></h3><p class="fsub">${S.busy?'时间正在流动。':'不再出牌的话，本回合 3 拍会这样结算。每打出一张牌，这里都会更新。'}</p>`
-    +`<div class="fbox" style="${foe}"><h4>${S.busy?'正在结算':'本回合预测'}<small>${S.busy?'NOW':'FATE'}</small></h4>${act.length?act.map(r=>line(r,headFor(r),outFor(r))).join(''):'<p class="fnote">这几拍没有任何交锋。</p>'}${resLine(bst)}</div>`;
 }
 
 /* ---------- Input: pick a card, then a beat ---------- */
@@ -1307,7 +1253,7 @@ let pickSel='warrior';
 function pkRow(k){
   const C=CLASSES[k],P=PICK[k],cards=[...new Set(C.deck)];
   return `<button class="pk-row" data-cl="${k}" style="--cc:${P.col}" aria-pressed="false">
-    <span class="pk-por" style="background-image:url(img/hero_${k}.jpg)"><span class="em">${COMPASS}${P.la}</span></span>
+    <span class="pk-por"><span class="fig" style="background-image:url(img/hero_${k}.jpg)"></span><span class="em">${COMPASS}${P.la}</span></span>
     <span class="pk-inf"><h3>${COMPASS}${C.n} · ${C.title}<small>${P.la}</small></h3>
       <span class="pk-st"><span>${PI.hp}生命 ${C.hp}</span><span>${PI.sand}每回合 ${C.sand||3} 粒时之砂</span><span>${PI.atk}每${C.atk.every===1?'':` ${C.atk.every} `}拍自动攻击 ${C.atk.dmg} 点</span></span>
       <p class="pk-pitch">${C.pitch}</p>
