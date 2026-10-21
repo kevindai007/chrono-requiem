@@ -50,7 +50,8 @@ button{font-family:var(--f-body);cursor:pointer}
 .arena{display:grid;grid-template-columns:1fr 1fr;height:340px;background:#0b0910;overflow:hidden}
 .half{position:relative;overflow:hidden;min-width:0}
 .half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transition:transform .18s ease-out}
-.half.hero .art{background-image:url(img/hero.jpg);background-position:42% 30%;transform-origin:30% 50%}
+.half.hero .art{background-image:var(--hero,url(img/hero.jpg));background-size:auto 100%;background-position:25% 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);transform-origin:30% 50%}
+.half.hero::before{content:"";position:absolute;inset:-20px;background:var(--hero,url(img/hero.jpg)) 25% 0/cover no-repeat;filter:blur(14px) brightness(.55) saturate(1.1)}
 .half.foe .art{background-image:url(img/knight.jpg);background-position:55% 25%}
 .half.hero .art.lunge{transform:translateX(18px) scale(1.04)}
 .half.foe .art.lunge{transform:translateX(-18px) scale(1.04)}
@@ -335,7 +336,6 @@ button{font-family:var(--f-body);cursor:pointer}
 .mid em{font-style:normal;font-family:var(--f-latin);font-weight:700;font-size:12px}
 .mid em.tk{color:#ff8a72}.mid em.dl{color:var(--gold2)}.mid em.hl{color:#c9a0ff}
 .mid .old{font-size:10px;color:var(--muted);text-decoration:line-through}
-.slot.chg .mid .mt{outline:1px solid var(--azure2);box-shadow:0 0 12px rgba(90,168,255,.6)}
 /* past: frozen stone */
 .slot.past{flex:0 0 76px;background:repeating-linear-gradient(160deg,#1b1a20 0 9px,#17161b 9px 18px);filter:grayscale(1);opacity:.8}
 .slot.past .bn span{border-color:#5a5860;color:#9d9aa4;background:#1d1c22;box-shadow:none}
@@ -347,25 +347,10 @@ button{font-family:var(--f-body);cursor:pointer}
 .slot.hit .chip{animation:lit .5s ease-out}
 @keyframes lit{0%{filter:brightness(2.4);transform:scale(1.15)}100%{filter:none}}
 /* drag preview */
-.slot.drop{background-color:rgba(90,168,255,.16)}
-.slot.drop::after{content:"";position:absolute;left:50%;top:52%;width:92px;height:92px;translate:-50% -50%;pointer-events:none;z-index:3;opacity:.9;animation:spin 7s linear infinite;filter:drop-shadow(0 0 8px #5aa8ff);
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%239fd0ff'%3E%3Ccircle cx='50' cy='50' r='46' stroke-width='1.5' stroke-dasharray='3 4'/%3E%3Ccircle cx='50' cy='50' r='38' stroke-width='1'/%3E%3Cpath d='M50 4v10M50 86v10M4 50h10M86 50h10M18 18l7 7M75 75l7 7M82 18l-7 7M25 75l-7 7' stroke-width='1.5'/%3E%3Cpath d='M50 22l8 28-8 28-8-28z' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat}
-.slot.drop.bad{background-color:rgba(216,67,47,.16)}
-.slot.drop.bad::after{filter:drop-shadow(0 0 8px #d8432f) hue-rotate(160deg)}
-.chip.o{opacity:.32;border-style:dotted!important;filter:grayscale(.6);box-shadow:none!important}
-.chip.nw{outline:1px solid var(--azure2);outline-offset:2px;box-shadow:0 0 14px var(--azure)!important;animation:nwglow 1.2s ease-in-out infinite;opacity:1!important;filter:none!important}
-@keyframes nwglow{50%{outline-color:transparent;box-shadow:0 0 4px var(--azure)}}
-#threads{position:absolute;left:0;top:0;pointer-events:none;z-index:4;overflow:visible}
-#threads path{fill:none;stroke:#9fd0ff;stroke-width:2;stroke-dasharray:6 5;filter:drop-shadow(0 0 4px #5aa8ff);animation:flow .8s linear infinite}
-@keyframes flow{to{stroke-dashoffset:-11}}
 #needle{position:absolute;top:0;bottom:0;left:0;width:4px;margin-left:-2px;z-index:5;pointer-events:none;opacity:0;transition:left .45s cubic-bezier(.5,0,.3,1),opacity .3s;
   background:linear-gradient(180deg,#fff,#bfe2ff 30%,#5aa8ff 75%,rgba(90,168,255,0));box-shadow:0 0 12px #5aa8ff,0 0 28px rgba(90,168,255,.7)}
 #needle.on{opacity:1}
 #needle::before{content:"";position:absolute;top:3px;left:50%;width:14px;height:14px;transform:translate(-50%,0) rotate(45deg);background:#fff;box-shadow:0 0 12px #9fd0ff,0 0 24px #5aa8ff}
-.dragcard{position:fixed;z-index:40;pointer-events:none;margin:0;width:140px;height:252px;transform:translate(-50%,16px) scale(.6) rotate(-6deg);transform-origin:50% 0;transition:none!important}
-.dragcard .fr{box-shadow:0 0 0 1px #3a2a10,0 0 0 4px var(--azure2),0 0 34px var(--azure),0 18px 30px rgba(0,0,0,.6)!important}
-.card.dragging{opacity:.35}
-body.dragging,body.dragging *{cursor:grabbing!important;user-select:none}
 .card{user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .card .art b.ic{position:absolute;left:50%;top:50%;width:66px;height:58px;transform:translate(-50%,-50%);background-size:cover;background-position:center;border:2px solid #e6c472;box-shadow:0 0 0 1px #2a1d0a,0 0 14px var(--tc),0 4px 8px rgba(0,0,0,.6)}
 /* foresight panel */
@@ -375,7 +360,7 @@ body.dragging,body.dragging *{cursor:grabbing!important;user-select:none}
 .fore .fsub{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
 .fore .fsub b{color:var(--azure2);font-weight:700}
 .fbox{position:relative;border:1px solid var(--line2);padding:8px 12px 9px;overflow:hidden;background:rgba(0,0,0,.28)}
-.fbox::after{content:"";position:absolute;right:0;top:0;bottom:0;width:48%;background:var(--thumb) center 25%/cover no-repeat;opacity:.28;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);pointer-events:none}
+.fbox::after{content:"";position:absolute;right:0;top:0;bottom:0;width:48%;background:var(--thumb) 42% 30%/cover no-repeat;opacity:.28;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);pointer-events:none}
 .fbox>*{position:relative;z-index:1}
 .fbox.before{border-color:rgba(216,67,47,.65);background:linear-gradient(90deg,rgba(80,18,12,.7),rgba(26,8,6,.6))}
 .fbox.after{border-color:rgba(120,180,255,.7);background:linear-gradient(90deg,rgba(18,46,98,.75),rgba(8,14,34,.6));box-shadow:0 0 16px rgba(90,168,255,.25)}
@@ -414,8 +399,8 @@ body.dragging,body.dragging *{cursor:grabbing!important;user-select:none}
 .pk-row:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(60,40,10,.25)}
 .pk-row:focus-visible{outline:2px solid var(--cc);outline-offset:3px}
 .pk-row.on{border-color:var(--cc);box-shadow:0 0 0 2px #fff8e6,0 0 0 4px var(--cc),0 0 26px color-mix(in srgb,var(--cc) 55%,transparent),0 10px 26px rgba(60,40,10,.25)}
-.pk-por{position:relative;clip-path:polygon(0 0,100% 0,89% 100%,0 100%);background:center 22%/cover no-repeat #222}
-.pk-por::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--cc) 82%,#000) 0%,color-mix(in srgb,var(--cc) 40%,transparent) 26%,transparent 52%)}
+.pk-por{position:relative;clip-path:polygon(0 0,100% 0,89% 100%,0 100%);background:100% 0/auto 100% no-repeat color-mix(in srgb,var(--cc) 70%,#000)}
+.pk-por::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--cc) 82%,#000) 0%,color-mix(in srgb,var(--cc) 70%,#000) 30%,color-mix(in srgb,var(--cc) 30%,transparent) 48%,transparent 62%)}
 .pk-por .em{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:96px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#f3e2b0;font-family:var(--f-latin);letter-spacing:.22em;font-size:12px;text-shadow:0 1px 3px #000}
 .pk-por .em svg{width:76px;height:76px;filter:drop-shadow(0 0 6px rgba(0,0,0,.6))}
 .pk-inf{padding:16px 22px 14px 8px;display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -553,7 +538,7 @@ body.dragging,body.dragging *{cursor:grabbing!important;user-select:none}
         <span class="win" id="winTxt"></span>
       </div>
       <div class="hint" id="hint"></div>
-      <div class="tlscroll" id="tlscroll"><div class="tlwrap" id="tlwrap"><div class="tl" id="timeline"></div><svg id="threads" aria-hidden="true"></svg><div id="needle" aria-hidden="true"></div></div></div>
+      <div class="tlscroll" id="tlscroll"><div class="tlwrap" id="tlwrap"><div class="tl" id="timeline"></div><div id="needle" aria-hidden="true"></div></div></div>
     </div>
     <aside class="fore frame" id="fore" aria-live="polite"><span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span><div id="foreBody"></div></aside>
   </section>
@@ -673,7 +658,7 @@ const CLASSES={
 };
 const castLen=C=>Math.max(1,C.cast-(S.quick?2:0));
 const CL=()=>CLASSES[S.run.cls];
-const HINTS={h:'拖到时间轴上：落在哪一拍，你的攻击就挪到哪一拍（也可以直接拖到攻击上）',e:'拖到时间轴上：落在哪一拍，敌人的行动就挪到哪一拍（也可以直接拖到敌人行动上）',pair:'拖到一拍上，它会与下一拍互换',b4:'拖到本回合起 4 拍内的一拍',any:'拖到时间轴上的一拍',cast:'拖到法术释放的那一拍（前面要留出吟唱的拍数）'};
+const HINTS={h:'点选时间轴上你的一次攻击（金框），或点选它要挪到的那一拍',e:'点选时间轴上敌人的一个行动（红框），或点选它要挪到的那一拍',pair:'点选一拍，它会与下一拍互换',b4:'点选本回合起 4 拍内的一拍',any:'点选时间轴上的一拍',cast:'点选法术释放的那一拍（前面要留出吟唱的拍数）'};
 const ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
 const roman=n=>{const k=((n-1)%12)+1;const lap=Math.floor((n-1)/12);return ROM[k]+(lap?'·'+(lap+1):'')};
 const $=id=>document.getElementById(id);
@@ -700,7 +685,7 @@ const gainRage=(n,why)=>{if(S.run.cls!=='warrior'||n<=0)return;const was=S.rage;
 /* ---------- The seven floors ---------- */
 const FLOORS=[
  {key:'wolf',floor:'第 1 层',name:'灰鬃野狼',lane:'野狼',hp:40,sub:'在塔底游荡的饿狼',
-  art:{pos:'60% 20%',filter:'sepia(.5) saturate(.6) brightness(.8) contrast(1.2)'},
+  art:{pos:'42% 30%',filter:'sepia(.5) saturate(.6) brightness(.8) contrast(1.2)'},
   lore:'它不懂时间，只懂扑咬。快，但不痛。',
   rules:['<b>扑咬</b>：每个奇数拍咬一次 4 点。','<b>狂性</b>：生命 ≤ 20 后每一拍都咬，每次 3 点。','战士：每一口都是怒气。刺客：咬的那拍会断连击，用「闪身」躲开。'],
   reward:['echo','charge','haste'],stagger:2,
@@ -712,7 +697,7 @@ const FLOORS=[
   rage:()=>S.E.mad},
 
  {key:'beetle',floor:'第 2 层',name:'铁壳甲虫',lane:'甲虫',hp:55,sub:'背着铁甲的巨型甲虫',
-  art:{pos:'40% 60%',filter:'sepia(1) hue-rotate(60deg) saturate(1.4) brightness(.7) contrast(1.3)'},
+  art:{pos:'42% 30%',filter:'sepia(1) hue-rotate(60deg) saturate(1.4) brightness(.7) contrast(1.3)'},
   lore:'刀砍上去只有火星。要么一下打穿，要么从缝里下毒。',
   rules:['<b>铁甲</b>：单拍低于 7 点的伤害无效。毒伤无视铁甲。','<b>蜷缩</b>：每 4 拍蜷成一团（灰色「缩」），那一拍你的攻击全部无效。蜷缩可以被「迟滞」「错位」挪开。','<b>撞击</b>：每 3 拍一次 7 点。','刺客的小刀很难打穿它，靠共鸣、标记和淬毒。'],
   reward:['stasis','gather','rewind'],
@@ -723,7 +708,7 @@ const FLOORS=[
   status:()=>'<span class="tag">铁甲 · 低于 7 无效</span>'},
 
  {key:'slime',floor:'第 3 层',name:'分裂史莱姆',lane:'史莱姆',hp:60,sub:'越打越多的软泥',
-  art:{pos:'50% 35%',filter:'hue-rotate(80deg) saturate(2.2) brightness(.85)'},
+  art:{pos:'42% 30%',filter:'hue-rotate(80deg) saturate(2.2) brightness(.85)'},
   lore:'重重一刀下去，它会裂成好几团。',
   rules:['<b>黏击</b>：每 3 拍一次，基础 6 点。','<b>分裂</b>：单次受到 15 点及以上的伤害就分裂一次（最多 3 次），之后每次黏击 +3。','<b>细碎</b>：低于 15 的伤害不会让它分裂。刺客的连击、毒、小刀都很合适；战士的裂地斩和大共鸣要算好时机再用。'],
   reward:['unity','stop','paradox'],
@@ -736,7 +721,7 @@ const FLOORS=[
   rage:()=>S.E.split>=3},
 
  {key:'treant',floor:'第 4 层',name:'荆棘树人',lane:'树人',hp:80,sub:'浑身长刺的老树',
-  art:{pos:'35% 25%',filter:'sepia(.7) hue-rotate(50deg) saturate(1.6) brightness(.75)'},
+  art:{pos:'42% 30%',filter:'sepia(.7) hue-rotate(50deg) saturate(1.6) brightness(.75)'},
   lore:'每砍它一刀，刺就扎回你身上。可它挥一次枝要很久。',
   rules:['<b>荆棘</b>：每次受到伤害，反刺你 2 点（毒伤除外）。反刺不会打断吟唱，也不给怒气。','<b>横扫</b>：每 5 拍一次 16 点，很慢但很痛。','<b>生长</b>：每回合结束回复 5 点生命。','刺客出手次数多，被扎得最狠，靠淬毒和绝杀；战士举盾挡横扫；法师一发大火球最划算。'],
   reward:['stasis','haste','rewind'],
@@ -748,7 +733,7 @@ const FLOORS=[
   status:()=>'<span class="tag">荆棘 · 每击反刺 2</span><span class="tag">每回合回 5</span>'},
 
  {key:'shaman',floor:'第 5 层',name:'哥布林萨满',lane:'萨满',hp:70,sub:'躲在图腾后面念咒的哥布林',
-  art:{pos:'45% 15%',filter:'hue-rotate(70deg) saturate(1.7) brightness(.8)'},
+  art:{pos:'42% 30%',filter:'hue-rotate(70deg) saturate(1.7) brightness(.8)'},
   lore:'它自己很少出手，打它之前先得砸烂那根图腾。',
   rules:['<b>图腾</b>（12 点）：图腾在的时候，你的每一下伤害都先打在图腾上，打碎图腾那一下不会溢出到萨满身上。图腾在场时萨满每回合结束回复 6 点。','<b>重立图腾</b>：图腾碎了，每 3 回合会重新立起来。','<b>巫火</b>：每 4 拍一次 5 点，很少出手。','战士难攒怒气；刺客的多段小刀砸图腾最快；法师的一发大招打在图腾上很浪费，先用小法术或普攻敲碎它。'],
   reward:['unity','stop','paradox'],
@@ -761,7 +746,7 @@ const FLOORS=[
   status:()=>S.E.totem>0?`<span class="tag sh">图腾 ${S.E.totem}/12</span>`:`<span class="tag ok">图腾已碎 · ${Math.max(0,3-(S.turn-S.E.broke))} 回合后重立</span>`},
 
  {key:'knight',floor:'第 6 层',name:'黑铁骑士',lane:'骑士',hp:120,sub:'魔王麾下的守门骑士',
-  art:{pos:'55% 25%',filter:'grayscale(.4) brightness(.85) contrast(1.1)'},portrait:'img/knight_portrait.jpg',moods:true,
+  art:{pos:'42% 30%',filter:'grayscale(.4) brightness(.85) contrast(1.1)'},portrait:'img/knight_portrait.jpg',moods:true,
   lore:'钟楼最后的守门人。击碎他，通往魔王的门才会打开。',
   rules:['<b>重甲</b>：单拍伤害低于 10 会被减半。','<b>盾反</b>：灰色「盾」的那一拍，你打过去的伤害一半弹回你身上，骑士不受伤。盾可以被「迟滞」「错位」挪开。','<b>斩击</b>：每 3 拍一次 8 点。','<b>重劈</b>：每 12 拍一次 24 点，被时间锁定。','<b>怒斩</b>：血量过半后斩击变成 11 点。','三个职业都得用上全部本事：没有专门针对谁。'],
   reward:['echo','haste','ghost','charge'],
@@ -776,7 +761,7 @@ const FLOORS=[
   mood:()=>S.E.phase===2?'rage':foeE(e=>e.label==='重劈'&&e.beat<S.beat+3).length?'judge':'calm'},
 
  {key:'king',floor:'塔顶',name:'永夜魔王',lane:'魔王',hp:240,sub:'把钟拨回零点的人',
-  art:{pos:'50% 18%',filter:'invert(.12) hue-rotate(300deg) saturate(2.3) brightness(.55) contrast(1.45)'},boss:true,
+  art:{pos:'42% 30%',filter:'invert(.12) hue-rotate(300deg) saturate(2.3) brightness(.55) contrast(1.45)'},boss:true,
   lore:'你曾倒在他脚下。你手里的时间，也曾属于他。',
   rules:['<b>齿轮护甲</b>：全程单拍低于 10 的伤害减半。','<b>一·倒转钟面</b>：刻刃每 3 拍 10 点。每 2 回合把你视野内最晚的一次攻击标成「逆」，逆攻击会给他回血，除非它共鸣或拼刀赢了。','<b>二·看穿</b>（≤170）：你布下的残影、盾、闪身、标记和蓄时加成被抹掉，审判每 8 拍一次（锁定）。他会看穿你的职业：<br>对战士，他收起刻刃只蓄力，每回合蓄力 +3（上限 8），审判改为每 6 拍一次，伤害 = 25 + 3×蓄力，单次打他 15 点以上能打散 2 层蓄力；<br>对刺客，他披上反甲，每挨一下反刺 1 点（毒伤除外）；<br>对法师，刻刃变成每 2 拍 6 点，专打你的吟唱。','<b>三·永夜</b>（≤90）：视野缩到 6 拍，刻刃变成每 2 拍 12 点。15 拍后终焉钟鸣 99 点，残影无效，每次弹反推迟 1 拍。'],
   reward:[],
@@ -972,14 +957,14 @@ function playCard(i,target){
   const err=commit(i,target);
   if(err){setHint(err);return}
   flyCard(i);
-  S.pending=null;GH=null;ghostKey='';render();
+  S.pending=null;render();
   if(S.over)setTimeout(showEnd,700);
 }
 let hintMsg='';function setHint(m){hintMsg=m;render();setTimeout(()=>{if(hintMsg===m){hintMsg='';render()}},2200)}
 
 /* ---------- Foresight: the preview runs the real rules on a copy of the state ---------- */
 // SIM silences the screen (floats, banners); FX collects the floats of the beat being stepped so the board can name what happened
-let SIM=false,FX=null,GH=null,ghostKey='';
+let SIM=false,FX=null;
 function sim(st,fn){
   const real=S;S=structuredClone(st);SIM=true;let out,res;
   try{out=fn()}finally{res=S;S=real;SIM=false}
@@ -1007,7 +992,7 @@ function forecast(i,t){
   if(pre.out)return {base,err:pre.out,i,t};
   return {base,pre:pre.st,alt:sim(pre.st,runBeats),i,t,key:S.hand[i]};
 }
-// a drop on beat b: for cards that move something, b is where it should end up
+// a click on beat b: for cards that move something, b is where it should end up (a click on the chip itself picks that chip)
 const SRC={swift:1,charge:-2,echo:0,slow:-1,taunt:1};
 function resolveTarget(i,slot,chip){
   const key=S.hand[i],C=CARDS[key],tg=C.tg,b=+slot.dataset.b;
@@ -1020,16 +1005,6 @@ function resolveTarget(i,slot,chip){
   }
   return {t:b,b};
 }
-function setGhost(i,tgt){
-  const k=i==null||!tgt?'':`${i}:${tgt.t}:${tgt.err||''}:${tgt.b}:${tgt.hint||''}`;
-  if(k===ghostKey)return;ghostKey=k;
-  if(!k)GH=null;
-  else if(tgt.hint)GH={i,hint:true};
-  else if(tgt.err)GH={...forecast(),i,err:tgt.err,b:tgt.b};
-  else{GH=forecast(i,tgt.t);GH.b=tgt.b;if(GH.pre&&(CARDS[GH.key].tg==='h'||CARDS[GH.key].tg==='e')){const e=GH.pre.events.find(x=>x.id===tgt.t);if(e)GH.b=e.beat}}
-  renderBoard();
-}
-
 function resolveBeat(b){
   const F=FL();
   let hs=at(b,'h');let es=atkE(b);const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
@@ -1099,7 +1074,7 @@ function snapBeat(b){
 async function endTurn(){
   if(S.busy||S.over)return;
   const F=FL();
-  S.busy=true;S.pending=null;GH=null;ghostKey='';
+  S.busy=true;S.pending=null;
   S.discard.push(...S.hand);S.hand=[];
   for(let k=0;k<3;k++){
     const b=S.beat+k;S.resolving=b;render();
@@ -1139,7 +1114,7 @@ function renderTop(){
   $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;$('beatNo').textContent=roman(S.beat);
   $('foeName').textContent=`${F.name} · ${F.floor}`;$('foeSub').textContent=F.sub;
   const art=$('enemyArt');art.style.backgroundPosition=F.art.pos;art.style.filter=F.art.filter;
-  $('heroArt').style.backgroundImage=`url(img/hero_${S.run.cls}.jpg)`;$('heroArt').style.backgroundPosition='50% 22%';
+  document.querySelector('.half.hero').style.setProperty('--hero',`url(img/hero_${S.run.cls}.jpg)`);
   const hp=(S.hp/S.maxhp*100)+'%',ehp=(S.ehp/S.emax*100)+'%';
   $('hpBar').style.width=hp;$('hpLag').style.width=hp;$('hpTxt').textContent=`${S.hp}/${S.maxhp}`;
   $('ehpBar').style.width=ehp;$('ehpLag').style.width=ehp;$('ehpTxt').textContent=`${S.ehp}/${S.emax}`;
@@ -1222,65 +1197,39 @@ function liveSlot(b,o){
   const now=b<S.beat+3,far=b>=S.beat+baseView();
   const tg=pend?pend.tg:null;
   const tgt=(tg==='pair'&&b<S.beat+W()-1)||tg==='any'||tg==='h'||tg==='e'||(tg==='b4'&&b<=S.beat+3)||(tg==='cast'&&b>=S.beat+castLen(pend)-1);
-  const nw=e=>o.moved.includes(e.id)?'nw':'';
-  const og=side=>o.orig.filter(e=>e.side===side&&e.beat===b);
-  const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${tg==='e'&&!e.locked?'pick':''} ${nw(e)}" data-id="${e.id}">${e.label}${e.na?'':` <b>${e.dmg}</b>`}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
-    +og('e').map(e=>`<div class="chip e o ${e.na?'na':''}" data-oid="${e.id}">${e.label}${e.na?'':` <b>${e.dmg}</b>`}</div>`).join('')
+  const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${tg==='e'&&!e.locked?'pick':''} " data-id="${e.id}">${e.label}${e.na?'':` <b>${e.dmg}</b>`}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
     +gs.map(()=>`<div class="chip g">残影</div>`).join('')+ws.map(()=>`<div class="chip w">盾 −8</div>`).join('')+ds.map(()=>`<div class="chip d">闪身</div>`).join('')+ms.map(()=>`<div class="chip e mir">镜影</div>`).join('');
-  const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''} ${nw(e)}" data-id="${e.id}">${e.rev?'逆':e.fx?'斩':'击'} <b>${e.dmg}</b></div>`).join('')
-    +og('h').map(e=>`<div class="chip h o" data-oid="${e.id}">击 <b>${e.dmg}</b></div>`).join('')+ks.map(()=>`<div class="chip k">标记 ×2</div>`).join('')
-    +cs.map(e=>`<div class="chip sp ${nw(e)}" data-el="${e.el}" data-id="${e.id}">${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
-  const m=now?midRec(o.rec,o.base):guessMid(b,F);
-  return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} ${m.chg?'chg':''} ${o.drop?(o.bad?'drop bad':'drop'):''}" data-b="${b}">
+  const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'逆':e.fx?'斩':'击'} <b>${e.dmg}</b></div>`).join('')
+    +ks.map(()=>`<div class="chip k">标记 ×2</div>`).join('')
+    +cs.map(e=>`<div class="chip sp" data-el="${e.el}" data-id="${e.id}">${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
+  const m=now?midRec(o.rec):guessMid(b,F);
+  return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} " data-b="${b}">
     <div class="bn"><span>${roman(b)}</span></div><div class="lane e">${ech}</div><div class="mid ${m.c}"><span class="mt">${m.h}</span></div><div class="lane h">${hch}</div></div>`;
 }
 let scrollKey='';
 function renderBoard(){
-  const F=FL(),real=S;
+  const F=FL();
   const pend=S.pending!=null?CARDS[S.hand[S.pending]]:null;
-  const fc=GH&&GH.base?GH:forecast();
-  const P=GH&&GH.pre?GH:null;
-  const recs=P?P.alt.out:fc.base.out,baseRecs=fc.base.out;
-  let orig=[],moved=[];
-  if(P){
-    const am=new Map(P.pre.events.map(e=>[e.id,e])),rm=new Map(real.events.map(e=>[e.id,e]));
-    orig=real.events.filter(e=>(e.side==='h'||e.side==='e')&&(!am.has(e.id)||am.get(e.id).beat!==e.beat));
-    moved=P.pre.events.filter(e=>!rm.has(e.id)||rm.get(e.id).beat!==e.beat).map(e=>e.id);
-  }
-  let html=lanesHtml(F)+real.hist.filter(h=>h.b>=real.beat-3).map(pastSlot).join('');
-  if(P)S=P.pre;
-  try{
-    for(let b=S.doneUpTo+1;b<S.beat+W();b++)html+=liveSlot(b,{pend,orig,moved,rec:recs.find(r=>r.b===b),base:P?baseRecs.find(r=>r.b===b):null,drop:GH&&GH.b===b,bad:GH&&!!GH.err});
-  }finally{S=real}
+  const fc=forecast(),recs=fc.base.out;
+  let html=lanesHtml(F)+S.hist.filter(h=>h.b>=S.beat-3).map(pastSlot).join('');
+  for(let b=S.doneUpTo+1;b<S.beat+W();b++)html+=liveSlot(b,{pend,rec:recs.find(r=>r.b===b)});
   $('timeline').innerHTML=html;
   const lo=S.doneUpTo+1;$('winTxt').innerHTML=`◆ 当前结算区间：<b>${roman(Math.min(lo,S.beat+2))} – ${roman(S.beat+2)}</b>`;
-  drawThreads(orig);
   // keep this turn's beats in view when the ribbon scrolls
   const sc=$('tlscroll'),first=document.querySelector('#timeline .slot[data-b]'),sk=S.beat+':'+S.doneUpTo;
   if(first&&sk!==scrollKey){scrollKey=sk;if(sc.scrollWidth>sc.clientWidth){const lw=document.querySelector('#timeline .lanes').offsetWidth;sc.scrollLeft=Math.max(0,first.offsetLeft-lw-70)}}
   const n=$('needle'),cs=S.resolving&&document.querySelector(`#timeline [data-b="${S.resolving}"],#timeline [data-pb="${S.resolving}"]`);
   if(cs){n.style.left=(cs.offsetLeft+cs.offsetWidth/2)+'px';n.classList.add('on')}else n.classList.remove('on');
-  renderFore(fc,P);
+  renderFore(fc);
   renderHint(pend);
-}
-function drawThreads(orig){
-  const svg=$('threads'),wrap=$('tlwrap');
-  svg.setAttribute('width',wrap.scrollWidth);svg.setAttribute('height',wrap.offsetHeight);
-  if(!orig.length){svg.innerHTML='';return}
-  const W0=wrap.getBoundingClientRect();
-  const c=el=>{const r=el.getBoundingClientRect();return [r.left+r.width/2-W0.left,r.top+r.height/2-W0.top]};
-  svg.innerHTML=orig.map(e=>{const a=document.querySelector(`#timeline [data-oid="${e.id}"]`),b=document.querySelector(`#timeline [data-id="${e.id}"]`);if(!a||!b)return '';
-    const [x1,y1]=c(a),[x2,y2]=c(b),lift=Math.max(18,Math.abs(x2-x1)*.35),dir=e.side==='e'?1:-1;
-    return `<path d="M${x1} ${y1} C${x1} ${y1+dir*lift},${x2} ${y2+dir*lift},${x2} ${y2}"/><circle cx="${x2}" cy="${y2}" r="3" fill="#dff0ff"/>`}).join('');
 }
 function renderHint(pend){
   let h=hintMsg;
-  if(!h&&GH&&GH.err)h=GH.err;
   if(!h&&pend)h=HINTS[pend.tg];
   if(!h&&S.busy)h='时针正在走过本回合的 3 拍……';
-  if(!h&&!S.busy)h='把卡牌拖到时间轴上，松手前就能看到改写后的未来';
+  if(!h&&!S.busy)h='亮蓝色的 3 拍会在本回合结算，右侧是它们的结果预测';
   const el=$('hint');
-  el.className='hint'+(hintMsg||(GH&&GH.err)?' err':pend?' pend':'');
+  el.className='hint'+(hintMsg?' err':pend?' pend':'');
   el.innerHTML=DIAM+`<span>${h}</span>`+(pend&&!hintMsg?'<button class="cancel" id="cancelBtn">取消</button>':'');
 }
 
@@ -1306,109 +1255,34 @@ function resLine(st){
   const F=FL(),dh=st.hp-S.hp,de=st.ehp-S.ehp;
   return `<div class="fres"><span>勇者 HP <b>${S.hp} → ${st.hp}</b>${dh<0?` <em class="bad">(−${-dh})</em>`:' <em class="ok">(无伤害)</em>'}</span><span>${F.lane} HP <b>${S.ehp} → ${st.ehp}</b>${de<0?` (−${-de})`:de>0?` (+${de})`:''}</span>${st.over==='win'?'<span class="ok">敌人倒下</span>':st.over==='lose'?'<span class="bad">勇者倒下</span>':''}</div>`;
 }
-function laterNotes(P){
-  const rm=new Map(S.events.map(e=>[e.id,e])),cut=S.beat+3,out=[];
-  const d=e=>e.side==='h'?`你的攻击 ${e.dmg}`:e.side==='c'?e.n:e.side==='e'?e.label:{g:'残影',w:'盾',d:'闪身',k:'标记'}[e.side]||'';
-  for(const e of P.pre.events){const r=rm.get(e.id);if(e.beat<cut&&(!r||r.beat<cut))continue;
-    if(!r)out.push(`${roman(e.beat)} 新增${d(e)}`);else if(r.beat!==e.beat)out.push(`${d(e)} ${roman(r.beat)} → ${roman(e.beat)}`);else if(r.dmg!==e.dmg)out.push(`${roman(e.beat)} ${d(e)} ${r.dmg} → ${e.dmg}`)}
-  const am=new Set(P.pre.events.map(e=>e.id));
-  for(const r of S.events)if(r.beat>=cut&&!am.has(r.id)&&(r.side==='h'||r.side==='e'))out.push(`${roman(r.beat)} ${d(r)}被移除`);
-  return out.slice(0,4);
-}
-function renderFore(fc,P){
-  const F=FL(),hero=`--thumb:url(img/hero_${S.run.cls}.jpg)`,foe=`--thumb:url(img/knight.jpg)`;
-  const base=fc.base.out,bst=fc.base.st;
-  let h='';
-  if(P){
-    const C=CARDS[P.key],alt=P.alt.out,ast=P.alt.st;
-    const ch=alt.map(r=>({r,bs:base.find(x=>x.b===r.b)})).filter(({r,bs})=>!bs||bs.took!==r.took||bs.net!==r.net||headFor(r,bs)!==headFor(bs,bs));
-    const later=laterNotes(P);
-    const headline=ch.length?(()=>{const {r,bs}=ch.find(x=>x.bs&&x.bs.took>x.r.took)||ch[0];return `在第 ${roman(r.b)} 拍：${headFor(r,bs)}`})():later.length?'影响落在之后的拍上':'本回合 3 拍的结果不变';
-    h=`<h3>未来预览<small>FORESIGHT</small></h3><p class="fsub">「<b>${C.n}</b>」${headline}。</p>`;
-    if(ch.length){
-      h+=`<div class="fbox before" style="${foe}"><h4>原本的未来<small>BEFORE</small></h4>${ch.map(({r,bs})=>bs?line(bs,esTxt(bs),outFor(bs)):'').join('')}${resLine(bst)}</div>`;
-      h+=`<div class="fbox after" style="${hero}"><h4>改写后的未来<small>AFTER</small></h4>${ch.map(({r,bs})=>line(r,headFor(r,bs),outFor(r,bs))).join('')}${resLine(ast)}</div>`;
-    }else h+=`<div class="fbox after" style="${hero}"><h4>改写后的未来<small>AFTER</small></h4><p class="fnote">${C.d}</p>${resLine(ast)}</div>`;
-    if(later.length)h+=`<p class="fnote">之后的拍：${later.join('；')}</p>`;
-    if(S.pending!=null&&!DR)h+=`<button class="fgo" id="foreGo">确认打出「${C.n}」</button>`;
-  }else if(GH&&GH.err){
-    h=`<h3>未来预览<small>FORESIGHT</small></h3><div class="fbox err"><p class="fl"><span class="bad">${GH.err}</span></p></div>`;
-  }else if(GH&&GH.hint){
-    const C=CARDS[S.hand[GH.i]];
-    h=`<h3>未来预览<small>FORESIGHT</small></h3><p class="fsub">把「<b>${C.n}</b>」拖到时间轴上的一拍，这里会对比原本的未来和改写后的未来。</p>`;
-  }
-  if(!h||GH&&(GH.err||GH.hint)){
-    const act=base.filter(r=>r.es.length||r.took||r.net||tagOf(r));
-    h=(h||`<h3>未来预览<small>FORESIGHT</small></h3><p class="fsub">${S.busy?'时间正在流动。':'这是不再出牌时，本回合 3 拍会发生的事。拖动卡牌到时间轴上，就能看到改写后的未来。'}</p>`)
-      +`<div class="fbox" style="${foe}"><h4>${S.busy?'正在结算':'本回合预测'}<small>${S.busy?'NOW':'FATE'}</small></h4>${act.length?act.map(r=>line(r,headFor(r),outFor(r))).join(''):'<p class="fnote">这几拍没有任何交锋。</p>'}${resLine(bst)}</div>`;
-  }
-  $('foreBody').innerHTML=h;
+function renderFore(fc){
+  const foe=`--thumb:url(img/knight.jpg)`,base=fc.base.out,bst=fc.base.st;
+  const act=base.filter(r=>r.es.length||r.took||r.net||tagOf(r));
+  $('foreBody').innerHTML=`<h3>未来预览<small>FORESIGHT</small></h3><p class="fsub">${S.busy?'时间正在流动。':'不再出牌的话，本回合 3 拍会这样结算。每打出一张牌，这里都会更新。'}</p>`
+    +`<div class="fbox" style="${foe}"><h4>${S.busy?'正在结算':'本回合预测'}<small>${S.busy?'NOW':'FATE'}</small></h4>${act.length?act.map(r=>line(r,headFor(r),outFor(r))).join(''):'<p class="fnote">这几拍没有任何交锋。</p>'}${resLine(bst)}</div>`;
 }
 
-/* ---------- Input: drag a card onto the loom, or tap a card then a beat ---------- */
-let DR=null,PT='mouse';
-document.addEventListener('pointerdown',e=>{PT=e.pointerType||'mouse'},true);
-function boardTarget(i,x,y){
-  const el=document.elementFromPoint(x,y);if(!el)return null;
-  const C=CARDS[S.hand[i]];
-  if(!C.tg)return el.closest('.loom,.arena')?{t:undefined,b:null}:null;
-  const slot=el.closest('#timeline .slot[data-b]');if(!slot)return null;
-  return resolveTarget(i,slot,el.closest('.chip[data-id]'));
-}
-$('hand').addEventListener('pointerdown',e=>{
-  const c=e.target.closest('.card');if(!c||c.disabled||e.button!==0||e.pointerType==='touch'||S.busy)return;
-  DR={i:+c.dataset.i,x:e.clientX,y:e.clientY,el:c,on:false};
-});
-document.addEventListener('pointermove',e=>{
-  if(DR){
-    if(!DR.on){if(Math.hypot(e.clientX-DR.x,e.clientY-DR.y)<8)return;
-      DR.on=true;S.pending=null;const f=DR.el.cloneNode(true);f.classList.add('dragcard');f.classList.remove('sel');document.body.appendChild(f);DR.f=f;DR.el.classList.add('dragging');document.body.classList.add('dragging')}
-    DR.f.style.left=e.clientX+'px';DR.f.style.top=e.clientY+'px';
-    setGhost(DR.i,boardTarget(DR.i,e.clientX,e.clientY));return;
-  }
-  if(S.pending!=null&&!S.busy&&e.pointerType!=='touch'){
-    const el=document.elementFromPoint(e.clientX,e.clientY),slot=el&&el.closest('#timeline .slot[data-b]');
-    if(slot)setGhost(S.pending,resolveTarget(S.pending,slot,el.closest('.chip[data-id]')));
-    else if(!(el&&el.closest('.fore')))setGhost(null);
-  }
-});
-document.addEventListener('pointerup',()=>{
-  if(!DR)return;const d=DR;DR=null;if(!d.on)return;
-  d.f.remove();d.el.classList.remove('dragging');document.body.classList.remove('dragging');
-  const g=GH;GH=null;ghostKey='';
-  if(g&&g.pre)playCard(g.i,g.t);else{if(g&&g.err)setHint(g.err);else renderBoard()}
-});
-$('hand').addEventListener('pointerover',e=>{
-  if(DR||S.pending!=null||S.busy||e.pointerType==='touch')return;
-  const c=e.target.closest('.card');if(!c||c.disabled)return;
-  const i=+c.dataset.i;setGhost(i,CARDS[S.hand[i]].tg?{hint:true}:{t:undefined,b:null});
-});
-$('hand').addEventListener('pointerout',e=>{
-  if(DR||S.pending!=null)return;const c=e.target.closest('.card');if(c&&!c.contains(e.relatedTarget))setGhost(null);
-});
+/* ---------- Input: pick a card, then a beat ---------- */
 $('hand').addEventListener('click',e=>{
   const c=e.target.closest('.card');if(!c||c.disabled)return;
   const i=+c.dataset.i,C=CARDS[S.hand[i]];
-  if(S.pending===i){S.pending=null;GH=null;ghostKey='';render();return}
+  if(S.pending===i){S.pending=null;render();return}
   if(C.c>S.sand)return setHint('时之砂不足');
   if(C.r&&S.rage<C.r)return setHint('怒气不足');
-  if(C.tg){S.pending=i;hintMsg='';GH=null;ghostKey='';render()}else playCard(i);
+  if(C.tg){S.pending=i;hintMsg='';render()}else playCard(i);
 });
 $('timeline').addEventListener('click',e=>{
   if(S.pending==null||S.busy)return;
   const slot=e.target.closest('.slot[data-b]');if(!slot)return;
   const tgt=resolveTarget(S.pending,slot,e.target.closest('.chip[data-id]'));
   if(tgt.err)return setHint(tgt.err);
-  // on touch the first tap previews and a second tap on the same spot plays
-  if(PT==='touch'&&!(GH&&GH.pre&&GH.i===S.pending&&GH.t===tgt.t)){setGhost(S.pending,tgt);return}
   playCard(S.pending,tgt.t);
 });
-$('fore').addEventListener('click',e=>{if(e.target.id==='foreGo'&&GH&&GH.pre)playCard(GH.i,GH.t)});
-$('hint').addEventListener('click',e=>{if(e.target.id==='cancelBtn'){S.pending=null;GH=null;ghostKey='';render()}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.pending=null;GH=null;ghostKey='';render()}});
+$('hint').addEventListener('click',e=>{if(e.target.id==='cancelBtn'){S.pending=null;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.pending=null;render()}});
 $('endBtn').addEventListener('click',endTurn);
 $('rulesBtn').addEventListener('click',()=>showRules(false));
-$('resetBtn').addEventListener('click',()=>{startFight(S.run);GH=null;ghostKey='';render();banner('第 1 回合','HORA I')});
+$('resetBtn').addEventListener('click',()=>{startFight(S.run);render();banner('第 1 回合','HORA I')});
 $('logBtn').addEventListener('click',()=>{const d=$('chron');d.open=!d.open;if(d.open)d.scrollIntoView({behavior:'smooth',block:'nearest'})});
 addEventListener('resize',()=>{if(S)renderBoard()});
 
@@ -1456,7 +1330,7 @@ function showClassPick(first){
   $('pick').hidden=false;$('pick').scrollTop=0;updatePick();
   const f=document.querySelector('.pk-row.on');if(f)f.focus({preventScroll:true});
 }
-$('pkGo').onclick=()=>{$('pick').hidden=true;newRun(0,pickSel);GH=null;ghostKey='';render();showRules(true)};
+$('pkGo').onclick=()=>{$('pick').hidden=true;newRun(0,pickSel);render();showRules(true)};
 $('pkBack').onclick=()=>{$('pick').hidden=true;if(S.over)showEnd()};
 function showRules(intro){
   const F=FL();
