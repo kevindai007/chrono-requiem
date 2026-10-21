@@ -41,7 +41,7 @@ window.AI={
   // a whole climb; nextFight(run) is how the game moves to the next floor (so it follows the real rules)
   run(cls){SIM=true;newRun(0,cls);const out=[];
     for(;;){const h0=S.hp;const r=this.fight();out.push({f:S.stage,r,t:S.turn,hp:S.hp,max:S.maxhp,e:S.ehp,loss:h0-S.hp});
-      if(r!=='win'||S.stage===FLOORS.length-1)break;
+      if(r!=='win'||S.stage===TOWER.length-1)break;
       const pool=shuffle(CL().pool.slice()).slice(0,2).concat(shuffle(FL().reward.slice()).slice(0,1));
       const k=pool[Math.floor(Math.random()*pool.length)];
       if(typeof nextFloor==='function')nextFloor(k);else{const run=S.run;run.deck.push(k);run.maxhp+=5;run.stage++;startFight(run)}

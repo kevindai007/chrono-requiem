@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+SC:wght@500;700;900&display=swap">
 <style>
-/* Seven floors of the clock tower: five minor foes, the clockwork knight, then the Demon King at zero hour. The run opens on a class pick (warrior, assassin or mage); the six minor foes are ordinary beasts and soldiers, each built to press one class. Non-knight foes reuse the knight art with a per-foe tint until they get their own. Layout follows kevin's battle mockup: gold title bar; a framed split arena (hero art left, knight art right, VS medallion on the seam); the time ribbon grid; a dock with the sand medallion, illustrated parchment cards and the big 推进时间 plate; one-line chronicle at the foot. Single deliberate dark look. */
+/* Seven floors of the clock tower: floors 1-5 each draw one of three minor foes at the start of a run, then the clockwork knight, then the Demon King at zero hour. The run opens on a class pick (warrior, assassin or mage); the minor foes are ordinary beasts and soldiers, each with one or two timeline mechanics. The knight keeps its painted art; every other foe has its own ink-and-gold SVG plate in img/foe_<key>.svg (arena) and img/foe_<key>_p.svg (portrait). Layout follows kevin's battle mockup: gold title bar; a framed split arena (hero art left, knight art right, VS medallion on the seam); the time ribbon grid; a dock with the sand medallion, illustrated parchment cards and the big 推进时间 plate; one-line chronicle at the foot. Single deliberate dark look. */
 :root{
   --night:#08070c; --panel:#0f0d15; --panel2:#171320; --cell:#120f19; --line:#2c2535; --line2:#4a3d4f;
   --gold:#d4a54a; --gold2:#f7dc96; --gold3:#fff1c8; --golddim:#80632a;
@@ -52,7 +52,7 @@ button{font-family:var(--f-body);cursor:pointer}
 .half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transition:transform .18s ease-out}
 .half.hero .art{background-image:var(--hero,url(img/hero.jpg));background-size:auto 100%;background-position:25% 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);transform-origin:30% 50%}
 .half.hero::before{content:"";position:absolute;inset:-20px;background:var(--hero,url(img/hero.jpg)) 25% 0/cover no-repeat;filter:blur(14px) brightness(.55) saturate(1.1)}
-.half.foe .art{background-image:url(img/knight.jpg);background-position:55% 25%}
+.half.foe .art{background-image:url(img/knight.jpg);background-position:50% 30%}
 .half.hero .art.lunge{transform:translateX(18px) scale(1.04)}
 .half.foe .art.lunge{transform:translateX(-18px) scale(1.04)}
 .half::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(8,7,12,0) 30%,rgba(8,7,12,.55) 62%,rgba(8,7,12,.95) 100%)}
@@ -237,6 +237,7 @@ button{font-family:var(--f-body);cursor:pointer}
   border:2px solid #b8913f;box-shadow:0 0 0 1px #3a2a10,0 0 0 5px #0a080d,0 0 0 6px var(--gold),0 30px 70px #000;animation:unfurl .45s cubic-bezier(.2,.9,.3,1.2)}
 @keyframes unfurl{from{transform:translateY(20px) scale(.95);opacity:0}}
 .panel .pic{background:url(img/knight_portrait.jpg) center 20%/cover #120e0a;border-right:2px solid #b8913f;min-height:100%}
+.panel .pic.svg{background-color:#060509;background-size:100% auto;background-position:center top;background-repeat:no-repeat}
 .panel .pic.hero{background-image:url(img/hero.jpg);background-position:44% 30%}
 .panel .body{padding:26px 28px 24px;min-width:0}
 .panel h2{font-family:var(--f-display);font-weight:900;margin:0 0 4px;letter-spacing:.14em;font-size:28px;text-wrap:balance}
@@ -252,7 +253,10 @@ button{font-family:var(--f-body);cursor:pointer}
 .panel button{background:radial-gradient(ellipse at 50% 0%,#5a4116,#1e1508);color:var(--gold3);border:2px solid var(--gold);padding:11px 30px;font-family:var(--f-display);font-weight:900;letter-spacing:.24em;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,.35)}
 .panel button:hover,.panel button:focus-visible{box-shadow:0 0 0 2px var(--gold2),0 0 16px rgba(212,165,74,.5);outline:none}
 .panel .floors{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
-.panel .floors span{width:100%;font-size:12px;color:var(--ink2);letter-spacing:.1em}
+.panel .floors>span{width:100%;font-size:12px;color:var(--ink2);letter-spacing:.1em}
+.panel .floors .fl{width:100%;display:flex;gap:6px;align-items:baseline}
+.panel .floors .fl em{font-style:normal;font-size:12px;color:var(--ink2);width:4.5em;flex:none}
+.panel .floors .fl div{display:flex;flex-wrap:wrap;gap:6px}
 .panel .floors button{padding:3px 10px;font-size:13px;letter-spacing:.06em;font-weight:700;box-shadow:none;background:rgba(42,29,16,.06);color:var(--ink);border:1px solid #b8913f}
 .panel .floors button.cur{background:radial-gradient(ellipse at 50% 0%,#5a4116,#1e1508);color:var(--gold3)}
 .panel .btns{display:flex;gap:10px;flex-wrap:wrap}
@@ -670,10 +674,9 @@ const foeE=(f)=>S.events.filter(e=>e.side==='e'&&(!f||f(e)));
 const atkE=b=>at(b,'e').filter(e=>!e.na);
 const gainRage=(n,why)=>{if(S.run.cls!=='warrior'||n<=0)return;const was=S.rage;S.rage=Math.min(10,S.rage+n);if(S.rage>was)flt('hero',`怒气 +${S.rage-was}`,'info')};
 
-/* ---------- The seven floors ---------- */
-const FLOORS=[
+/* ---------- The foes: floors 1-5 each draw one of three, then the knight and the Demon King ---------- */
+const FOES=[
  {key:'wolf',floor:'第 1 层',name:'灰鬃野狼',lane:'野狼',hp:70,sub:'在塔底游荡的饿狼',
-  art:{pos:'42% 30%',filter:'sepia(.5) saturate(.6) brightness(.8) contrast(1.2)'},
   lore:'它不懂时间，只懂扑咬。快，但不痛。',
   rules:['<b>扑咬</b>：每 3 拍里扑咬 2 次，每次 9 点。','<b>狂性</b>：生命 ≤ 30 后每一拍都咬，每次 7 点。','战士：每一口都是怒气。刺客：咬的那拍会断连击，用「闪身」躲开。'],
   reward:['echo','charge','haste'],stagger:2,
@@ -684,8 +687,29 @@ const FLOORS=[
   status:()=>S.E.mad?'<span class="tag p2">狂性</span>':'',
   rage:()=>S.E.mad},
 
+ {key:'bat',floor:'第 1 层',name:'吸血蝠',lane:'蝙蝠',hp:65,sub:'倒挂在钟楼横梁上的大蝙蝠',
+  lore:'咬得不重，可每一口喝到的血都会变成它自己的。',
+  rules:['<b>撕咬</b>：每 3 拍里咬 2 次，每次 9 点。','<b>吸血</b>：撕咬真正打到你身上的伤害，蝙蝠全部回给自己。格挡、闪身、残影、弹反都能让它喝不到血。','战士：盾放在撕咬上，挡下的就是它喝不到的。刺客：第 III、VI、IX 拍它不咬，正好背刺。法师：吟唱被咬断就是双亏，先用寒冰枪把撕咬推开。'],
+  reward:['echo','charge','ghost'],stagger:2,
+  open:'头顶传来一阵扑翅声。开战。',
+  init:()=>({}),
+  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'咬',dmg:9})},
+  onHeroHit(es,x){if(!es.length||x<=0||S.ehp<=0)return;const h=Math.min(x,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','吸血 +'+h,'heal');log(`吸血：蝙蝠回复 ${h} 点生命。`)}},
+  status:()=>'<span class="tag">吸血 · 咬到多少回多少</span>'},
+
+ {key:'skeleton',floor:'第 1 层',name:'骷髅兵',lane:'骷髅',hp:55,sub:'守着楼梯不肯倒下的老兵',
+  lore:'打散了还会自己拼回去，除非一下把骨头砸碎。',
+  rules:['<b>骨刃</b>：每 3 拍里砍 2 次，每次 10 点。','<b>重组</b>：第一次被打倒时，骨头会拼回去，带着 25 点生命再站起来。','<b>粉碎</b>：打倒它的那一下如果单次 15 点及以上（共鸣、蓄时、裂地斩、火球……），骨头直接碎掉，不会重组。','战士留一记共鸣或裂地斩收尾；刺客攒一手绝杀；法师把火球留到最后。'],
+  reward:['echo','charge','haste'],
+  open:'一堆白骨咔咔作响地站了起来。开战。',
+  init:()=>({up:false}),
+  beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'砍',dmg:10})},
+  onDealt(x){if(S.ehp>0||S.E.up)return;S.E.up=true;if(x>=15){log(`粉碎！${x} 点的一击把骨头砸成了粉。`);banner('粉碎','SHATTER');return}
+    S.ehp=25;flt('enemy','重组','info');log('骷髅散了架……又咔咔地拼了回去，带着 25 点生命站起来。');banner('重组','REASSEMBLE',true)},
+  status:()=>S.E.up?'<span class="tag p2">已重组</span>':'<span class="tag">重组 · 最后一击 ≥15 才能粉碎</span>',
+  rage:()=>S.E.up},
+
  {key:'beetle',floor:'第 2 层',name:'铁壳甲虫',lane:'甲虫',hp:95,sub:'背着铁甲的巨型甲虫',
-  art:{pos:'42% 30%',filter:'sepia(1) hue-rotate(60deg) saturate(1.4) brightness(.7) contrast(1.3)'},
   lore:'刀砍上去只有火星。要么一下打穿，要么从缝里下毒。',
   rules:['<b>铁甲</b>：单拍低于 7 点的伤害无效。毒伤无视铁甲。','<b>蜷缩</b>：每 4 拍蜷成一团（灰色「缩」），那一拍你的攻击全部无效。蜷缩可以被「迟滞」「错位」挪开。','<b>撞击</b>：每 3 拍里撞 2 次，每次 11 点。','刺客的小刀很难打穿它，靠共鸣、标记和淬毒。'],
   reward:['stasis','gather','rewind'],
@@ -695,8 +719,28 @@ const FLOORS=[
   mod:(x,o)=>{if(o.src==='poison'||o.src==='true')return x;if(o.beat&&at(o.beat,'e').some(e=>e.na))return 0;return x<7?0:x},modNote:'铁甲 · 无效',modShort:'铁甲',
   status:()=>'<span class="tag">铁甲 · 低于 7 无效</span>'},
 
+ {key:'spider',floor:'第 2 层',name:'剧毒织蛛',lane:'蜘蛛',hp:90,sub:'在齿轮之间结网的毒蛛',
+  lore:'毒牙本身不痛，痛的是之后一拍一拍渗进来的毒。',
+  rules:['<b>毒牙</b>：每 3 拍里咬 2 次，每次 8 点。','<b>蛛毒</b>：毒牙咬中你，你身上叠 3 层毒（最多 6 层）；之后每拍掉 1 点生命、毒减 1 层。蛛毒不会打断吟唱，也不给怒气。','别让它咬到：战士举盾、拼刀；刺客闪身；法师用寒冰枪和迟滞把毒牙推开。「回溯」也能把毒掉的血一起拿回来。'],
+  reward:['stasis','gather','rewind'],
+  open:'齿轮缝里垂下一根发亮的丝。开战。',
+  init:()=>({tox:0}),
+  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'毒牙',dmg:8})},
+  onHeroHit(es,x){if(es.length&&x>0&&S.E.tox<6){S.E.tox=Math.min(6,S.E.tox+3);flt('hero','蛛毒','info')}},
+  afterBeat(){if(S.E.tox>0&&!S.over){S.E.tox--;log('蛛毒发作，你掉了 1 点生命。');dealHero(1,[],{thorn:true})}},
+  status:()=>'<span class="tag">毒牙 · 咬中叠 3 层毒</span>'+(S.E.tox?`<span class="tag p2">你中毒 ${S.E.tox}</span>`:'')},
+
+ {key:'gargoyle',floor:'第 2 层',name:'钟楼石像鬼',lane:'石像鬼',hp:95,sub:'蹲在钟楼檐角的石像',
+  lore:'只有扑下来的那一瞬间它是血肉，其余时候都是石头。',
+  rules:['<b>俯扑</b>：每 3 拍里扑 2 次，每次 11 点。','<b>石肤</b>：它不俯扑的拍，以及立刻结算的牌，伤害减半。只有它俯扑的那一拍吃全额伤害。毒伤无视石肤。','战士：普攻撞上俯扑就是全额，用战吼、蓄时把拼刀打赢。刺客：在俯扑拍闪身白打，或者靠淬毒。法师：把释放拍对准俯扑，用屏障护住吟唱。'],
+  reward:['stasis','gather','rewind'],
+  open:'檐角的石像慢慢转过了脖子。开战。',
+  init:()=>({}),
+  beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'扑',dmg:11})},
+  mod:(x,o)=>{if(o.src==='poison'||(o.beat&&atkE(o.beat).length))return x;return Math.floor(x/2)},modNote:'石肤 · 减半',modShort:'石肤',
+  status:()=>'<span class="tag">石肤 · 只有俯扑拍吃全额</span>'},
+
  {key:'slime',floor:'第 3 层',name:'分裂史莱姆',lane:'史莱姆',hp:100,sub:'越打越多的软泥',
-  art:{pos:'42% 30%',filter:'hue-rotate(80deg) saturate(2.2) brightness(.85)'},
   lore:'重重一刀下去，它会裂成好几团。',
   rules:['<b>黏击</b>：每 3 拍里黏 2 次，基础 9 点。','<b>分裂</b>：单次受到 15 点及以上的伤害就分裂一次（最多 3 次），之后每次黏击 +3。','<b>细碎</b>：低于 15 的伤害不会让它分裂。刺客的连击、毒、小刀都很合适；战士的裂地斩和大共鸣要算好时机再用。'],
   reward:['unity','stop','paradox'],
@@ -708,8 +752,31 @@ const FLOORS=[
   status:()=>`<span class="tag">分裂 ${S.E.split}/3</span>`,
   rage:()=>S.E.split>=3},
 
+ {key:'mirror',floor:'第 3 层',name:'镜之妖精',lane:'妖精',hp:90,sub:'住在钟面玻璃里的妖精',
+  lore:'它把镜子立在时间上。砍进镜子里的刀，什么也碰不到。',
+  rules:['<b>镜影</b>：第 III、VI、IX、XII 拍各有一面镜影，那一拍你的攻击全部被吞掉；法术、毒和残影反击不受影响。用「迅步」「蓄时」把攻击挪出去，或用「错位」把镜影换走。','<b>镜饲</b>：镜影每吞掉一拍攻击，妖精回复 6 点生命。','<b>碎光</b>：镜影之间的两拍各一次，每次 9 点。','法师几乎不怕镜影；战士和刺客得学会挪动自己的攻击。'],
+  reward:['unity','stop','paradox'],
+  open:'钟面玻璃里，有个影子对你眨了眨眼。开战。',
+  init:()=>({}),
+  beat(b){if(b%3===0)ev({beat:b,side:'m'});else ev({beat:b,side:'e',label:'碎光',dmg:9})},
+  onMirror(){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`镜饲：妖精回复 ${h} 点生命。`)}},
+  status:()=>'<span class="tag">镜影 · 每 3 拍吞掉攻击</span>'},
+
+ {key:'puppet',floor:'第 3 层',name:'发条傀儡',lane:'傀儡',hp:100,sub:'钟匠留下的发条人偶',
+  lore:'你越想拨慢它的时间，它的发条就拧得越紧。',
+  rules:['<b>锤击</b>：每 3 拍里锤 2 次，基础 8 点。','<b>上弦</b>：它的行动每被你的牌延后一次（迟滞、错位、静滞领域、时停、寒冰枪、感电），发条就拧紧一圈，之后每次锤击 +2（最多 5 圈）。','<b>松弦</b>：拼刀弹反它，发条松掉 2 圈。','别拖它，正面接：战士举盾拼刀；刺客用闪身和残影；法师少用冰，靠屏障硬扛。'],
+  reward:['echo','haste','ghost'],
+  open:'咔哒、咔哒，傀儡背上的发条转了起来。开战。',
+  init:()=>({wind:0}),
+  dmgNow(){return 8+2*S.E.wind},
+  retune(){const d=this.dmgNow();foeE(e=>e.label==='锤').forEach(e=>e.dmg=d)},
+  beat(b){if(b%3!==2)ev({beat:b,side:'e',label:'锤',dmg:this.dmgNow()})},
+  onDelay(src){if(src==='stagger'||S.E.wind>=5)return;S.E.wind++;this.retune();flt('enemy',`上弦 ${S.E.wind}`,'info');log(`上弦：发条拧紧一圈，锤击升到 ${this.dmgNow()} 点。`)},
+  onParry(){if(!S.E.wind)return;S.E.wind=Math.max(0,S.E.wind-2);this.retune();log(`松弦：弹反震松了发条，锤击降到 ${this.dmgNow()} 点。`)},
+  status:()=>`<span class="tag ${S.E.wind>=4?'p2':''}">上弦 ${S.E.wind}/5</span>`,
+  rage:()=>S.E.wind>=4},
+
  {key:'treant',floor:'第 4 层',name:'荆棘树人',lane:'树人',hp:110,sub:'浑身长刺的老树',
-  art:{pos:'42% 30%',filter:'sepia(.7) hue-rotate(50deg) saturate(1.6) brightness(.75)'},
   lore:'每砍它一刀，刺就扎回你身上。可它挥一次枝要很久。',
   rules:['<b>荆棘</b>：每次受到伤害，反刺你 2 点（毒伤除外）。反刺不会打断吟唱，也不给怒气。','<b>横扫</b>：每 5 拍一次 22 点，很慢但很痛。','<b>藤鞭</b>：横扫之间连抽 2 次，每次 7 点。','<b>生长</b>：每回合结束回复 6 点生命。','刺客出手次数多，被扎得最狠，靠淬毒和绝杀；战士举盾挡横扫；法师一发大火球最划算。'],
   reward:['stasis','haste','rewind'],
@@ -720,8 +787,31 @@ const FLOORS=[
   turnEnd(){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`生长：树人回复 ${h} 点生命。`)}},
   status:()=>'<span class="tag">荆棘 · 每击反刺 2</span><span class="tag">每回合回 5</span>'},
 
+ {key:'ogre',floor:'第 4 层',name:'独眼巨魔',lane:'巨魔',hp:140,sub:'扛着钟锤的独眼巨魔',
+  lore:'它的钟锤砸下来，连时间都会晃一下。',
+  rules:['<b>连拳</b>：每 6 拍里连打 3 拳，每拳 8 点。','<b>钟锤</b>：连拳之后隔一拍砸下钟锤，26 点，被时间锁定。','<b>震荡</b>：钟锤打到你身上，下回合少 1 粒时之砂。','血厚但慢：战士把盾放在钟锤上；刺客在钟锤拍闪身；法师在两锤之间吟唱大法术。'],
+  reward:['stasis','haste','rewind'],
+  open:'地板随着它的脚步一下下震动。开战。',
+  init:()=>({daze:0}),
+  beat(b){const m=b%6;if(m===3)ev({beat:b,side:'e',kind:'j',label:'钟锤',dmg:26,locked:true});else if(m===5||m===0||m===1)ev({beat:b,side:'e',label:'拳',dmg:8})},
+  onHeroHit(es,x){if(x>0&&!S.E.daze&&es.some(e=>e.label==='钟锤')){S.E.daze=1;flt('hero','震荡','info');log('震荡：你被砸得眼冒金星，下回合少 1 粒时之砂。')}},
+  turnStart(first){if(!first&&S.E.daze){S.sand--;S.E.daze=0;log('震荡：这回合少了 1 粒时之砂。')}},
+  status:()=>'<span class="tag">钟锤 · 锁定</span>'+(S.E.daze?'<span class="tag p2">你被震荡</span>':''),
+  rage:()=>foeE(e=>e.label==='钟锤'&&e.beat<S.beat+3).length>0},
+
+ {key:'banshee',floor:'第 4 层',name:'哀泣女妖',lane:'女妖',hp:115,sub:'在钟声里哭泣的亡灵',
+  lore:'她没有身体可砍。再重的一刀，穿过去也只剩一点点。',
+  rules:['<b>虚体</b>：单次伤害最多 12 点，多出来的穿体而过（毒伤除外）。','<b>冥爪</b>：每 6 拍里抓 3 次，每次 9 点。','<b>尖啸</b>：每 6 拍一次 14 点，紧跟在第一爪后面。尖啸打到你身上，下回合少抽 1 张牌。','大招打她很亏：刺客的多段和毒最合适；战士多拼刀、少攒重击；法师用雷链和元素反应凑多段。'],
+  reward:['echo','haste','ghost'],
+  open:'钟声里混进了一声长长的哭嚎。开战。',
+  init:()=>({hush:0}),
+  beat(b){const m=b%6;if(m===1||m===4||m===5)ev({beat:b,side:'e',label:'爪',dmg:9});else if(m===2)ev({beat:b,side:'e',label:'尖啸',dmg:14})},
+  mod:(x,o)=>o.src==='poison'?x:Math.min(x,12),modNote:'虚体 · 穿透',modShort:'虚体',
+  onHeroHit(es,x){if(x>0&&!S.E.hush&&es.some(e=>e.label==='尖啸')){S.E.hush=1;S.drawN=4;flt('hero','尖啸','info');log('尖啸：你的耳朵嗡嗡作响，下回合少抽 1 张牌。')}},
+  turnStart(first){if(!first)S.E.hush=0},
+  status:()=>'<span class="tag">虚体 · 单次最多 12</span>'+(S.E.hush?'<span class="tag p2">下回合少抽 1</span>':'')},
+
  {key:'shaman',floor:'第 5 层',name:'哥布林萨满',lane:'萨满',hp:110,sub:'躲在图腾后面念咒的哥布林',
-  art:{pos:'42% 30%',filter:'hue-rotate(70deg) saturate(1.7) brightness(.8)'},
   lore:'它自己很少出手，打它之前先得砸烂那根图腾。',
   rules:['<b>图腾</b>（12 点）：图腾在的时候，你的每一下伤害都先打在图腾上，打碎图腾那一下不会溢出到萨满身上。图腾在场时萨满每回合结束回复 6 点。','<b>重立图腾</b>：图腾碎了，每 3 回合会重新立起来。','<b>巫火</b>：每 3 拍里 2 次，每次 11 点。','战士难攒怒气；刺客的多段小刀砸图腾最快；法师的一发大招打在图腾上很浪费，先用小法术或普攻敲碎它。'],
   reward:['unity','stop','paradox'],
@@ -733,8 +823,37 @@ const FLOORS=[
   turnStart(first){if(!first&&S.E.totem<=0&&S.turn-S.E.broke>=3){S.E.totem=12;log('萨满重新立起了图腾。');flt('enemy','图腾','info')}},
   status:()=>S.E.totem>0?`<span class="tag sh">图腾 ${S.E.totem}/12</span>`:`<span class="tag ok">图腾已碎 · ${Math.max(0,3-(S.turn-S.E.broke))} 回合后重立</span>`},
 
+ {key:'thief',floor:'第 5 层',name:'时之窃贼',lane:'窃贼',hp:115,sub:'偷走别人时间的蒙面人',
+  lore:'每被他划中一刀，你就丢掉一点时间，他的刀也更快一分。',
+  rules:['<b>快刀</b>：每 3 拍里 2 刀，基础 10 点。','<b>窃时</b>：快刀打到你身上，你的下一次普通攻击延后 1 拍（重击不受影响）。','<b>得手</b>：每偷到一次，快刀永久 +1（最多 +4）。','开局要稳：战士趁刀还轻，用战吼、蓄时多拼刀弹反；刺客用闪身保住连击；法师怕他打断吟唱，屏障和寒冰枪要早用。'],
+  reward:['stasis','gather','rewind'],
+  open:'影子里有人轻轻笑了一声。开战。',
+  init:()=>({stole:0}),
+  dmgNow(){return 10+Math.min(4,S.E.stole)},
+  beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'刀',dmg:this.dmgNow()})},
+  onHeroHit(es,x){if(!es.length||x<=0)return;const c=cur(),h=S.events.filter(e=>e.side==='h'&&!e.fx&&e.beat>c).sort((a,b)=>a.beat-b.beat)[0];
+    if(h)h.beat++;S.E.stole++;const d=this.dmgNow();foeE(e=>e.label==='刀').forEach(e=>e.dmg=d);flt('hero','窃时','info');
+    log(`窃时：${h?`你第 ${roman(h.beat-1)} 拍的攻击被偷到第 ${roman(h.beat)} 拍，`:''}快刀升到 ${d} 点。`)},
+  status:()=>`<span class="tag ${S.E.stole>=4?'p2':''}">得手 ${Math.min(4,S.E.stole)}/4</span>`,
+  rage:()=>S.E.stole>=4},
+
+ {key:'golem',floor:'第 5 层',name:'熔核魔像',lane:'魔像',hp:120,sub:'从钟楼锅炉里爬出来的魔像',
+  lore:'它越烧越烫，拳头也越来越重。只有一记重击或寒冰，才能让它冷下来。',
+  rules:['<b>熔拳</b>：每 3 拍里 2 拳，每拳 8 点 + 热度。','<b>升温</b>：每回合结束热度 +1（最多 8）。','<b>冷却</b>：单次 15 点及以上的伤害，或寒冰枪命中，热度清零。','<b>熔甲</b>：单拍低于 4 点的伤害无效（毒伤除外）。','战士用共鸣和裂地斩定时降温；刺客攒连击、上毒，用绝杀降温；法师的寒冰枪是天生的克星。'],
+  reward:['unity','stop','paradox'],
+  open:'锅炉门被一拳砸开，热浪扑面而来。开战。',
+  init:()=>({heat:0}),
+  dmgNow(){return 8+S.E.heat},
+  retune(){const d=this.dmgNow();foeE(e=>e.label==='熔拳').forEach(e=>e.dmg=d)},
+  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'熔拳',dmg:this.dmgNow()})},
+  mod:(x,o)=>o.src==='poison'||x>=4?x:0,modNote:'熔甲 · 无效',modShort:'熔甲',
+  onDealt(x,o){if(S.E.heat&&S.ehp>0&&(x>=15||o.el==='冰')){S.E.heat=0;this.retune();flt('enemy','冷却','info');log(`冷却：${o.el==='冰'?'寒冰':'重击'}让魔像的热度归零，熔拳回到 ${this.dmgNow()} 点。`)}},
+  turnEnd(){if(S.E.heat<8){S.E.heat++;this.retune();log(`升温：魔像热度 ${S.E.heat}，熔拳升到 ${this.dmgNow()} 点。`)}},
+  status:()=>`<span class="tag">熔甲 · 低于 4 无效</span><span class="tag ${S.E.heat>=5?'p2':''}">热度 ${S.E.heat}/8</span>`,
+  rage:()=>S.E.heat>=5},
+
  {key:'knight',floor:'第 6 层',name:'黑铁骑士',lane:'骑士',hp:180,sub:'魔王麾下的守门骑士',
-  art:{pos:'42% 30%',filter:'grayscale(.4) brightness(.85) contrast(1.1)'},portrait:'img/knight_portrait.jpg',moods:true,
+ img:'img/knight.jpg',tint:'grayscale(.4) brightness(.85) contrast(1.1)',portrait:'img/knight_portrait.jpg',moods:true,
   lore:'钟楼最后的守门人。击碎他，通往魔王的门才会打开。',
   rules:['<b>重甲</b>：单拍伤害低于 10 会被减半。','<b>盾反</b>：灰色「盾」的那一拍，你打过去的伤害一半弹回你身上，骑士不受伤。盾可以被「迟滞」「错位」挪开。','<b>斩击</b>：除了举盾的拍，每 3 拍里斩 2 次，每次 10 点。','<b>重劈</b>：每 12 拍一次 28 点，被时间锁定。','<b>怒斩</b>：血量过半后斩击变成 13 点。','三个职业都得用上全部本事：没有专门针对谁。'],
   reward:['echo','haste','ghost','charge'],
@@ -749,7 +868,7 @@ const FLOORS=[
   mood:()=>S.E.phase===2?'rage':foeE(e=>e.label==='重劈'&&e.beat<S.beat+3).length?'judge':'calm'},
 
  {key:'king',floor:'塔顶',name:'永夜魔王',lane:'魔王',hp:320,sub:'把钟拨回零点的人',
-  art:{pos:'42% 30%',filter:'invert(.12) hue-rotate(300deg) saturate(2.3) brightness(.55) contrast(1.45)'},boss:true,
+ boss:true,
   lore:'你曾倒在他脚下。你手里的时间，也曾属于他。',
   rules:['<b>齿轮护甲</b>：全程单拍低于 10 的伤害减半。','<b>一·倒转钟面</b>：刻刃每 3 拍里 2 次，每次 10 点。每 2 回合把你视野内最晚的一次攻击标成「逆」，逆攻击会给他回血，除非它共鸣或拼刀赢了。','<b>二·看穿</b>（≤225）：你布下的残影、盾、闪身、标记和蓄时加成被抹掉，审判每 8 拍一次（锁定）。他会看穿你的职业：<br>对战士，刻刃放慢到每 3 拍一次（10 点），他边打边蓄力，每回合蓄力 +3（上限 8），审判改为每 6 拍一次，伤害 = 25 + 3×蓄力，单次打他 15 点以上能打散 2 层蓄力；<br>对刺客，他披上反甲，每挨一下反刺 1 点（毒伤除外）；<br>对法师，刻刃变成每 2 拍 6 点，专打你的吟唱。','<b>三·永夜</b>（≤120）：视野缩到 6 拍，刻刃变成每 2 拍 14 点。15 拍后终焉钟鸣 99 点，残影无效，每次弹反推迟 1 拍。'],
   reward:[],
@@ -797,19 +916,23 @@ const FLOORS=[
   status(){const f=foeE(e=>e.fin)[0];return `<span class="tag">齿轮护甲</span><span class="tag p2">${['','倒转钟面','看穿','永夜'][S.E.phase]}</span>`+(S.E.phase===2?`<span class="tag mr">${{warrior:`蓄力 ${S.E.charge}/8`,rogue:'反甲 · 每击反刺 1',mage:'刻刃每 2 拍'}[S.run.cls]}</span>`:'')+(f?`<span class="tag p2">终焉 ${f.beat-S.beat+1} 拍</span>`:'')},
   rage:()=>S.E.phase===3}
 ];
-const FL=()=>FLOORS[S.stage];
+const FOE=Object.fromEntries(FOES.map(f=>[f.key,f]));
+const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];
+const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
+const FL=()=>FOE[S.run.foes[S.stage]];
 // between floors: max HP +5, and only part of the lost HP comes back
 const FLOOR_HEAL=.2;
 
 /* ---------- Run & fight setup ---------- */
 let S;
-function newRun(stage,cls){
+function newRun(stage,cls,key){
   const C=CLASSES[cls];
-  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck)};run.hp=run.maxhp;
+  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes()};run.hp=run.maxhp;
+  if(key)run.foes[stage]=key;
   startFight(run);
 }
 function startFight(run){
-  const F=FLOORS[run.stage];
+  const F=FOE[run.foes[run.stage]];
   S={run,stage:run.stage,beat:1,turn:1,hp:run.hp??run.maxhp,maxhp:run.maxhp,ehp:F.hp,emax:F.hp,sand:CLASSES[run.cls].sand||3,debt:0,shield:0,barrier:0,quick:false,med:false,iceArmor:false,lastSpell:null,
      parried:false,parriedPrev:false,foresight:false,rage:0,combo:0,poison:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
      deck:shuffle(run.deck.slice()),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
@@ -867,7 +990,7 @@ function dealEnemy(raw,label,o={}){
   if(S.ehp<=0)S.over='win';
 }
 function healEnemy(x,label){
-  const h=Math.min(x,S.emax-S.ehp);S.ehp+=h;flt('enemy','+'+h,'heal');log(`${label}：魔王回复了 ${h} 点生命。`);
+  const h=Math.min(x,S.emax-S.ehp);S.ehp+=h;flt('enemy','+'+h,'heal');log(`${label}：${FL().lane}回复了 ${h} 点生命。`);
 }
 function dealHero(x,es,opt={}){
   if(S.iceArmor){x=Math.max(0,x-3);if(!x){flt('hero','冰甲','info');return}}
@@ -1001,7 +1124,7 @@ function resolveTarget(i,slot,chip){
 function resolveBeat(b){
   const F=FL();
   let hs=at(b,'h');let es=atkE(b);const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
-  if(at(b,'m').length&&hs.length){flt('hero','镜影 · 落空','info');log(`第 ${roman(b)} 拍：你的攻击被镜影吞没。`);hs=[]}
+  if(at(b,'m').length&&hs.length){flt('hero','镜影 · 落空','info');log(`第 ${roman(b)} 拍：你的攻击被镜影吞没。`);hs=[];F.onMirror?.call(F)}
   const res=hs.length>=2;if(res)S.resThis=true;
   const ht=heroTotal(hs);let et=es.reduce((a,e)=>a+e.dmg,0);
   // a spell going off on this beat clashes too
@@ -1047,13 +1170,14 @@ function resolveBeat(b){
     else if(S.combo){log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层）。`);S.combo=0}
   }
   if(S.poison>0&&!S.over){S.poison--;dealEnemy(2,'毒',{src:'poison',beat:b})}
+  if(!S.over)F.afterBeat?.call(F,b);
   S.events=S.events.filter(e=>e.beat!==b);
 }
 
 function freeze(why){const nx=foeE(e=>!e.locked&&!e.na&&e.beat>cur()).sort((x,y)=>x.beat-y.beat)[0];if(nx){nx.beat++;log(`${why}：${FL().lane}的${nx.label}延后到第 ${roman(nx.beat)} 拍。`);delayed('card')}}
 function castFire(c,b){
   flt('hero',c.n,'info');
-  for(let i=0;i<c.hits&&!S.over;i++)dealEnemy(c.dmg,c.n,{src:'spell',beat:b});
+  for(let i=0;i<c.hits&&!S.over;i++)dealEnemy(c.dmg,c.n,{src:'spell',beat:b,el:c.el});
   if(S.over)return;
   if(c.frz)freeze(c.n);
   const p=S.lastSpell,R=p&&p.el!==c.el&&b-p.beat<=1?REACT[p.el+c.el]:null;
@@ -1109,7 +1233,7 @@ function renderTop(){
   const F=FL();
   $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;$('beatNo').textContent=roman(S.beat);
   $('foeName').textContent=`${F.name} · ${F.floor}`;$('foeSub').textContent=F.sub;
-  const art=$('enemyArt');art.style.backgroundPosition=F.art.pos;art.style.filter=F.art.filter;
+  const art=$('enemyArt');art.style.backgroundImage=`url(${F.img||`img/foe_${F.key}.svg`})`;art.style.filter=F.tint||'';
   document.querySelector('.half.hero').style.setProperty('--hero',`url(img/hero_${S.run.cls}.jpg)`);
   const hp=(S.hp/S.maxhp*100)+'%',ehp=(S.ehp/S.emax*100)+'%';
   $('hpBar').style.width=hp;$('hpLag').style.width=hp;$('hpTxt').textContent=`${S.hp}/${S.maxhp}`;
@@ -1257,14 +1381,14 @@ addEventListener('resize',()=>{if(S)renderBoard()});
 /* ---------- Panels ---------- */
 function pic(F,hero){
   if(hero)return `<div class="pic hero" style="background-image:url(img/body_${S.run.cls}.jpg);background-position:center 8%"></div>`;
-  return `<div class="pic" style="${F.portrait?'':`background-image:url(img/knight.jpg);background-position:${F.art.pos};`}filter:${F.art.filter}"></div>`;
+  return F.portrait?`<div class="pic" style="background-image:url(${F.portrait})"></div>`:`<div class="pic svg" style="background-image:url(img/foe_${F.key}_p.svg)"></div>`;
 }
 function openPanel(html,focus){$('panel').classList.remove('wide');$('panel').innerHTML=html;$('modal').hidden=false;const f=$(focus);if(f)f.focus()}
 function closePanel(){$('modal').hidden=true}
 function floorPicker(){
-  return `<div class="floors"><span>楼层（试玩可直接跳层，从头开始的生命和牌组）</span>${FLOORS.map((f,i)=>`<button data-fl="${i}" class="${i===S.stage?'cur':''}">${f.floor} · ${f.name}</button>`).join('')}</div>`;
+  return `<div class="floors"><span>楼层（试玩可直接跳到任一只怪，从头开始的生命和牌组）</span>${TOWER.map((p,i)=>`<div class="fl"><em>${FOE[p[0]].floor}</em><div>${p.map(k=>`<button data-fl="${i}" data-k="${k}" class="${i===S.stage&&k===FL().key?'cur':''}">${FOE[k].name}</button>`).join('')}</div></div>`).join('')}</div>`;
 }
-function wireFloors(){document.querySelectorAll('.floors button').forEach(b=>b.onclick=()=>{newRun(+b.dataset.fl,S.run.cls);render();showRules(true)})}
+function wireFloors(){document.querySelectorAll('.floors button').forEach(b=>b.onclick=()=>{newRun(+b.dataset.fl,S.run.cls,b.dataset.k);render();showRules(true)})}
 const PICK={warrior:{col:'#9a2414',la:'WARRIOR',q:'以剑守护当下，\n以时间开创未来。'},rogue:{col:'#1d6a5c',la:'ASSASSIN',q:'以影为步，\n以时间为刃。'},mage:{col:'#26408f',la:'MAGE',q:'以时间为语，\n以星轨为笔。'}};
 const COMPASS='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="40" cy="40" r="25"/><circle cx="40" cy="40" r="31" stroke-dasharray="2 3"/><path d="M40 2l5 33 33 5-33 5-5 33-5-33-33-5 33-5z" fill="currentColor" fill-opacity=".18"/><path d="M40 18l3 19 19 3-19 3-3 19-3-19-19-3 19-3z" fill="currentColor" fill-opacity=".5"/><path d="M22 22l12 12M58 22L46 34M22 58l12-12M58 58L46 46"/><circle cx="40" cy="40" r="3" fill="currentColor"/></svg>';
 const PI={hp:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>',
@@ -1308,7 +1432,7 @@ function showRules(intro){
     <li>时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>3 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。</li>
     <li><b>${CL().n}</b>：${CL().rule}</li>
     <li><b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。</li>
-    <li>高塔七层：${FLOORS.map(f=>f.name).join(' → ')}。生命不会自动回满：每层打完最大生命 +5，回复 20% 最大生命，并挑一张新牌。</li>
+    <li>高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。生命不会自动回满：每层打完最大生命 +5，回复 20% 最大生命，并挑一张新牌。</li>
   </ul>`}
   ${floorPicker()}
   <div class="btns"><button id="startBtn">${S.turn===1&&!S.busy?'开战':'继续'}</button><button class="alt" id="pickBtn">换职业重来</button></div></div>`,'startBtn');
@@ -1317,7 +1441,7 @@ function showRules(intro){
 }
 function showEnd(){
   if(!$('modal').hidden&&$('panel').dataset.end===String(S.uid))return;
-  const F=FL(),win=S.over==='win',last=S.stage===FLOORS.length-1;
+  const F=FL(),win=S.over==='win',last=S.stage===TOWER.length-1;
   const stats=`<div class="stats"><div><span>回合</span><b>${S.turn}</b></div><div><span>剩余生命</span><b>${S.hp}/${S.maxhp}</b></div><div><span>${F.lane}剩余</span><b>${S.ehp}/${S.emax}</b></div></div>`;
   if(!win){
     openPanel(`${pic(F)}<div class="body"><h2>时间终结</h2><p class="psub">你倒在了${F.floor}，${F.name}面前。也许，该换一种方式排布时间。</p>${stats}
@@ -1329,7 +1453,7 @@ function showEnd(){
     <div class="btns"><button id="runBtn">再登钟楼</button></div></div>`,'runBtn');
     $('runBtn').onclick=()=>showClassPick();
   }else{
-    const N=FLOORS[S.stage+1];
+    const N=FOE[S.run.foes[S.stage+1]];
     // two class cards and one shared time card
     const pool=shuffle(CL().pool.slice()).slice(0,2).concat(shuffle(F.reward.slice()).slice(0,1));
     openPanel(`${pic(F,true)}<div class="body"><h2>${F.name}倒下了</h2><p class="psub">第 ${S.turn} 回合，你击败了${F.name}。往上一层（${N.floor}）是${N.name}。最大生命 +5，喘口气回到 ${healTo()}/${S.maxhp+5}。</p>${stats}
@@ -1355,7 +1479,7 @@ function showEnd(){
 })();
 
 function start(data){
-  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.over)showEnd()}
+  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.over)showEnd()}
   else{newRun(0,'warrior');render();showClassPick(true)}
 }
 window.claude?.hot?.snapshot?.(()=>({state:JSON.parse(JSON.stringify(S))}));
