@@ -29,20 +29,16 @@ window.AI={
       commit(best[0],best[1]);if(S.over)return;
     }
   },
-  endTurnSync(){const F=FL();S.discard.push(...S.hand);S.hand=[];
+  endTurnSync(){S.discard.push(...S.hand);S.hand=[];
     for(let k=0;k<3;k++){stepBeat(S.beat+k);if(S.over)break}
     S.resolving=null;
-    if(!S.over){F.turnEnd?.call(F);S.beat+=3;S.turn++;gen(S.beat+11);
-      S.parriedPrev=S.parried;S.parried=false;S.dmgLast=S.dmgThis;S.dmgThis=0;S.foresight=false;
-      S.lastPlayed=S.played;S.played=null;S.resThis=false;S.cry=false;S.smoke=[];
-      S.sand=(CL().sand||3)-S.debt+(S.med?2:0);S.debt=0;S.med=false;S.barrier=0;S.iceArmor=false;
-      F.turnStart?.call(F,false);S.sand=Math.max(0,S.sand);draw(S.drawN);S.drawN=5;}},
+    if(!S.over)nextTurn()},
   fight(){while(!S.over&&S.turn<=60){this.turn();if(S.over)break;this.endTurnSync()}return S.over||'timeout'},
   // a whole climb; nextFight(run) is how the game moves to the next floor (so it follows the real rules)
   run(cls){SIM=true;newRun(0,cls);const out=[];
     for(;;){const h0=S.hp;const r=this.fight();out.push({f:S.stage,r,t:S.turn,hp:S.hp,max:S.maxhp,e:S.ehp,loss:h0-S.hp});
       if(r!=='win'||S.stage===TOWER.length-1)break;
-      const pool=shuffle(CL().pool.slice()).slice(0,2).concat(shuffle(FL().reward.slice()).slice(0,1));
+      const pool=rewardPool(S.run,FL());
       const k=pool[Math.floor(Math.random()*pool.length)];
       if(typeof nextFloor==='function')nextFloor(k);else{const run=S.run;run.deck.push(k);run.maxhp+=5;run.stage++;startFight(run)}
     }
