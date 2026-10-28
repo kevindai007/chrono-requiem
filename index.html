@@ -182,6 +182,9 @@ button{font-family:var(--f-body);cursor:pointer}
 .card[data-t="法师"] .art i{background-image:url(img/art_rhy.jpg);filter:hue-rotate(150deg) saturate(1.4) brightness(.95)}
 .card[data-t="战士"] .art i{background-image:url(img/art_res.jpg);filter:hue-rotate(-28deg) saturate(1.6) contrast(1.15)}
 .card[data-t="刺客"] .art i{background-image:url(img/art_frb.jpg);filter:hue-rotate(-120deg) saturate(1.2) brightness(.9)}
+.card.ks .fr{border-color:#e9c46a;box-shadow:0 0 0 1px #3a2a10,inset 0 0 0 3px rgba(255,240,200,.5),inset 0 0 0 5px rgba(212,165,74,.8),0 0 18px rgba(247,220,150,.45),0 10px 22px rgba(0,0,0,.6),inset 0 0 28px rgba(140,100,40,.3)}
+.card .ks{font-size:11px;color:#8a5a0a;letter-spacing:.3em;margin-top:auto;padding-bottom:7px;font-weight:700}
+.card.ks .orn{display:none}
 .card.rg .cost::before{background:radial-gradient(circle at 35% 30%,#ffb08a,var(--rage) 45%,#7a1e08)}
 .card .cost small{position:absolute;bottom:-11px;left:0;right:0;font-size:10px;color:#ffd0b8;text-shadow:0 1px 2px #000;letter-spacing:0}
 .card .cost{position:absolute;top:-10px;left:-10px;width:40px;height:40px;z-index:3;display:flex;align-items:center;justify-content:center}
@@ -308,7 +311,7 @@ button{font-family:var(--f-body);cursor:pointer}
 .rm small{font-size:12px;letter-spacing:.2em;color:#e4d3ae;margin-top:4px}
 .scr .rm b{font-family:var(--f-latin);font-weight:900;font-size:24px;line-height:1.15;color:var(--gold3);white-space:nowrap}
 .scr .rm b.zh{font-family:var(--f-display);font-size:17px;letter-spacing:.06em}
-.rm i{font-style:normal;font-size:11px;color:#bfae88}
+.rm i{font-style:normal;font-size:11px;color:#bfae88;max-width:108px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pp .rms::before{background:linear-gradient(90deg,transparent,#b8913f,transparent)}
 .pp .rm{background:radial-gradient(circle at 50% 40%,#fffaf0,#efe2c2 72%);border-color:#b8913f;box-shadow:0 0 0 4px #f6edd8,0 0 0 5px rgba(184,145,63,.6),0 0 0 9px rgba(246,237,216,.6),0 0 0 10px rgba(184,145,63,.35),0 8px 18px rgba(60,40,10,.25)}
 .pp .rm .ic{color:#9a2414}.pp .rm small{color:var(--ink2)}.scr .pp .rm b{color:#1e150a}.pp .rm i{color:var(--ink2)}
@@ -688,16 +691,16 @@ const CARDS={
   paradox:{n:'悖论',c:0,t:'禁术',d:'本回合 +2 时之砂，下回合 −3。'},
   // warrior: rage (r) is spent instead of, or as well as, sand
   // a: the archetype (CLASSES[cls].arch) a class card belongs to; rewards lean toward the one you have taken most
-  shield:{n:'举盾',c:1,t:'战士',a:'wall',d:'在一拍举盾。该拍敌人伤害 −6，每挡下 1 点得 1 怒气。',tg:'any'},
+  shield:{n:'举盾',c:1,t:'战士',a:'wall',d:'在一拍举盾。该拍敌人的每次攻击 −6，每挡下 1 点得 1 怒气。',tg:'any'},
   bash:{n:'盾击',c:2,t:'战士',a:'wall',d:'在一个举盾的拍追加一次攻击，伤害等于该拍敌人的伤害（4~12）。',tg:'any'},
-  taunt:{n:'挑衅',c:1,t:'战士',a:'wall',d:'选择敌人的一个行动，提前 1 拍（拉到你的盾上）。',tg:'e'},
+  taunt:{n:'挑衅',c:1,t:'战士',a:'wall',d:'选择敌人的一个行动，提前 1 拍。',tg:'e'},
   cleave:{n:'裂地斩',c:0,r:4,t:'战士',a:'rage',d:'在一拍放下一次 20 点重击。重击不能被挪动。',tg:'any'},
   warcry:{n:'战吼',c:0,r:3,t:'战士',a:'rage',d:'本回合 3 拍内，你的每次攻击 +4。'},
   backwater:{n:'背水',c:0,t:'战士',a:'blood',d:'生命不到一半时才能用：你最近的一次攻击伤害翻倍。'},
   ironwall:{n:'铁壁',c:2,t:'战士',a:'wall',d:'视野内敌人最重的一次攻击伤害减半，立刻得到 5 怒气。'},
   frenzy:{n:'狂怒',c:0,r:2,ra:1,t:'战士',a:'rage',d:'消耗全部怒气，立刻造成 怒气×3 点伤害。'},
   riposte:{n:'反击架势',c:1,t:'战士',a:'wall',d:'本回合你的盾每挡下 1 点伤害，立刻反击 2 点。'},
-  towershield:{n:'塔盾',c:2,t:'战士',a:'wall',d:'在一拍竖起塔盾。该拍敌人伤害 −12，每挡下 1 点得 1 怒气。',tg:'any'},
+  towershield:{n:'塔盾',c:2,t:'战士',a:'wall',d:'在一拍竖起塔盾。该拍敌人的每次攻击 −12，每挡下 1 点得 1 怒气。',tg:'any'},
   lure:{n:'引战',c:1,t:'战士',a:'wall',d:'在本回合起 4 拍内选一拍，这 4 拍内敌人未锁定的攻击全部挪到那里。',tg:'b4'},
   wrath:{n:'狂暴之心',c:1,t:'战士',a:'rage',d:'本场战斗怒气上限变为 20。',x:1},
   skybreaker:{n:'天崩',c:0,r:8,t:'战士',a:'rage',d:'在一拍放下一次 38 点重击。重击不能被挪动。',tg:'any'},
@@ -706,6 +709,12 @@ const CARDS={
   gamble:{n:'搏命',c:0,t:'战士',a:'blood',d:'失去 6 点生命（不会致死），获得 5 怒气。'},
   drain:{n:'饮血',c:1,t:'战士',a:'blood',d:'本回合你每次弹反，回复造成伤害的一半。'},
   undying:{n:'不屈',c:2,t:'战士',a:'blood',d:'本场战斗第一次受到致命伤时，保留 1 点生命并回复 15 点。',x:1},
+  // ks: a keystone changes one rule for the rest of the fight; rewards offer at most one, and only from the third pick on
+  steadfast:{n:'不动如山',c:2,t:'战士',a:'wall',ks:1,x:1,d:'本场战斗，你的盾挡下攻击后留到下一拍（最多连留 3 拍）。'},
+  breaker:{n:'破军',c:1,t:'战士',a:'rage',ks:1,x:1,d:'本场战斗，重击砸掉同一拍未锁定的敌人攻击，每砸一次 +2 怒气。'},
+  quake:{n:'震地',c:0,r:3,t:'战士',a:'rage',d:'在一拍放下一次 12 点重击，命中后敌人下一次行动延后 1 拍。重击不能被挪动。',tg:'any'},
+  bloodwar:{n:'血战',c:1,t:'战士',a:'blood',ks:1,x:1,d:'本场战斗，拼刀输了你那一击照样打出；拼刀赢了回复 3。'},
+  grudge:{n:'怨报',c:2,t:'战士',a:'blood',d:'在一拍放一次攻击，伤害等于你上回合受到的伤害（最多 30）。',tg:'any'},
   // assassin
   dodge:{n:'闪身',c:1,t:'刺客',a:'combo',d:'选一拍，敌人在该拍的攻击落空，连击不中断。',tg:'any'},
   poison:{n:'淬毒',c:1,t:'刺客',a:'venom',d:'敌人 +4 层毒。'},
@@ -719,12 +728,17 @@ const CARDS={
   vanish:{n:'影遁',c:2,t:'刺客',a:'combo',d:'本回合 3 拍你全部闪身。'},
   flurry:{n:'乱刃',c:1,t:'刺客',a:'combo',d:'本回合 3 拍，每拍多一次 2 点攻击（与普攻共鸣）。'},
   ready:{n:'蓄势',c:0,t:'刺客',a:'combo',d:'连击 +2。'},
-  venomblade:{n:'毒刃',c:1,t:'刺客',a:'venom',d:'本回合你的攻击每命中一拍，敌人 +2 层毒。'},
+  venomblade:{n:'毒刃',c:1,t:'刺客',a:'venom',d:'本回合你的攻击每命中一次，敌人 +2 层毒。'},
   corrode:{n:'蚀骨',c:1,t:'刺客',a:'venom',d:'敌人的毒层数翻倍。'},
   detonate:{n:'毒爆',c:2,t:'刺客',a:'venom',d:'立刻造成 毒层×2 点伤害，毒层不减。'},
   converge:{n:'聚刃',c:1,t:'刺客',a:'mark',d:'选一个标记过的拍，本回合起 4 拍内你的攻击全部挪到那里。',tg:'any'},
   expose:{n:'破绽',c:2,t:'刺客',a:'mark',d:'标记一拍，那一拍你的伤害 ×3。',tg:'any'},
   clone:{n:'分影',c:1,t:'刺客',a:'mark',d:'在一拍插入两次 4 点攻击（自带共鸣）。',tg:'any'},
+  shift:{n:'换影',c:1,t:'刺客',a:'combo',d:'选敌人的一次攻击，挪到它后面最近的另一次敌人攻击的拍上。',tg:'e'},
+  zanshin:{n:'残心',c:1,t:'刺客',a:'combo',ks:1,x:1,d:'本场战斗，你每闪开一次攻击，连击 +1，并反刺 3 点。'},
+  toxin:{n:'毒发',c:1,t:'刺客',a:'venom',d:'本回合你的连击每 +1，敌人 +1 层毒。'},
+  plague:{n:'瘟疫',c:2,t:'刺客',a:'venom',ks:1,x:1,d:'本场战斗，毒上限 30，不再每拍减层，改为每回合结束减半。'},
+  omen:{n:'死兆',c:1,t:'刺客',a:'mark',ks:1,x:1,d:'本场战斗，标记的拍上你打出了伤害，标记就移到下一拍。'},
   // mage: a spell with cast:n takes n beats; it goes off on the last one unless a hit lands inside the window
   fireball:{n:'火球',c:1,t:'法师',a:'chain',cast:2,el:'火',dmg:16,d:'吟唱 2 拍，造成 16 点火焰伤害。',tg:'cast'},
   icelance:{n:'寒冰枪',c:1,t:'法师',a:'ice',cast:1,el:'冰',dmg:9,frz:1,d:'吟唱 1 拍，9 点冰伤，敌人下一次攻击延后 1 拍。',tg:'cast'},
@@ -743,7 +757,11 @@ const CARDS={
   aria:{n:'时之咏叹',c:2,t:'法师',a:'grand',cast:4,el:'雷',dmg:30,d:'吟唱 4 拍，30 点雷伤。',tg:'cast'},
   glacier:{n:'冰川',c:2,t:'法师',a:'ice',cast:2,el:'冰',dmg:10,frz:2,d:'吟唱 2 拍，10 点冰伤，敌人接下来两次攻击各延后 1 拍。',tg:'cast'},
   nova:{n:'霜冻新星',c:1,t:'法师',a:'ice',d:'霜冻 +2。'},
-  rime:{n:'寒霜印记',c:1,t:'法师',a:'ice',d:'本场战斗中，敌人的行动每被你推迟一次，受到 4 点冰伤。',x:1}
+  rime:{n:'寒霜印记',c:1,t:'法师',a:'ice',d:'本场战斗中，敌人的行动每被你推迟一次，受到 4 点冰伤。',x:1},
+  tide:{n:'元素潮汐',c:1,t:'法师',a:'chain',ks:1,x:1,d:'本场战斗，每次元素反应让下回合 +1 沙（每回合最多 +3）。'},
+  linger:{n:'余韵',c:2,t:'法师',a:'grand',ks:1,x:1,d:'本场战斗，吟唱 4 拍以上的法术释放后，下一拍再响一次，伤害减半。'},
+  zero:{n:'绝对零度',c:2,t:'法师',a:'ice',ks:1,x:1,d:'本场战斗，被冻碎的攻击以 ×2 伤害反噬敌人，并算一次冰法术。'},
+  frostfire:{n:'霜火',c:1,t:'法师',a:'ice',d:'消耗全部霜冻，每层让你下一张火焰法术 +6 伤害。'}
 };
 // two spells of different elements going off on the same or adjacent beats react; reactions in a row build a chain, +CHAIN per link
 const CHAIN=4;
@@ -758,22 +776,22 @@ const CLASSES={
     rule:'你每 <b>2 拍</b>自动攻击一次（7 点）。<b>怒气</b>：举盾挡下伤害、被打中（+2）、弹反（+2）都会攒怒气，上限 10，整场战斗不清空。红色费用的牌花的是怒气。',
     arch:{wall:'铁壁',rage:'重击',blood:'背水'},
     pitch:'想要敌人出手的拍。把盾放在敌人的攻击上，挡下的伤害变成怒气，再用怒气打出不能挪动的重击。',
-    deck:['shield','shield','shield','bash','bash','taunt','cleave','warcry','ironwall'],
-    pool:['shield','bash','taunt','cleave','warcry','backwater','ironwall','frenzy','riposte','towershield','lure','wrath','skybreaker','whet','bloodlust','gamble','drain','undying']},
+    deck:['shield','shield','shield','bash','grudge','taunt','cleave','warcry','ironwall'],
+    pool:['shield','bash','taunt','cleave','warcry','backwater','ironwall','frenzy','riposte','towershield','lure','wrath','skybreaker','whet','bloodlust','gamble','drain','undying','steadfast','breaker','quake','bloodwar','grudge']},
   rogue:{n:'刺客',title:'无影',hp:70,col:'var(--t-rog)',atk:{every:1,dmg:2},
     sub:'在缝隙里连刺',
     rule:'你<b>每一拍</b>都自动攻击一次（2 点）。<b>连击</b>：没有敌人干扰的拍命中一次，连击 +1，每 2 层让每拍伤害 +1（上限 8 层）。你那一拍被敌人攻击（哪怕拼刀赢了）或没攻击，连击归零。<b>背刺</b>：敌人不出手的拍，伤害 +1。<b>毒</b>：敌人每拍受到 毒层数 点伤害（无视护甲），然后毒减 1 层，最多 15 层。',
     arch:{combo:'连击',venom:'淬毒',mark:'标记'},
     pitch:'想要连续的空拍。避开敌人的攻击拍，在中间连续出手，越连越痛。和敌人拼刀反而会断掉连击。',
-    deck:['dodge','dodge','poison','poison','shadow','finisher','boomerang','mark','smoke'],
-    pool:['dodge','poison','shadow','finisher','smoke','boomerang','mark','assassinate','momentum','vanish','flurry','ready','venomblade','corrode','detonate','converge','expose','clone']},
+    deck:['dodge','dodge','poison','shift','shadow','finisher','boomerang','mark','smoke'],
+    pool:['dodge','poison','shadow','finisher','smoke','boomerang','mark','assassinate','momentum','vanish','flurry','ready','venomblade','corrode','detonate','converge','expose','clone','shift','zanshin','toxin','plague','omen']},
   mage:{n:'法师',title:'刻律术士',hp:90,sand:4,col:'var(--t-mag)',atk:{every:3,dmg:4},
     sub:'守住时间的空窗',
     rule:'你每 <b>3 拍</b>自动攻击一次（4 点），每回合 <b>4 粒时之砂</b>。<b>吟唱</b>：法术要吟唱好几拍，在最后一拍释放；吟唱期间你被敌人打中就会中断，法术作废、沙不退。<b>释放那一拍法术也参与拼刀</b>：法术伤害高过敌人那一击就弹反，挡下它。<b>元素反应</b>：火、冰、雷两种不同元素在同一拍或相邻两拍释放，触发碎裂（火+冰 +10）、感电（冰+雷 +8，敌人下一击延后）或爆燃（雷+火 +12）。<b>连锁</b>：反应一个接一个，每多一环反应伤害 +4。<b>霜冻</b>：你每把敌人的行动推迟一次，霜冻 +1，到 3 层时敌人下一次未锁定的攻击被冻碎。',
     arch:{chain:'连锁',grand:'大咒',ice:'冰封'},
     pitch:'想要敌人不出手的空窗。把吟唱塞进敌人两次攻击之间，用迟滞、寒冰枪把攻击推出窗口，再排好元素的先后。',
     deck:['fireball','fireball','icelance','icelance','chain','barrier','quick','meditate','frostarmor'],
-    pool:['fireball','icelance','chain','meteor','barrier','quick','meditate','frostarmor','spark','ember','prism','trinity','overcharge','manaflow','aria','glacier','nova','rime']}
+    pool:['fireball','icelance','chain','meteor','barrier','quick','meditate','frostarmor','spark','ember','prism','trinity','overcharge','manaflow','aria','glacier','nova','rime','tide','linger','zero','frostfire']}
 };
 const castLen=C=>Math.max(1,C.cast-(S.quick?2:0)+(S.surge?2:0));
 const CL=()=>CLASSES[S.run.cls];
@@ -797,7 +815,9 @@ const SHIELD=6;
 const blkAt=b=>Math.max(0,...at(b,'w').map(w=>w.v||SHIELD));
 // poison stacks on the enemy: each beat deals its stacks, then one wears off
 const POISON_MAX=15;
-const addPoison=n=>{S.poison=Math.min(POISON_MAX,S.poison+n)};
+const addPoison=n=>{S.poison=Math.min(S.plague?30:POISON_MAX,S.poison+n)};
+// every way the assassin's combo goes up runs through here (毒发 turns each step into poison)
+function addCombo(n){const was=S.combo;S.combo=Math.min(S.comboMax,S.combo+n);const up=S.combo-was;if(up>0&&S.toxin)addPoison(up);return up}
 const armored=x=>x<10?Math.floor(x/2):x;
 const mult=n=>n<=1?1:n===2?1.5:2;
 // "now" for mid-resolution changes: the beat being resolved, or just before this turn when a card triggers it
@@ -1070,7 +1090,7 @@ function newRun(stage,cls,key){
 function startFight(run){
   const F=FOE[run.foes[run.stage]];
   S={run,stage:run.stage,beat:1,turn:1,hp:run.hp??run.maxhp,maxhp:run.maxhp,ehp:F.hp,emax:F.hp,sand:CLASSES[run.cls].sand||3,debt:0,shield:0,barrier:0,quick:false,med:false,iceArmor:false,lastSpell:null,
-     parried:false,parriedPrev:false,foresight:false,rage:0,rageMax:10,combo:0,comboMax:8,poison:0,chain:0,frost:0,refund:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
+     best:null,turnCards:[],parried:false,parriedPrev:false,foresight:false,rage:0,rageMax:10,combo:0,comboMax:8,poison:0,chain:0,frost:0,refund:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
      deck:shuffle(run.deck.slice()),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
   gen(S.beat+11);
   F.turnStart?.call(F,true);
@@ -1080,12 +1100,14 @@ function startFight(run){
 // climb to the next floor with the HP this fight left you, taking card k (or none)
 function nextFloor(k){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.maxhp+=5;run.hp=Math.min(run.maxhp,S.hp+5+Math.round(run.maxhp*FLOOR_HEAL));run.stage++;startFight(run)}
 // the reward offer: two class cards and one shared time card. From the third pick on, one of the class cards comes from
-// the archetype you have taken the most cards of (ties go to the latest), the other from anywhere in the pool
+// the archetype you have taken the most cards of (ties go to the latest), the other from anywhere in the pool.
+// Keystones only show up from the third pick on, and never two in one offer
 function rewardPool(run,F){
-  const K=CLASSES[run.cls],picks=run.picks||[],cls=[];
-  if(picks.length>=2){const n={};picks.forEach((k,i)=>{const a=CARDS[k].a;n[a]=(n[a]||0)+1+i/100});
-    const top=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];cls.push(shuffle(K.pool.filter(k=>CARDS[k].a===top))[0])}
-  cls.push(...shuffle(K.pool.filter(k=>!cls.includes(k))).slice(0,2-cls.length));
+  const K=CLASSES[run.cls],picks=run.picks||[],cls=[],late=picks.length>=2;
+  const pool=K.pool.filter(k=>late||!CARDS[k].ks);
+  if(late){const n={};picks.forEach((k,i)=>{const a=CARDS[k].a;n[a]=(n[a]||0)+1+i/100});
+    const top=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];cls.push(shuffle(pool.filter(k=>CARDS[k].a===top))[0])}
+  for(const k of shuffle(pool.slice())){if(cls.length>=2)break;if(cls.includes(k)||(CARDS[k].ks&&cls.some(c=>CARDS[c].ks)))continue;cls.push(k)}
   return cls.concat(shuffle(F.reward.slice()).slice(0,1));
 }
 const healTo=()=>Math.min(S.maxhp+5,S.hp+5+Math.round((S.maxhp+5)*FLOOR_HEAL));
@@ -1128,7 +1150,7 @@ function dealEnemy(raw,label,o={}){
   let x=F.mod&&o.src!=='true'?F.mod(raw,o):raw,note='';
   if(x<raw&&!(o.beat&&at(o.beat,'e').some(e=>e.sh))){flt('enemy',F.modNote,'info');note=`（${F.modNote}）`}
   if(F.take)x=F.take(x,o,raw);
-  if(S.venom&&o.src==='atk'&&raw>0){addPoison(2);flt('enemy','毒 +2','info')}
+  if(S.venom&&o.src==='atk'&&raw>0){const k=2*(o.n||1);addPoison(k);flt('enemy',`毒 +${k}`,'info')}
   if(S.shield>0&&x>0){const a=Math.min(S.shield,x);S.shield-=a;x-=a;flt('enemy',`帷幕 −${a}`,'info');note+=`（沙之帷幕吸收 ${a}）`}
   S.ehp=Math.max(0,S.ehp-x);
   if(x>0)flt('enemy',String(x),x>=25?'big':'dmg');
@@ -1157,7 +1179,9 @@ function delayed(src){const F=FL();F.onDelay?.call(F,src);
 // at FROST stacks the next attack that is not time-locked freezes solid and never lands
 function addFrost(n){S.frost+=n;flt('enemy',`霜冻 ${Math.min(S.frost,FROST)}/${FROST}`,'info');
   while(S.frost>=FROST){const e=foeE(e=>!e.locked&&!e.na&&e.beat>cur()).sort((x,y)=>x.beat-y.beat)[0];if(!e)break;
-    S.frost-=FROST;S.events=S.events.filter(x=>x!==e);log(`冻结：${FL().lane}第 ${roman(e.beat)} 拍的${e.label}被冻碎了。`);banner('冻结','FROZEN')}}
+    S.frost-=FROST;S.events=S.events.filter(x=>x!==e);log(`冻结：${FL().lane}第 ${roman(e.beat)} 拍的${e.label}被冻碎了。`);banner('冻结','FROZEN');
+    if(S.zero&&!S.over){const b=cur();dealEnemy(e.dmg*2,'绝对零度',{src:'spell',el:'冰',beat:b});if(!S.over)react('冰',b)}
+    if(S.over)break}}
 
 function apply(key,target){
   const lo=S.beat,hi=S.beat+W()-1;
@@ -1167,8 +1191,10 @@ function apply(key,target){
     if(from<lo)return `吟唱要 ${L} 拍，往后选一拍`;if(target>hi)return '那一拍不在视野内';
     const k=S.surge?2:1;
     // 三相咒 goes off over its last three beats, fire then ice then lightning; the whole window is one cast
-    if(C.tri){if(target-2<lo)return '三相咒要 3 拍，往后选一拍';['火','冰','雷'].forEach((el,j)=>ev({beat:target-2+j,side:'c',from:Math.min(from,target-2),el,dmg:C.dmg*k,hits:1,n:C.n+'·'+el,c:j?0:C.c}))}
-    else ev({beat:target,side:'c',from,el:C.el,dmg:C.dmg*k,hits:C.hits||1,frz:C.frz,n:C.n,c:C.c});
+    const ff=S.ff||0;
+    if(C.tri){if(target-2<lo)return '三相咒要 3 拍，往后选一拍';['火','冰','雷'].forEach((el,j)=>ev({beat:target-2+j,side:'c',from:Math.min(from,target-2),el,dmg:C.dmg*k+(el==='火'?ff:0),hits:1,n:C.n+'·'+el,c:j?0:C.c,len:L}))}
+    else ev({beat:target,side:'c',from,el:C.el,dmg:C.dmg*k+(C.el==='火'?ff:0),hits:C.hits||1,frz:C.frz,n:C.n,c:C.c,len:L});
+    if(ff&&(C.tri||C.el==='火')){S.ff=0;log(`霜火：这一发火焰 +${ff}。`)}
     S.quick=false;S.surge=false;
     log(`${C.n}：从第 ${roman(Math.min(from,C.tri?target-2:from))} 拍开始吟唱，${C.tri?`第 ${roman(target-2)}~${roman(target)} 拍依次释放火、冰、雷`:`第 ${roman(target)} 拍释放`}${k>1?'（超载，伤害翻倍）':''}。`);return null;
   }
@@ -1180,12 +1206,12 @@ function apply(key,target){
     case 'echo':{const e=find(target);ev({beat:e.beat,side:'h',dmg:e.dmg,ch:e.ch});log(`回响：第 ${roman(e.beat)} 拍多了一次 ${e.dmg} 点的攻击。`);break}
     case 'gather':{const b=target;if(b>S.beat+3)return '只能选本回合起 4 拍内的一拍';const hs=S.events.filter(e=>e.side==='h'&&!e.fx&&e.beat>=lo&&e.beat<=S.beat+3);if(!hs.length)return '这 4 拍内没有你的攻击';hs.forEach(e=>e.beat=b);log(`收束：${hs.length} 次攻击汇聚于第 ${roman(b)} 拍。`);break}
     case 'charge':{const e=find(target);if(e.fx)return '重击不能被挪动';e.beat+=2;e.dmg+=8;e.ch=true;log(`蓄时：攻击延后到第 ${roman(e.beat)} 拍，伤害升至 ${e.dmg}。`);break}
-    case 'stasis':{const es=foeE(e=>!e.locked&&e.beat>=lo&&e.beat<=S.beat+2);if(!es.length)return '本回合没有可以延后的敌人行动';es.forEach(e=>e.beat++);log(`静滞领域：${es.length} 个敌人行动延后 1 拍。`);delayed('card');break}
+    case 'stasis':{const es=foeE(e=>!e.locked&&e.beat>=lo&&e.beat<=S.beat+2);if(!es.length)return '本回合没有可以延后的敌人行动';es.forEach(e=>e.beat++);log(`静滞领域：${es.length} 个敌人行动延后 1 拍。`);for(const e of es){if(S.over)break;delayed('card')}break}
     case 'haste':{let n=0;for(let b=lo;b<=S.beat+3;b++){if(!at(b,'h').length){ev({beat:b,side:'h',dmg:6});n++}}if(!n)return '这 4 拍每一拍都已经有攻击了';log(`疾时：补上了 ${n} 次攻击。`);break}
     case 'ghost':{if(at(target,'g').length)return '这一拍已经有残影了';ev({beat:target,side:'g'});log(`残影：留在第 ${roman(target)} 拍。`);break}
     case 'rewind':{if(S.dmgLast<=0)return '上回合没有受到伤害';const h=Math.min(S.dmgLast,S.maxhp-S.hp);S.hp+=h;S.dmgLast=0;flt('hero','+'+h,'heal');log(`回溯：恢复 ${h} 点生命。`);break}
     case 'foresee':{draw(2);S.foresight=true;log('预知：看见了更远的时间。');break}
-    case 'stop':{foeE(e=>e.beat>=lo).forEach(e=>e.beat+=2);log(`时停：${FL().lane}的时间整体冻结 2 拍。`);flt('enemy','时停','info');banner('时停','TEMPUS · STOP');delayed('stop');break}
+    case 'stop':{const es=foeE(e=>e.beat>=lo);es.forEach(e=>e.beat+=2);log(`时停：${FL().lane}的时间整体冻结 2 拍。`);flt('enemy','时停','info');banner('时停','TEMPUS · STOP');for(const e of es.filter(e=>!e.na)){if(S.over)break;delayed('stop')}break}
     case 'unity':{const hs=S.events.filter(e=>e.side==='h'&&e.beat>=lo&&e.beat<=hi);if(!hs.length)return '视野内没有你的攻击';const sum=hs.reduce((a,e)=>a+e.dmg,0);const tot=Math.round(sum*(1+.5*(hs.length-1)));S.events=S.events.filter(e=>!hs.includes(e));if(hs.length>=2)S.resThis=true;banner('万象归一',`${hs.length} 次攻击同时落下`);dealEnemy(tot,`万象归一（${hs.length} 次攻击）`,{src:'unity',res:hs.length>=2});break}
     case 'paradox':{S.sand+=2;S.debt+=3;log('悖论：借来 2 粒时之砂，下回合要还 3 粒。');break}
     case 'barrier':{if(S.barrier)return '本回合已经有屏障了';S.barrier=1;log('法力屏障：本回合的吟唱能挨一下。');break}
@@ -1224,7 +1250,7 @@ function apply(key,target){
     case 'momentum':{S.comboMax=12;S.keep=true;log('余势：连击上限 12，中断时只掉一半。');break}
     case 'vanish':{let n=0;for(let b=S.beat;b<S.beat+3;b++)if(b>S.doneUpTo&&!at(b,'d').length){ev({beat:b,side:'d'});n++}if(!n)return '本回合每一拍都已经闪身了';log('影遁：本回合 3 拍你都会闪开。');break}
     case 'flurry':{for(let b=S.beat;b<S.beat+3;b++)if(b>S.doneUpTo)ev({beat:b,side:'h',dmg:2});log('乱刃：本回合每拍多一次 2 点攻击。');break}
-    case 'ready':{S.combo=Math.min(S.comboMax,S.combo+2);log(`蓄势：连击升到 ${S.combo}。`);flt('hero','连击 +2','info');break}
+    case 'ready':{addCombo(2);log(`蓄势：连击升到 ${S.combo}。`);flt('hero','连击 +2','info');break}
     case 'converge':{const b=target;if(!at(b,'k').length)return '选一个标记过的拍';const hs=S.events.filter(e=>e.side==='h'&&!e.fx&&e.beat>=lo&&e.beat<=S.beat+3&&e.beat!==b);if(!hs.length)return '这 4 拍内没有能挪动的攻击';
       hs.forEach(e=>e.beat=b);log(`聚刃：${hs.length} 次攻击汇聚到标记的第 ${roman(b)} 拍。`);break}
     case 'expose':{if(at(target,'k').some(k=>k.v))return '这一拍已经有破绽了';ev({beat:target,side:'k',v:3});log(`破绽：第 ${roman(target)} 拍伤害 ×3。`);break}
@@ -1234,6 +1260,21 @@ function apply(key,target){
     case 'smoke':{S.smoke=[S.beat,S.beat+1,S.beat+2];log('烟幕：本回合敌人的攻击伤害减半。');break}
     case 'boomerang':{if(target+2>hi)return '回程那一拍不在视野内';ev({beat:target,side:'h',dmg:5});ev({beat:target+2,side:'h',dmg:5});log(`回旋刃：第 ${roman(target)} 拍和第 ${roman(target+2)} 拍各 5 点。`);break}
     case 'mark':{if(at(target,'k').length)return '这一拍已经标记过了';ev({beat:target,side:'k'});log(`标记：第 ${roman(target)} 拍伤害翻倍。`);break}
+    case 'steadfast':{S.steady=true;log('不动如山：你的盾挡下攻击后会留到下一拍。');flt('hero','不动如山','info');break}
+    case 'breaker':{S.breaker=true;log('破军：你的重击会直接砸掉同一拍的敌人攻击。');flt('hero','破军','info');break}
+    case 'quake':{ev({beat:target,side:'h',dmg:12,fx:true,quake:true});log(`震地：第 ${roman(target)} 拍放下一次 12 点重击。`);break}
+    case 'bloodwar':{S.bloodwar=true;log('血战：拼刀输了也照样打出去。');flt('hero','血战','info');break}
+    case 'grudge':{if(S.dmgLast<=0)return '上回合没有受到伤害';const d=Math.min(30,S.dmgLast);ev({beat:target,side:'h',dmg:d});log(`怨报：第 ${roman(target)} 拍放下一次 ${d} 点攻击。`);break}
+    case 'shift':{const e=find(target);if(e.locked)return '这个行动被时间锁定，无法挪动';if(e.na)return '选敌人的一次攻击';const to=foeE(x=>!x.na&&x.beat>e.beat&&x.beat<=hi).sort((a,b)=>a.beat-b.beat)[0];if(!to)return '它后面视野内没有别的敌人攻击';
+      e.beat=to.beat;log(`换影：${e.label}挪到第 ${roman(e.beat)} 拍，和${to.label}叠在一起。`);delayed('card');break}
+    case 'zanshin':{S.zanshin=true;log('残心：每闪开一次攻击，连击 +1 并反刺 3 点。');flt('hero','残心','info');break}
+    case 'toxin':{if(S.toxin)return '本回合已经用过毒发了';S.toxin=true;log('毒发：本回合连击每 +1，敌人 +1 层毒。');break}
+    case 'plague':{S.plague=true;log('瘟疫：毒上限 30，毒每回合结束减半，不再每拍减层。');flt('enemy','瘟疫','info');break}
+    case 'omen':{S.omen=true;log('死兆：打出伤害的标记会移到下一拍。');flt('hero','死兆','info');break}
+    case 'tide':{S.tide=true;log('元素潮汐：每次元素反应，下回合 +1 时之砂。');flt('hero','潮汐','info');break}
+    case 'linger':{S.linger=true;log('余韵：长吟唱的法术释放后，下一拍再响一次。');flt('hero','余韵','info');break}
+    case 'zero':{S.zero=true;log('绝对零度：冻碎的攻击会反噬敌人。');flt('enemy','绝对零度','info');break}
+    case 'frostfire':{if(!S.frost)return '还没有霜冻';const n=S.frost;S.frost=0;S.ff=(S.ff||0)+6*n;log(`霜火：消耗 ${n} 层霜冻，下一张火焰法术 +${S.ff}。`);flt('hero','霜火','info');break}
     case 'assassinate':{if(FL().boss){dealEnemy(40,'暗杀',{src:'true'});break}if(S.ehp*4>S.emax)return '敌人生命还没低于 25%';banner('暗杀','ASSASSINATE');dealEnemy(S.ehp,'暗杀',{src:'true'});break}
   }
   return null;
@@ -1250,7 +1291,11 @@ function commit(i,target){
   const key=S.hand[i],C=CARDS[key];
   if(C.c>S.sand)return '时之砂不足';
   if(C.r&&S.rage<C.r)return '怒气不足';
+  const was=new Map(S.events.map(e=>[e.id,e.beat])),e0=S.ehp;
   const err=apply(key,target);if(err)return err;
+  for(const e of S.events)if(was.get(e.id)!==e.beat)(e.by??=[]).push(C.n);
+  if(!C.tg&&!C.ks)S.turnCards.push(C.n);
+  if(e0-S.ehp>(S.best?.d||0))S.best={d:e0-S.ehp,cards:[C.n]};
   S.sand-=C.c;if(C.r&&!C.ra)S.rage-=C.r;S.hand.splice(i,1);
   if(!C.x)S.discard.push(key);
   if(!S.played||C.c>=S.played.c)S.played={t:C.t,c:C.c};
@@ -1276,8 +1321,10 @@ function sim(st,fn){
 function stepBeat(b){
   const r={b,hp0:S.hp,ehp0:S.ehp,es:atkE(b).map(e=>({l:e.label,d:e.dmg})),st:at(b,'e').filter(e=>e.na).map(e=>e.label),fx:[]};
   const keep=FX;FX=r.fx;S.resolving=b;
+  const by=[...new Set(at(b).flatMap(e=>e.by||[]).concat(S.turnCards))];
   try{resolveBeat(b)}finally{FX=keep}
-  S.doneUpTo=b;r.took=r.hp0-S.hp;r.net=r.ehp0-S.ehp;r.hp=S.hp;r.ehp=S.ehp;r.over=S.over;
+  S.doneUpTo=b;r.took=r.hp0-S.hp;r.net=r.ehp0-S.ehp;
+  if(r.net>(S.best?.d||0))S.best={d:r.net,b,cards:by};r.hp=S.hp;r.ehp=S.ehp;r.over=S.over;
   return r;
 }
 // the rest of this turn's three beats plus the end-of-turn effects, exactly as endTurn runs them
@@ -1312,20 +1359,26 @@ function resolveBeat(b){
   const F=FL();
   let hs=at(b,'h');let es=atkE(b);const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
   if(at(b,'m').length&&hs.length){flt('hero','镜影 · 落空','info');log(`第 ${roman(b)} 拍：你的攻击被镜影吞没。`);hs=[];F.onMirror?.call(F)}
+  // 破军: a heavy hit smashes the unlocked attacks on its beat before they can clash
+  if(S.breaker&&hs.some(h=>h.fx)){const sm=atkE(b).filter(e=>!e.locked);if(sm.length){S.events=S.events.filter(e=>!sm.includes(e));es=atkE(b);gainRage(2*sm.length);flt('enemy','破招','info');log(`第 ${roman(b)} 拍：重击砸掉了${sm.map(e=>e.label).join('、')}。`)}}
   const res=hs.length>=2;if(res)S.resThis=true;
-  const ht=heroTotal(hs);let et=es.reduce((a,e)=>a+e.dmg,0);
+  const ht=heroTotal(hs);let struck=false,blkd=0;let et=es.reduce((a,e)=>a+e.dmg,0);
   // a spell going off on this beat clashes too
   const sp=at(b,'c').reduce((a,c)=>a+c.dmg*c.hits,0),ct=ht+sp;
   const rev=hs.length===1&&hs[0].rev;
   const resLbl=res?`共鸣×${mult(hs.length)}`:(S.run.cls==='rogue'&&hs.length&&openBeat(b)?'背刺':'攻击');
-  const hit=()=>{if(rev)healEnemy(ht,`第 ${roman(b)} 拍的逆攻击`);else dealEnemy(ht,resLbl,{res,src:'atk',beat:b})};
+  const hit=()=>{if(rev)healEnemy(ht,`第 ${roman(b)} 拍的逆攻击`);else{struck=true;dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length})}};
   const names=[...new Set(es.map(e=>e.label))].join('、');
   if(res)flt('hero',resLbl,'info');
   let clean=hs.length>0;  // assassin combo survives this beat
   if(es.length&&S.smoke.includes(b)){const h=Math.floor(et/2);flt('hero',`烟幕 −${et-h}`,'info');log(`第 ${roman(b)} 拍：烟幕里${F.lane}的${names}只打出一半（${et}→${h}）。`);et=h;if(et<=0)es=[]}
-  if(es.length&&dodge){flt('hero','闪身','info');log(`第 ${roman(b)} 拍：你闪开了${names}。`);es=[];et=0}
+  if(es.length&&dodge){flt('hero','闪身','info');log(`第 ${roman(b)} 拍：你闪开了${names}。`);
+    if(S.zanshin){const n=es.length;addCombo(n);dealEnemy(3*n,'残心',{src:'ghost',beat:b});if(S.over)return}
+    es=[];et=0}
   if(es.length&&shield&&!(g&&!es.some(e=>e.noGhost))){
-    const blk=Math.min(blkAt(b),et);et-=blk;gainRage(blk);flt('hero',`格挡 ${blk}`,'info');log(`第 ${roman(b)} 拍：盾挡下 ${blk} 点${names}。`);
+    // a shield takes its full value off each attack on the beat
+    const v=blkAt(b),raw=es.reduce((a,e)=>a+e.dmg,0),k=raw?et/raw:0;
+    const blk=Math.min(et,es.reduce((a,e)=>a+Math.min(v,Math.floor(e.dmg*k)),0));et-=blk;blkd=blk;gainRage(blk);flt('hero',`格挡 ${blk}`,'info');log(`第 ${roman(b)} 拍：盾挡下 ${blk} 点${names}。`);
     if(S.ripo&&blk>0){dealEnemy(blk*2,'反击架势',{src:'ghost',beat:b});if(S.over)return}
     if(et<=0){es=[]}
   }
@@ -1339,7 +1392,8 @@ function resolveBeat(b){
     }else if(hs.length||sp){
       if(ct>et){
         flt('hero','弹反！','info');S.parried=true;gainRage(2);log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，弹反成功！${rev?'逆针被弹反净化。':''}`);
-        if(hs.length){const e0=S.ehp;dealEnemy(ht,resLbl,{res,src:'atk',beat:b});
+        if(S.bloodwar){const h=Math.min(3,S.maxhp-S.hp);if(h>0){S.hp+=h;flt('hero','+'+h,'heal')}}
+        if(hs.length){struck=true;const e0=S.ehp;dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length});
           const h=S.drain?Math.min(Math.floor((e0-S.ehp)/2),S.maxhp-S.hp):0;if(h>0){S.hp+=h;flt('hero','+'+h,'heal');log(`饮血：回复 ${h} 点生命。`)}}
         const nx=foeE(e=>!e.locked&&!e.na&&e.beat>b).sort((x,y)=>x.beat-y.beat)[0];
         const st=F.stagger||1;
@@ -1348,18 +1402,24 @@ function resolveBeat(b){
       }else{
         const left=et-ct;log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，被压制，承受 ${left} 点伤害。`);
         flt('hero','拼刀失利','info');if(left>0)dealHero(left,es);
+        if(S.bloodwar&&hs.length&&!S.over){struck=true;log('血战：你那一击照样砍了下去。');dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length})}
       }
     }else{
       log(`第 ${roman(b)} 拍：${F.lane}的${names}，受到 ${et} 点伤害。`);dealHero(et,es);
     }
   }else if(hs.length){hit()}
+  if(struck&&!S.over&&hs.some(h=>h.quake))freeze('震地');
   for(const c of at(b,'c')){if(S.over)break;castFire(c,b)}
   if(S.run.cls==='rogue'&&!S.over){
-    if(clean){if(S.combo<S.comboMax)S.combo++}
+    if(clean)addCombo(1)
     else if(S.combo){const k=S.keep?Math.floor(S.combo/2):0;log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层${k?`，余势留下 ${k} 层`:''}）。`);S.combo=k}
   }
-  if(S.poison>0&&!S.over){const d=S.poison;S.poison--;dealEnemy(d,`毒（${d} 层）`,{src:'poison',beat:b})}
+  if(S.poison>0&&!S.over){const d=S.poison;if(!S.plague)S.poison--;dealEnemy(d,`毒（${d} 层）`,{src:'poison',beat:b})}
   if(!S.over)F.afterBeat?.call(F,b);
+  // 不动如山: a shield that blocked stays up for the next beat (three beats in a row at most)
+  if(S.steady&&blkd>0)for(const w of at(b,'w'))if((w.k||0)<3&&!at(b+1,'w').length)ev({beat:b+1,side:'w',v:w.v,k:(w.k||0)+1});
+  // 死兆: a mark you dealt damage on moves on to the next beat
+  if(S.omen&&struck)for(const m of at(b,'k'))ev({beat:b+1,side:'k',v:m.v});
   S.events=S.events.filter(e=>e.beat!==b);
 }
 
@@ -1372,11 +1432,17 @@ function castFire(c,b){
   if(S.over)return;
   if(c.frz)freeze(c.n,c.frz);
   if(S.over)return;
-  const p=S.lastSpell,R=p&&p.el!==c.el&&b-p.beat<=(S.prism?2:1)?REACT[p.el+c.el]:null;
-  S.lastSpell={beat:b,el:c.el};
+  if(S.linger&&!c.echo&&(c.len||0)>=4&&c.el){ev({beat:b+1,side:'c',from:b+1,el:c.el,dmg:Math.floor(c.dmg/2),hits:c.hits,n:c.n+'·余韵',c:0,echo:true});log(`余韵：${c.n}会在第 ${roman(b+1)} 拍再响一次。`)}
+  react(c.el,b);
+}
+// an element going off at beat b reacts with the last one if they differ and are close enough
+function react(el,b){
+  const p=S.lastSpell,R=p&&p.el!==el&&b-p.beat<=(S.prism?2:1)?REACT[p.el+el]:null;
+  S.lastSpell={beat:b,el};
   if(!R){S.chain=0;return}
   const link=S.chain++,d=R.dmg+link*(CHAIN+(S.prism?4:0));
-  banner(R.n,`${p.el} + ${c.el}${link?` · 连锁 ${link+1}`:''}`);dealEnemy(d,`元素反应·${R.n}${link?`（连锁 ${link+1}）`:''}`,{src:'spell',beat:b});S.resThis=true;if(R.frz&&!S.over)freeze(R.n)
+  if(S.tide&&(S.tideN||0)<3){S.tideN=(S.tideN||0)+1;S.refund++;flt('hero','潮汐 +1','info')}
+  banner(R.n,`${p.el} + ${el}${link?` · 连锁 ${link+1}`:''}`);dealEnemy(d,`元素反应·${R.n}${link?`（连锁 ${link+1}）`:''}`,{src:'spell',beat:b});S.resThis=true;if(R.frz&&!S.over)freeze(R.n)
 }
 
 // what the timeline showed for a beat just before it resolved, kept as a stone fragment of the past
@@ -1391,8 +1457,9 @@ function nextTurn(){
   S.beat+=3;S.turn++;gen(S.beat+11);
   S.parriedPrev=S.parried;S.parried=false;
   S.dmgLast=S.dmgThis;S.dmgThis=0;S.foresight=false;
-  S.lastPlayed=S.played;S.played=null;S.resThis=false;S.cry=false;S.smoke=[];
-  S.ripo=S.drain=S.venom=S.prism=S.flow=false;
+  S.lastPlayed=S.played;S.played=null;S.turnCards=[];S.resThis=false;S.cry=false;S.smoke=[];
+  S.ripo=S.drain=S.venom=S.prism=S.flow=S.toxin=false;S.tideN=0;
+  if(S.plague&&S.poison){S.poison=Math.floor(S.poison/2);log(`瘟疫：毒减半到 ${S.poison} 层。`)}
   S.sand=(CL().sand||3)-S.debt+(S.med?2:0)+S.refund;S.debt=0;S.med=false;S.refund=0;S.barrier=0;S.iceArmor=false;
   F.turnStart?.call(F,false);
   S.sand=Math.max(0,S.sand);
@@ -1441,9 +1508,9 @@ function renderTop(){
   $('foeHalf').classList.toggle('rage',!!(F.rage&&F.rage()));
   const K=CL();$('heroName').textContent=`时之勇者 · ${K.n}`;$('heroSub').textContent=`${K.title} · ${K.sub}`;
   const T=(c,on,t)=>on?`<span class="tag ${c}">${t}</span>`:'';
-  $('heroStatus').innerHTML=(S.run.cls==='warrior'?T('rg',1,`怒气 ${S.rage}/${S.rageMax}`)+T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,S.hp*2<S.maxhp?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')
-      :S.run.cls==='rogue'?T('cb',1,`连击 ${S.combo}/${S.comboMax}`)+T('cb',S.keep,'余势')+T('cb',S.venom,'毒刃')
-      :T('mg',1,`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.frost,`霜冻 ${S.frost}/${FROST}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
+  $('heroStatus').innerHTML=(S.run.cls==='warrior'?T('rg',1,`怒气 ${S.rage}/${S.rageMax}`)+T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,S.hp*2<S.maxhp?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')+T('rg',S.steady,'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
+      :S.run.cls==='rogue'?T('cb',1,`连击 ${S.combo}/${S.comboMax}`)+T('cb',S.keep,'余势')+T('cb',S.venom,'毒刃')+T('cb',S.toxin,'毒发')+T('cb',S.zanshin,'残心')+T('cb',S.plague,'瘟疫')+T('cb',S.omen,'死兆')
+      :T('mg',1,`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.frost,`霜冻 ${S.frost}/${FROST}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.ff,`霜火 +${S.ff}`)+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
   let st='';
   if(F.moods){const m=F.mood();st+=`<span class="mood ${m}" style="background-image:url(img/kx_${m}.jpg)" title="${MOODS[m]}"></span>`}
   $('enemyStatus').innerHTML=st+(F.status?F.status():'')+(S.poison?`<span class="tag p2">中毒 ${S.poison} 层</span>`:'');
@@ -1459,8 +1526,8 @@ function renderTop(){
 }
 const archName=a=>Object.values(CLASSES).map(K=>K.arch[a]).find(Boolean);
 // one card face, shared by the hand and the reward screen; opt.i is its hand index, opt.off disables it
-function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:#3a4ca8">吟唱 ${castLen(C)} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
-    <span class="fr"><span class="art"><i></i>${ICONS.has(k)?`<b class="ic" style="background-image:url(img/ic_${k}.jpg)"></b>`:''}</span><span class="cn">${C.n}</span><span class="ct">${C.t}${C.a?' · '+archName(C.a):' · 通用'}</span><span class="cd">${C.d}</span>${ex}${C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}<span class="orn"><i></i></span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
+function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:#3a4ca8">吟唱 ${castLen(C)} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''} ${C.ks?'ks':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
+    <span class="fr"><span class="art"><i></i>${ICONS.has(k)?`<b class="ic" style="background-image:url(img/ic_${k}.jpg)"></b>`:''}</span><span class="cn">${C.n}</span><span class="ct">${C.t}${C.a?' · '+archName(C.a):' · 通用'}</span><span class="cd">${C.d}</span>${ex}${C.ks?'<span class="ks">基石</span>':C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}<span class="orn"><i></i></span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
 function renderHand(){
   $('hand').classList.toggle('empty',!S.hand.length);
   $('hand').innerHTML=S.hand.map((k,i)=>{const C=CARDS[k];return cardHtml(k,{cls:S.pending===i?'sel':'',attr:`data-i="${i}"`,off:C.c>S.sand||(C.r&&S.rage<C.r)||S.busy||S.over})}).join('');
@@ -1660,10 +1727,11 @@ function showEnd(){
   if(!$('scr').hidden&&$('scr').dataset.end===String(S.uid))return;
   const F=FL(),win=S.over==='win',last=S.stage===TOWER.length-1;
   const turns=rm(PI.sand,'回合',S.turn);
+  const B=S.best,best=B?rm(PI.atk,'最高一拍',B.d,`${B.b?`第 ${roman(B.b)} 拍`:'一张牌'}${B.cards.length?' · '+B.cards.join('、'):''}`):'';
   if(!win){
     openScr('lose',figFoe(F),`<div class="pp frame scr-p sheet">${CN}${ribbon('DEFEAT · <span>败北</span>')}<h2 class="ttl">时间终结</h2>
       <p class="lead">你倒在了${F.floor}，${F.name}面前。钟针没有停下，但你还记得它的节奏。</p>
-      <div class="rms">${turns}${rm(PI.hp,'所在',F.floor,'',1)}${rm(PI.atk,F.lane+'剩余',`${S.ehp}/${S.emax}`,`削去 ${Math.round(100*(1-S.ehp/S.emax))}%`)}</div>
+      <div class="rms">${turns}${best||rm(PI.hp,'所在',F.floor,'',1)}${rm(PI.atk,F.lane+'剩余',`${S.ehp}/${S.emax}`,`削去 ${Math.round(100*(1-S.ehp/S.emax))}%`)}</div>
       <section>${SH('它的节奏','KNOW THY FOE')}<ul>${F.rules.map(r=>`<li>${r}</li>`).join('')}</ul></section>
       <div class="acts"><button class="btn" id="runBtn">重新选职业</button><button class="btn red" id="retryBtn">重试本层</button></div></div>`,'','retryBtn');
     $('retryBtn').onclick=()=>{closePanel();startFight(S.run);render();banner(FL().floor,FL().name)};
@@ -1671,7 +1739,7 @@ function showEnd(){
   }else if(last){
     openScr('win',figHero(),`${ribbon('VICTORY · <span>登顶</span>')}<h2 class="ttl">永夜终结</h2>
       <p class="lead">第 ${S.turn} 回合，魔王的钟针停下了。七层钟楼的钟声一起响起：这一次，时间站在你这边。</p>
-      <div class="rms">${turns}${rm(PI.hp,'生命',`${S.hp}/${S.maxhp}`)}${rm(PI.atk,'牌组',`${S.run.deck.length} 张`,'',1)}</div>
+      <div class="rms">${turns}${best}${rm(PI.hp,'生命',`${S.hp}/${S.maxhp}`)}${rm(PI.atk,'牌组',`${S.run.deck.length} 张`,'',1)}</div>
       <section class="gp frame scr-p">${CN}<h4 class="sh2"><span>登顶的牌组</span><small>THE WINNING DECK</small></h4><div class="deck">${[...new Set(S.run.deck)].map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span data-t="${CARDS[k].t}">${CARDS[k].n}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
       <div class="acts"><button class="btn go" id="runBtn">再登钟楼</button></div>`,'','runBtn');
     $('runBtn').onclick=()=>showClassPick();
@@ -1679,7 +1747,7 @@ function showEnd(){
     const N=FOE[S.run.foes[S.stage+1]],pool=rewardPool(S.run,F);
     openScr('win',figHero(),`${ribbon('VICTORY · <span>胜利</span>')}<h2 class="ttl">${F.name}倒下了</h2>
       <p class="lead">第 ${S.turn} 回合，你击败了${F.name}。最大生命 +5，喘口气，往上一层。</p>
-      <div class="rms">${turns}${rm(PI.hp,'生命',`${S.hp} → ${healTo()}`,`上限 ${S.maxhp+5}`)}${rm(STAIRS,'下一层',N.name,N.floor,1)}</div>
+      <div class="rms">${turns}${best}${rm(PI.hp,'生命',`${S.hp} → ${healTo()}`,`上限 ${S.maxhp+5}`)}${rm(STAIRS,'下一层',N.name,N.floor,1)}</div>
       <section class="gp frame scr-p">${CN}<h4 class="sh2"><span>战利品</span><small>SPOILS</small></h4>
       <div class="rewards">${pool.map(k=>cardHtml(k,{cls:'rw',attr:`data-k="${k}"`})).join('')}
         <button class="skipcard" id="skipBtn"><span class="sk-ic">${COMPASS}</span><b>直接上楼</b><i>不拿牌</i><span>牌组保持精简，<br>更容易抽到核心牌。</span></button></div>
