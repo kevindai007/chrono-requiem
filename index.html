@@ -980,7 +980,7 @@ const FOES=[
 ];
 const FOE=Object.fromEntries(FOES.map(f=>[f.key,f]));
 /* Painted art: list a foe key here once img/foe_<key>.jpg (arena, ~3:1) and img/foe_<key>_p.jpg (portrait, ~1:2) exist; others keep their SVG plate. Prompts live in tools/foe_art_prompts.md. */
-const PAINTED=new Set([]);
+const PAINTED=new Set(['wolf','bat','skeleton','beetle','spider','gargoyle','slime','mirror','puppet','treant','ogre','banshee','shaman','thief','golem','king']);
 PAINTED.forEach(k=>{const f=FOE[k];f.img??=`img/foe_${k}.jpg`;f.portrait??=`img/foe_${k}_p.jpg`});
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];
 const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
