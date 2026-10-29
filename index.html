@@ -1,677 +1,629 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>时之勇者 · 钟楼</title>
+<title>时之勇者 · 命运织锦</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+SC:wght@500;700;900&display=swap">
 <style>
-/* Seven floors of the clock tower: floors 1-5 each draw one of three minor foes at the start of a run, then the clockwork knight, then the Demon King at zero hour. The run opens on a class pick (warrior, assassin or mage); the minor foes are ordinary beasts and soldiers, each with one or two timeline mechanics. The knight keeps its painted art; every other foe has its own ink-and-gold SVG plate in img/foe_<key>.svg (arena) and img/foe_<key>_p.svg (portrait). Layout follows kevin's battle mockup: gold title bar; a framed split arena (hero art left, knight art right, VS medallion on the seam); the time ribbon grid; a dock with the sand medallion, illustrated parchment cards and the big 推进时间 plate; one-line chronicle at the foot. Single deliberate dark look. */
+/* 命运织锦 · Fate Tapestry (design/fate-tapestry). The whole game is one woven medieval tapestry: flax linen carries
+   the information, ink-indigo carries story and figures, madder red marks danger and the main action, ochre-gold thread
+   marks selection and the moments where threads cross. Texture stays at the edges and in the art; text fields stay quiet.
+   Seven floors of the clock tower: floors 1-5 each draw one of three minor foes, then the black knight, then the Demon King. */
 :root{
-  --night:#08070c; --panel:#0f0d15; --panel2:#171320; --cell:#120f19; --line:#2c2535; --line2:#4a3d4f;
-  --gold:#d4a54a; --gold2:#f7dc96; --gold3:#fff1c8; --golddim:#80632a;
-  --parch:#f1e6c8; --parch2:#dccaa0; --ink:#2a1d10; --ink2:#5f4a31;
-  --azure:#5aa8ff; --azure2:#9fd0ff; --blood:#d8432f; --moss:#7ec26e;
-  --text:#efe5d2; --muted:#a39580;
-  --t-move:#4d8fe6; --t-res:#e0a43a; --t-rhy:#4caf68; --t-grd:#a8a6bd; --t-frb:#9a5ad8; --t-war:#d0532f; --t-rog:#3fb59a; --t-mag:#6f86ff; --rage:#ff6a3d; --fire:#ff7a3a; --ice:#7fd4ff; --bolt:#e8d24a;
+  --flax:#e8d9b9; --flax2:#f1e7d1; --flax3:#d9c6a0; --flax4:#c9b48a;
+  --indigo:#202d3a; --indigo2:#2c3d4f; --indigo3:#3b5064;
+  --madder:#923f35; --madder2:#73302a; --madder3:#b4574a;
+  --gold:#b28a45; --gold2:#cfa95f; --gold3:#ead39a;
+  --moss:#69745c; --moss2:#4f5a44; --stone:#8d8a80;
+  --ink:#2a241c; --ink2:#5e5343; --muted:#857a66;
+  --fire:#b8562f; --ice:#5f8296; --bolt:#b28a45;
+  --t-move:var(--indigo2); --t-res:#9a7535; --t-rhy:var(--moss); --t-grd:#7c7a72; --t-frb:#5b2c3a;
+  --t-war:var(--madder); --t-rog:var(--moss2); --t-mag:var(--indigo2); --rage:var(--madder3);
   --f-display:"Noto Serif SC","Songti SC","STSong",serif;
-  --f-latin:"Cinzel","Times New Roman",serif;
-  --f-body:"Noto Serif SC","Songti SC",Georgia,serif;
-  color-scheme:dark;
+  --f-latin:"Cinzel","Trajan Pro","Times New Roman",serif;
+  --f-body:"Noto Serif SC","Songti SC","STSong",Georgia,serif;
+  /* textures: flax linen, indigo weave, millefleur sprigs, woven trim */
+  --linen:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .045' numOctaves='2' stitchTiles='stitch' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .24 0 0 0 0 .12 0 0 0 .9 -.3'/%3E%3C/filter%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.045 .9' numOctaves='2' stitchTiles='stitch' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .98 0 0 0 0 .9 0 0 0 .9 -.35'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23a)' opacity='.32'/%3E%3Crect width='220' height='220' filter='url(%23b)' opacity='.4'/%3E%3C/svg%3E");
+  --weave:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85 .05' numOctaves='2' stitchTiles='stitch' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .62 0 0 0 0 .72 0 0 0 .9 -.3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23a)' opacity='.22'/%3E%3C/svg%3E");
+  --sprig:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' fill-opacity='.5'%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='20' cy='22' r='2.6'/%3E%3Ccircle cx='24.5' cy='24' r='2.6'/%3E%3Ccircle cx='23' cy='28.5' r='2.6'/%3E%3Ccircle cx='17.5' cy='28' r='2.6'/%3E%3Ccircle cx='16.5' cy='23.5' r='2.6'/%3E%3Ccircle cx='96' cy='92' r='2.2'/%3E%3Ccircle cx='100' cy='95' r='2.2'/%3E%3Ccircle cx='97' cy='99' r='2.2'/%3E%3Ccircle cx='92.5' cy='97' r='2.2'/%3E%3Ccircle cx='93' cy='92.5' r='2.2'/%3E%3C/g%3E%3Cg fill='%23f6efe0'%3E%3Ccircle cx='86' cy='30' r='2.2'/%3E%3Ccircle cx='89.5' cy='32.5' r='2.2'/%3E%3Ccircle cx='88' cy='36.5' r='2.2'/%3E%3Ccircle cx='84' cy='36.5' r='2.2'/%3E%3Ccircle cx='82.5' cy='32.5' r='2.2'/%3E%3Ccircle cx='34' cy='106' r='2.2'/%3E%3Ccircle cx='37.5' cy='108.5' r='2.2'/%3E%3Ccircle cx='36' cy='112.5' r='2.2'/%3E%3Ccircle cx='32' cy='112.5' r='2.2'/%3E%3Ccircle cx='30.5' cy='108.5' r='2.2'/%3E%3C/g%3E%3Cg fill='%23b28a45'%3E%3Ccircle cx='20.5' cy='25.8' r='1.4'/%3E%3Ccircle cx='96' cy='95.5' r='1.2'/%3E%3Ccircle cx='86' cy='33.6' r='1.2'/%3E%3Ccircle cx='34' cy='109.6' r='1.2'/%3E%3Ccircle cx='60' cy='64' r='1.3'/%3E%3Ccircle cx='124' cy='128' r='1.3'/%3E%3C/g%3E%3Cg fill='none' stroke='%2369745c' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M20 31c-1 8 2 14 6 18M22 40c4-3 8-3 10-1M20 44c-4-2-8-1-9 2M93 101c-2 8 0 13 3 17M95 110c4-2 7-1 8 1M84 40c1 7-1 11-4 15M83 48c-4-1-6 0-7 2M33 116c0 7 3 11 6 14M36 123c3-2 6-2 8 0'/%3E%3C/g%3E%3C/svg%3E");
+  --trim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12'%3E%3Crect width='18' height='12' fill='%23e8d9b9'/%3E%3Crect width='18' height='2' fill='%23923f35'/%3E%3Crect y='10' width='18' height='2' fill='%23923f35'/%3E%3Cpath d='M0 6l3-3 3 3-3 3z' fill='%23202d3a'/%3E%3Cpath d='M9 6l3-3 3 3-3 3z' fill='%23923f35'/%3E%3Ccircle cx='7.5' cy='6' r='.9' fill='%23b28a45'/%3E%3Ccircle cx='16.5' cy='6' r='.9' fill='%23b28a45'/%3E%3C/svg%3E");
+  --trim-i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12'%3E%3Crect width='18' height='12' fill='%23202d3a'/%3E%3Crect width='18' height='1.4' fill='%23b28a45'/%3E%3Crect y='10.6' width='18' height='1.4' fill='%23b28a45'/%3E%3Cpath d='M0 6l3-3 3 3-3 3z' fill='%23923f35'/%3E%3Cpath d='M9 6l3-3 3 3-3 3z' fill='%23e8d9b9'/%3E%3C/svg%3E");
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{background:var(--night);color:var(--text);font-family:var(--f-body);font-size:15px;line-height:1.5;overflow-x:hidden;
-  background-image:linear-gradient(180deg,rgba(8,7,12,.35),rgba(8,7,12,.7)),url(img/ui/bg_battle.jpg),radial-gradient(ellipse 30% 40% at 0% 85%,rgba(255,170,70,.16),transparent 70%),radial-gradient(ellipse 30% 40% at 100% 85%,rgba(255,170,70,.14),transparent 70%),radial-gradient(ellipse 70% 40% at 50% 0%,rgba(70,60,120,.35),transparent 70%);background-size:cover;background-position:center;background-attachment:fixed}
-#dust{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding-block:12px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+body{margin:0;background:var(--flax) var(--linen);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;overflow-x:hidden}
+button{font-family:var(--f-body);cursor:pointer;color:inherit}
+.wrap{position:relative;max-width:1440px;margin:0 auto;padding-block:0 18px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));display:flex;flex-direction:column}
+.trim{height:12px;background:var(--trim) 0 0/18px 12px repeat-x}
+.trim.i{background-image:var(--trim-i)}
 
-/* ornate frame used by arena + ribbon */
-.frame{position:relative;border:1px solid var(--golddim);box-shadow:0 0 0 3px #0a080d,0 0 0 4px rgba(212,165,74,.45),0 14px 40px rgba(0,0,0,.6)}
-.frame>.cn{position:absolute;width:26px;height:26px;pointer-events:none;z-index:6}
-.frame>.cn svg{width:100%;height:100%}
-.frame>.cn.tl{left:-8px;top:-8px}.frame>.cn.tr{right:-8px;top:-8px;transform:scaleX(-1)}
-.frame>.cn.bl{left:-8px;bottom:-8px;transform:scaleY(-1)}.frame>.cn.br{right:-8px;bottom:-8px;transform:scale(-1)}
+/* stitched frames: a hairline running stitch inside the edge of every woven panel */
+.stitch{position:relative}
+.stitch::after{content:"";position:absolute;inset:4px;border:1.5px dashed rgba(178,138,69,.75);pointer-events:none;z-index:1}
+.stitch.r::after{border-color:rgba(146,63,53,.55)}
 
-/* Header */
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h1{margin:0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-h1 .zh{font-family:var(--f-display);font-weight:900;font-size:clamp(28px,5vw,42px);letter-spacing:.06em;line-height:1.1;
-  background:linear-gradient(180deg,var(--gold3) 0%,var(--gold2) 40%,var(--gold) 75%,#9a7228 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 16px rgba(212,165,74,.3))}
-h1 .la{font-family:var(--f-latin);font-size:13px;letter-spacing:.32em;color:var(--gold);font-weight:500}
-.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
-.meta .rt{color:var(--text);margin-right:6px;font-variant-numeric:tabular-nums}
-.meta .rt b{font-family:var(--f-latin);color:var(--gold2)}
-button{font-family:var(--f-body);cursor:pointer}
-.gbtn{background:linear-gradient(180deg,#1c1724,#0f0c14);border:1px solid var(--golddim);color:var(--gold2);padding:7px 18px;font-size:14px;letter-spacing:.15em;transition:border-color .15s,box-shadow .15s}
-.gbtn:hover,.gbtn:focus-visible{border-color:var(--gold2);box-shadow:0 0 12px rgba(212,165,74,.4);outline:none}
-.gbtn.ic{padding:6px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-.gbtn.ic svg{width:22px;height:22px}
+/* Masthead */
+.mast{display:flex;align-items:center;gap:14px 22px;padding:10px 6px 8px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px;margin:0;text-decoration:none}
+.logo .knot{width:40px;height:40px;flex:none;color:var(--madder)}
+.logo b{font-family:var(--f-display);font-weight:900;font-size:clamp(24px,3vw,32px);letter-spacing:.08em;line-height:1;color:var(--ink)}
+.logo span{font-family:var(--f-latin);font-size:12px;letter-spacing:.3em;color:var(--ink2);font-weight:500}
+.vine{flex:1;min-width:60px;height:26px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='26'%3E%3Cpath d='M0 13c15-9 25-9 30 0s15 9 30 0 25-9 30 0 20 9 30 0' fill='none' stroke='%2369745c' stroke-width='1.4'/%3E%3Cg fill='%2369745c'%3E%3Cpath d='M14 7c3-4 7-4 8-2-3 2-5 3-8 2zM44 19c3 4 7 4 8 2-3-2-5-3-8-2zM74 7c3-4 7-4 8-2-3 2-5 3-8 2zM104 19c3 4 7 4 8 2-3-2-5-3-8-2z'/%3E%3C/g%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='30' cy='13' r='3'/%3E%3Ccircle cx='90' cy='13' r='3'/%3E%3C/g%3E%3Cg fill='%23f6efe0'%3E%3Ccircle cx='60' cy='13' r='2.6'/%3E%3Ccircle cx='0' cy='13' r='2.6'/%3E%3Ccircle cx='120' cy='13' r='2.6'/%3E%3C/g%3E%3Cg fill='%23b28a45'%3E%3Ccircle cx='30' cy='13' r='1.1'/%3E%3Ccircle cx='90' cy='13' r='1.1'/%3E%3C/g%3E%3C/svg%3E") center/120px 26px repeat-x;opacity:.9}
+.meta{display:flex;align-items:center;font-family:var(--f-display);font-size:16px;font-weight:700;color:var(--ink)}
+.meta>*{padding:2px 16px;border-left:1.5px solid var(--flax4)}
+.meta>*:first-child{border-left:0}
+.meta b{font-family:var(--f-display);font-variant-numeric:tabular-nums}
+.tbtn{display:inline-flex;align-items:center;gap:7px;background:none;border:0;font-family:var(--f-display);font-weight:700;font-size:16px;color:var(--ink);letter-spacing:.08em}
+.tbtn svg{width:20px;height:20px;color:var(--ink2);transition:transform .3s}
+.tbtn:hover svg,.tbtn:focus-visible svg{transform:rotate(60deg);color:var(--madder)}
+.tbtn:focus-visible{outline:1.5px dashed var(--madder);outline-offset:3px}
 
-/* Arena */
-.arena{display:grid;grid-template-columns:1fr 1fr;height:340px;background:#0b0910;overflow:hidden}
+/* Arena: one indigo story frieze, hero at left facing the foe at right */
+.arena{position:relative;display:grid;grid-template-columns:1fr 1fr;height:clamp(240px,27vw,350px);background:var(--indigo) var(--weave);overflow:hidden;border-block:3px solid var(--indigo)}
 .half{position:relative;overflow:hidden;min-width:0}
-.half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transition:transform .18s ease-out}
-.half.hero .art{background-image:var(--hero,url(img/hero.jpg));background-size:auto 100%;background-position:25% 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);transform-origin:30% 50%}
-.half.hero::before{content:"";position:absolute;inset:-20px;background:var(--hero,url(img/hero.jpg)) 25% 0/cover no-repeat;filter:blur(14px) brightness(.55) saturate(1.1)}
-.half.foe .art{background-image:url(img/knight.jpg);background-position:50% 30%}
-.half.hero .art.lunge{transform:translateX(18px) scale(1.04)}
-.half.foe .art.lunge{transform:translateX(-18px) scale(1.04)}
-.half::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(8,7,12,0) 30%,rgba(8,7,12,.55) 62%,rgba(8,7,12,.95) 100%)}
-.half.foe.rage .art{filter:saturate(1.4) hue-rotate(-12deg) brightness(1.05)}
-.half.foe.rage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,rgba(216,67,47,.28),transparent 70%);animation:breathe 1.6s ease-in-out infinite}
-@keyframes breathe{50%{opacity:.4}}
+.half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transform-origin:50% 90%}
+.half.hero .art{background-image:var(--hero,url(img/hero_warrior.jpg));background-position:30% 40%;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
+.half.foe .art{background-position:70% 40%;-webkit-mask-image:linear-gradient(270deg,#000 80%,transparent);mask-image:linear-gradient(270deg,#000 80%,transparent)}
+.half::after{content:"";position:absolute;inset:auto 0 0;height:34%;pointer-events:none;background:linear-gradient(0deg,rgba(32,45,58,.7),transparent)}
+.half.foe.rage .art{filter:saturate(1.25) sepia(.25) hue-rotate(-12deg)}
+.half.foe.rage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 60% 45%,rgba(146,63,53,.38),transparent 70%);animation:breathe 1.8s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.35}}
 .half .art.hitfx{animation:hitfx .32s}
-@keyframes hitfx{0%{filter:brightness(2.6) saturate(.2)}100%{filter:none}}
+@keyframes hitfx{0%{filter:brightness(1.7) sepia(.6)}100%{filter:none}}
 .half .art.shake{animation:shake .35s,hitfx .32s}
 @keyframes shake{25%{translate:-8px 0}50%{translate:7px 0}75%{translate:-3px 0}}
-.plate{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 20px 16px;text-align:center}
-.name{font-family:var(--f-display);font-weight:900;font-size:24px;letter-spacing:.08em;color:var(--gold3);text-shadow:0 2px 0 #000,0 0 14px rgba(0,0,0,.9);line-height:1.2}
-.sub{font-size:13px;color:#e4d8c2;text-shadow:0 1px 3px #000;margin-top:-4px}
-.bar{width:min(290px,92%);height:18px;background:#09070b;border:1px solid #6a5226;position:relative;overflow:hidden;box-shadow:0 0 0 1px #000,inset 0 2px 4px rgba(0,0,0,.8)}
-.bar i{position:absolute;inset:0 auto 0 0}
-.bar .lag{background:#fff0cc;opacity:.5;transition:width .7s .35s ease-in}
-.bar .cur{background:linear-gradient(180deg,#f06650,#c8321f 55%,#7a1b10);transition:width .25s ease-out}
-.half.foe .bar .cur{background:linear-gradient(180deg,#ffe08a,#d4a54a 55%,#7a5a1c)}
-.bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-latin);font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000;z-index:1;font-variant-numeric:tabular-nums}
-.status{display:flex;gap:8px;align-items:center;justify-content:center;font-size:13px;color:#e4d8c2;min-height:26px;flex-wrap:wrap;text-shadow:0 1px 2px #000}
-.gears{display:flex;gap:4px}
-.gears i{width:15px;height:15px;border-radius:50%;border:2px solid var(--golddim);background:rgba(0,0,0,.5)}
-.gears i.on{border-color:var(--gold2);background:radial-gradient(circle,var(--gold2),var(--gold));box-shadow:0 0 8px var(--gold)}
-.tag{border:1px solid var(--golddim);padding:1px 10px;font-size:12px;background:rgba(10,8,12,.75);color:var(--gold2)}
-.tag.ok{border-color:var(--moss);color:var(--moss)}
-.tag.p2{border-color:var(--blood);color:#ffab9b;animation:pulse 1.4s infinite}
-.mood{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);background-size:cover;background-position:center;box-shadow:0 0 8px rgba(0,0,0,.8)}
-.mood.judge{border-color:#ff8a4a;box-shadow:0 0 10px #ff8a4a}
-.mood.rage{border-color:var(--blood);box-shadow:0 0 12px var(--blood)}
-.seam{position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);z-index:4;pointer-events:none;background:linear-gradient(180deg,transparent,var(--gold) 15%,var(--gold2) 50%,var(--gold) 85%,transparent)}
-.vs{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:5;width:118px;height:118px;pointer-events:none}
-.vs svg{width:100%;height:100%;overflow:visible}
-.vs .ring{transform-origin:60px 60px;animation:spin 40s linear infinite}
+.roundel{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:clamp(110px,13vw,170px);aspect-ratio:1;z-index:4;pointer-events:none;color:var(--gold2)}
+.roundel svg{width:100%;height:100%;overflow:visible}
+.roundel .rays{transform-origin:50% 50%;animation:spin 90s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.plate{position:absolute;bottom:12px;z-index:3;display:flex;flex-direction:column;align-items:flex-start;gap:6px;max-width:calc(100% - 30px)}
+.half.hero .plate{left:clamp(14px,6%,70px)}
+.half.foe .plate{right:clamp(14px,6%,70px);align-items:flex-end}
+.status{display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-height:24px}
+.half.foe .status{justify-content:flex-end}
+/* life ribbon: a madder pennant with notched ends and a thread gauge sewn along its foot */
+.lr{position:relative;display:flex;align-items:baseline;gap:14px;padding:7px 34px 11px;min-width:min(330px,100%);color:var(--flax2);background:var(--madder) var(--linen);
+  clip-path:polygon(0 0,100% 0,calc(100% - 14px) 50%,100% 100%,0 100%,14px 50%);font-family:var(--f-display);white-space:nowrap}
+.lr::before{content:"";position:absolute;inset:3px 16px;border-block:1px dashed rgba(234,211,154,.55);pointer-events:none}
+.lr .nm{font-weight:900;font-size:18px;letter-spacing:.12em}
+.lr .hp{font-family:var(--f-display);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.lr .res{font-size:13px;color:var(--gold3);letter-spacing:.06em}
+.lr .gauge{position:absolute;left:22px;right:22px;bottom:4px;height:3px;background:rgba(32,45,58,.55)}
+.lr .gauge i{position:absolute;inset:0 auto 0 0}
+.lr .gauge .lag{background:var(--flax);opacity:.55;transition:width .7s .35s ease-in}
+.lr .gauge .cur{background:var(--gold3);transition:width .25s ease-out}
+.tag{display:inline-block;padding:1px 9px;font-size:12px;line-height:1.6;color:var(--ink);background:var(--flax2);border-left:3px solid var(--gold);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.tag.ok{border-color:var(--moss)} .tag.rg{border-color:var(--madder)} .tag.cb{border-color:var(--moss2)} .tag.mg{border-color:var(--indigo2)}
+.tag.sh{border-color:var(--ice)} .tag.mr{border-color:var(--t-frb)}
+.tag.p2{border-color:var(--madder);background:var(--madder);color:var(--flax2);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{filter:brightness(1.18)}}
+.mood{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold2);background:var(--indigo) center/cover;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.mood.judge{border-color:var(--gold3)} .mood.rage{border-color:var(--madder3);box-shadow:0 0 0 2px var(--madder)}
 .floats{position:absolute;inset:0;pointer-events:none;z-index:6}
-.flt{position:absolute;left:50%;top:34%;transform:translateX(-50%);font-family:var(--f-latin);font-weight:900;font-size:34px;white-space:nowrap;animation:rise 1.3s ease-out forwards;text-shadow:0 2px 0 #000,0 0 12px rgba(0,0,0,.9)}
-.flt.dmg{color:var(--gold2)} .flt.big{font-size:52px;color:var(--gold3);text-shadow:0 0 22px var(--gold),0 2px 0 #000}
-.flt.hurt{color:#ff7a62} .flt.info{font-family:var(--f-display);font-size:19px;color:var(--azure2);letter-spacing:.1em} .flt.heal{color:var(--moss)}
-@keyframes rise{0%{opacity:0;transform:translate(-50%,14px) scale(.6)}14%{opacity:1;transform:translate(-50%,0) scale(1.2)}28%{transform:translate(-50%,-6px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(1)}}
-.flash{position:absolute;inset:0;z-index:7;pointer-events:none;background:radial-gradient(circle,rgba(255,240,200,.6),transparent 65%);opacity:0}
+.flt{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-family:var(--f-display);font-weight:900;font-size:34px;white-space:nowrap;animation:rise 1.3s ease-out forwards;color:var(--flax2);-webkit-text-stroke:1px var(--indigo);paint-order:stroke fill;text-shadow:0 2px 0 var(--indigo)}
+.flt.dmg{color:var(--gold3)} .flt.big{font-size:54px;color:var(--gold3);text-shadow:0 3px 0 var(--madder2),0 0 0 var(--indigo)}
+.flt.hurt{color:#f0a493} .flt.info{font-size:19px;color:var(--flax2);letter-spacing:.12em;-webkit-text-stroke:0;text-shadow:0 1px 3px var(--indigo),0 0 8px var(--indigo)} .flt.heal{color:#b9c9a3}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,14px) scale(.6)}14%{opacity:1;transform:translate(-50%,0) scale(1.15)}28%{transform:translate(-50%,-6px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(1)}}
+.flash{position:absolute;inset:0;z-index:7;pointer-events:none;background:radial-gradient(circle,rgba(234,211,154,.55),transparent 65%);opacity:0}
 .flash.on{animation:flash .45s ease-out}
 @keyframes flash{0%{opacity:1}100%{opacity:0}}
-.banner{position:absolute;left:0;right:0;top:40%;transform:translateY(-50%);z-index:8;pointer-events:none;text-align:center;opacity:0;padding:12px 0;
-  background:linear-gradient(90deg,transparent,rgba(8,7,12,.92) 22%,rgba(8,7,12,.92) 78%,transparent);border-block:1px solid transparent;border-image:linear-gradient(90deg,transparent,var(--gold),transparent) 1}
-.banner b{display:block;font-family:var(--f-display);font-weight:900;font-size:32px;letter-spacing:.3em;color:var(--gold2);text-shadow:0 0 18px rgba(212,165,74,.6)}
-.banner span{font-family:var(--f-latin);font-size:12px;letter-spacing:.4em;color:var(--muted)}
-.banner.red b{color:#ff9a86;text-shadow:0 0 18px rgba(216,67,47,.8)}
+/* turn and event banners: a madder cloth tab let down over the frieze */
+.banner{position:absolute;left:50%;top:44%;z-index:8;pointer-events:none;text-align:center;opacity:0;padding:12px 64px 14px;transform:translate(-50%,-50%);color:var(--flax2);background:var(--madder) var(--linen);
+  clip-path:polygon(0 0,100% 0,calc(100% - 22px) 50%,100% 100%,0 100%,22px 50%)}
+.banner::before{content:"";position:absolute;inset:4px 24px;border-block:1.5px dashed rgba(234,211,154,.6)}
+.banner b{display:block;font-family:var(--f-display);font-weight:900;font-size:30px;letter-spacing:.3em;white-space:nowrap}
+.banner span{font-family:var(--f-latin);font-size:11px;letter-spacing:.4em;color:var(--gold3);white-space:nowrap}
+.banner.red{background-color:var(--indigo)}
 .banner.show{animation:banner 1.6s ease-out}
-@keyframes banner{0%{opacity:0;letter-spacing:.6em}15%{opacity:1}75%{opacity:1}100%{opacity:0}}
+@keyframes banner{0%{opacity:0;transform:translate(-50%,-80%) scaleY(.4)}14%{opacity:1;transform:translate(-50%,-50%) scaleY(1)}78%{opacity:1}100%{opacity:0}}
 
-/* Time ribbon */
-.ribbon{background:linear-gradient(180deg,var(--panel2),var(--panel));padding:10px 12px 12px}
-.tlhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:0 4px 8px}
-.label{display:flex;align-items:center;gap:10px;font-family:var(--f-latin);font-size:16px;letter-spacing:.12em;color:var(--gold2)}
-.label svg{width:20px;height:24px}
-.label small{font-family:var(--f-display);font-size:15px;letter-spacing:.05em}
-.hint{font-size:13px;color:var(--azure2);display:flex;align-items:center;gap:6px;min-height:26px}
-.hint>svg{width:16px;height:16px;flex:none}
-.hint.err{color:#ffb4a5}
-.hint.pend{color:var(--gold2)}
-.tlscroll{overflow-x:auto;border:1px solid var(--line2);background:var(--cell)}
-.tl{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(100px,1fr);min-width:max-content;width:100%}
-.lanes{display:grid;grid-template-rows:32px 66px 60px 66px;border-right:1px solid var(--line2);background:#0c0a11;position:sticky;left:0;z-index:2;width:128px}
-.lanes div{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--f-display);font-size:14px;color:var(--text);border-bottom:1px solid var(--line)}
-.lanes div:last-child{border-bottom:0}
-.lanes svg{width:26px;height:26px;color:var(--muted)}
-.slot{display:grid;grid-template-rows:32px 66px 60px 66px;border-right:1px solid var(--line);position:relative;transition:background .25s;
-  background-image:radial-gradient(circle at 50% 55%,rgba(255,255,255,.025) 0 22px,transparent 23px)}
-.slot:last-child{border-right:0}
-.slot>div{border-bottom:1px solid var(--line)}
+/* Loom of fate: warp threads divide time into beats, cloth patches carry the actions, knots mark beats where they meet */
+.loom{display:grid;grid-template-columns:200px minmax(0,1fr);gap:0 14px;padding:14px 10px 14px 6px;background:var(--flax2) var(--linen)}
+.loom>*{min-width:0}
+.loomhead{display:flex;flex-direction:column;gap:10px;padding:6px 4px 0 10px;position:relative}
+.loomhead .ttl b{display:block;font-family:var(--f-display);font-weight:900;font-size:34px;letter-spacing:.06em;line-height:1.1;color:var(--ink)}
+.loomhead .ttl small{display:block;font-family:var(--f-latin);font-size:11px;letter-spacing:.28em;color:var(--ink2);margin-top:4px}
+.loomhead .sprigs{flex:1;min-height:60px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 110'%3E%3Cg fill='none' stroke='%2369745c' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M10 108C30 80 40 50 70 30M40 70c-10-6-22-4-28 4M52 52c4-12 14-18 26-18M70 30c10-10 24-12 34-6'/%3E%3Cpath d='M150 108c-6-30 0-60 20-80M158 70c8-6 16-6 20-2M156 50c-8-4-16-2-20 4'/%3E%3C/g%3E%3Cg fill='%2369745c'%3E%3Cpath d='M30 82c-8 0-12-6-12-6 6-2 12 0 12 6zM60 40c-2-8 2-13 2-13 4 5 3 10-2 13zM88 26c4-7 10-8 10-8 0 6-4 9-10 8zM164 62c6-4 12-2 12-2-3 5-8 6-12 2z'/%3E%3C/g%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='70' cy='30' r='5'/%3E%3Ccircle cx='12' cy='76' r='4'/%3E%3Ccircle cx='170' cy='28' r='5'/%3E%3C/g%3E%3Cg fill='%23f6efe0'%3E%3Ccircle cx='104' cy='24' r='4'/%3E%3Ccircle cx='136' cy='54' r='3.5'/%3E%3C/g%3E%3Cg fill='%23b28a45'%3E%3Ccircle cx='70' cy='30' r='1.8'/%3E%3Ccircle cx='170' cy='28' r='1.8'/%3E%3Ccircle cx='104' cy='24' r='1.4'/%3E%3C/g%3E%3C/svg%3E") left bottom/contain no-repeat}
+.hint{font-size:13px;line-height:1.55;color:var(--ink2);display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}
+.hint>svg{width:12px;height:12px;flex:none;margin-top:4px;color:var(--gold)}
+.hint.err{color:var(--madder);font-weight:700}
+.hint.pend{color:var(--indigo);font-weight:700}
+.cancel{background:var(--flax2);border:1px solid var(--indigo2);color:var(--indigo);padding:0 12px;font-size:12px}
+.cancel:hover,.cancel:focus-visible{background:var(--indigo);color:var(--flax2);outline:none}
+.tlscroll{position:relative;overflow-x:auto;border:2px solid var(--indigo);background:var(--flax);scrollbar-color:var(--flax4) transparent}
+.tlwrap{position:relative;min-width:max-content}
+.tl{display:flex}
+.lanes{flex:none;width:86px;display:grid;grid-template-rows:42px 74px 64px 74px;position:sticky;left:0;z-index:3;background:var(--flax2);border-right:2px solid var(--indigo)}
+.lanes div{display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.1em;color:var(--flax2)}
+.lanes div:first-child{background:var(--flax2)}
+.lanes .le{background:var(--madder) var(--linen)} .lanes .lc{background:var(--moss2) var(--linen)} .lanes .lh{background:var(--indigo) var(--weave)}
+.lanes div+div{border-top:2px solid var(--flax2)}
+.slot{flex:1 0 104px;display:grid;grid-template-rows:42px 74px 64px 74px;position:relative;background:#e0d1b0;transition:background-color .25s}
+/* warp threads: each beat is bounded by a pair of flax threads, studded with ochre where the lanes cross */
+.slot::before{content:"";position:absolute;inset:0;pointer-events:none;border-left:1px solid rgba(94,83,67,.35);box-shadow:inset 1px 0 0 rgba(255,250,236,.7)}
+.slot>div{position:relative;border-bottom:1px solid rgba(94,83,67,.28)}
 .slot>div:last-child{border-bottom:0}
-.slot.now{background-color:rgba(90,168,255,.10)}
-.slot.now::before{content:"";position:absolute;inset:0;pointer-events:none;border-left:1px solid rgba(90,168,255,.55);border-right:1px solid rgba(90,168,255,.55);box-shadow:inset 0 0 26px rgba(90,168,255,.14)}
-.slot.far{opacity:.5}
-.slot.hit{background-color:rgba(212,165,74,.22)}
-.slot.hit::before{border:2px solid var(--gold2);box-shadow:inset 0 0 26px rgba(247,220,150,.45),0 0 18px rgba(247,220,150,.4)}
+.slot.now{background:#f4e9cf}
+.slot.fut{background:#e3d5b6}
+.slot.far{opacity:.55}
+.bn{display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:20px;color:var(--ink);letter-spacing:.02em}
+.slot.fut .bn{color:var(--ink2)}
+.slot.hit{background:#f9efd2}
+.slot.hit::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 18px rgba(178,138,69,.35);z-index:2}
 .slot.tgt{cursor:pointer}
-.slot.tgt::after{content:"";position:absolute;inset:4px;border:1px dashed var(--gold2);pointer-events:none;opacity:.55}
-.slot.tgt:hover{background-color:rgba(247,220,150,.14)}
-.bn{display:flex;align-items:center;justify-content:center;font-family:var(--f-latin);font-weight:700;font-size:15px;color:var(--muted)}
-.slot.now .bn{color:var(--azure2);text-shadow:0 0 8px rgba(90,168,255,.6)}
-.slot.hit .bn{color:var(--gold3)}
-.lane{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;padding:4px}
+.slot.tgt::after{content:"";position:absolute;inset:4px;border:1.5px dashed var(--indigo2);pointer-events:none;opacity:.55;z-index:2}
+.slot.tgt:hover{background:#fbf3df}
+.slot.smk{background-image:repeating-linear-gradient(135deg,rgba(105,116,92,.14) 0 6px,transparent 6px 12px)}
+.lane{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;padding:4px 6px}
 .mid{display:flex;align-items:center;justify-content:center;font-size:13px;text-align:center;padding:0 3px;line-height:1.3}
-.mid.ok{color:var(--moss)} .mid.bad{color:#ff9585} .mid.res{color:var(--gold2)} .mid.arm{color:#cfc4b2}
-.chip{display:flex;align-items:center;gap:6px;padding:4px 12px;font-size:16px;font-family:var(--f-display);font-weight:700;border:1px solid;min-width:74px;justify-content:center;transition:transform .12s,box-shadow .12s}
-.chip b{font-family:var(--f-latin);font-weight:700;font-variant-numeric:tabular-nums}
-.chip.h{border-color:var(--gold);color:var(--gold3);background:linear-gradient(180deg,#2a2112,#16110a);box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 0 8px rgba(212,165,74,.25)}
-.chip.h.ch{background:linear-gradient(180deg,#5a4318,#2a1f0c);box-shadow:0 0 12px rgba(247,220,150,.55)}
-.chip.e{border-color:var(--blood);color:#ffd6cc;background:linear-gradient(180deg,#5a1a12,#2a0c08);box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 0 10px rgba(216,67,47,.45)}
-.chip.e.j{border-color:#ff8a4a;background:linear-gradient(180deg,#7a2a10,#3a1206);color:#fff0d8}
+/* the clash lane: two ochre threads cross the cell, a woven knot sits where they meet */
+.mid.res,.mid.ok{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64' preserveAspectRatio='none'%3E%3Cpath d='M0 0L100 64M100 0L0 64' stroke='%23b28a45' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.mid .mt{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:2px 6px;line-height:1.25;font-family:var(--f-display);font-weight:700;color:var(--ink)}
+.mid .mt:empty{display:none}
+.mid.res .mt,.mid.ok .mt{background:var(--flax2);box-shadow:0 0 0 1px var(--gold)}
+.mid.res .mt::before,.mid.ok .mt::before{content:"";width:20px;height:20px;margin-bottom:1px;background:var(--knot) center/contain no-repeat}
+.mid.bad .mt{color:var(--madder)} .mid.ok .mt{color:var(--moss2)} .mid.arm .mt{color:var(--ink2)}
+.mid em{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:12px}
+.mid em.tk{color:var(--madder)}.mid em.dl{color:var(--indigo)}.mid em.hl{color:var(--t-frb)}
+.mid .old{font-size:10px;color:var(--muted);text-decoration:line-through}
+:root{--knot:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23b28a45' stroke-width='3'%3E%3Cpath d='M20 4c6 0 9 5 6 10l-12 12c-3 5 0 10 6 10s9-5 6-10L14 14c-3-5 0-10 6-10z'/%3E%3Cpath d='M4 20c0-6 5-9 10-6l12 12c5 3 10 0 10-6s-5-9-10-6L14 26c-5 3-10 0-10-6z'/%3E%3C/svg%3E")}
+/* cloth patches: madder for the foe, indigo for the hero, notched like cut cloth, a running stitch inside */
+.chip{position:relative;z-index:1;display:flex;align-items:center;gap:6px;padding:6px 16px;min-width:84px;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:17px;letter-spacing:.04em;white-space:nowrap;
+  color:var(--flax2);background:var(--indigo) var(--weave);clip-path:polygon(0 0,100% 0,calc(100% - 6px) 50%,100% 100%,0 100%,6px 50%);transition:filter .12s}
+.chip::before{content:"";position:absolute;inset:3px 8px;border-block:1px dashed rgba(234,211,154,.5);pointer-events:none}
+.chip>svg{width:18px;height:18px;flex:none}
+.chip b{font-weight:900;font-variant-numeric:tabular-nums}
+.chip.e{background-color:var(--madder);background-image:var(--linen)}
+.chip.e.j{background-color:var(--madder2);box-shadow:inset 0 0 0 2px var(--gold2)}
 .chip.e.j.warn{animation:pulse 1.1s infinite}
-@keyframes pulse{50%{box-shadow:0 0 16px var(--blood)}}
-.chip.g{border-color:var(--t-grd);color:#dcdaf0;border-style:dashed;background:rgba(168,166,189,.08);font-size:14px}
-.chip .lock{font-size:11px;opacity:.85;border-left:1px solid currentColor;padding-left:5px}
-.chip.pick{cursor:pointer;outline:2px solid var(--azure2);outline-offset:2px;animation:bob 1s ease-in-out infinite}
-.chip.pick:hover{transform:scale(1.07)}
+.chip.e.na{background:var(--flax2);color:var(--madder);box-shadow:inset 0 0 0 1.5px var(--madder);font-size:14px}
+.chip.e.na::before{border-color:rgba(146,63,53,.4)}
+.chip.e.sh{background:var(--stone) var(--linen);color:var(--flax2);font-size:14px}
+.chip.e.mir{background:var(--flax2);color:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--indigo2);font-size:14px}
+.chip.e.fin{background:#3a1512;animation:pulse 1.1s infinite;box-shadow:inset 0 0 0 2px var(--madder3)}
+.chip .lock{font-size:11px;opacity:.9;border-left:1px solid currentColor;padding-left:5px}
+.chip.h.ch{box-shadow:inset 0 0 0 2px var(--gold2)}
+.chip.h.fx{background-color:#152029;box-shadow:inset 0 0 0 2px var(--gold2);color:var(--gold3)}
+.chip.h.rev{background:var(--t-frb);color:var(--flax2)}
+.chip.g{background:var(--flax2);color:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--indigo2);font-size:14px}
+.chip.g::before,.chip.w::before,.chip.d::before{border-color:rgba(32,45,58,.35)}
+.chip.w{background:var(--gold3) var(--linen);color:var(--ink);font-size:14px}
+.chip.d{background:var(--flax2);color:var(--moss2);box-shadow:inset 0 0 0 1.5px var(--moss2);font-size:14px}
+.chip.k{background:var(--moss2) var(--linen);font-size:13px;min-width:0;padding:2px 12px}
+.chip.sp{--ec:var(--fire);background:var(--ec) var(--linen);font-size:14px;padding:5px 12px}
+.chip.sp[data-el="冰"]{--ec:var(--ice)} .chip.sp[data-el="雷"]{--ec:var(--bolt)}
+.chip.spw{--ec:var(--fire);background:none;color:var(--ec);font-size:12px;min-width:0;padding:1px 10px;font-weight:700;clip-path:none;border:1.5px dotted var(--ec)}
+.chip.spw::before{display:none}
+.chip.spw[data-el="冰"]{--ec:var(--ice)} .chip.spw[data-el="雷"]{--ec:var(--bolt)}
+.chip.pick{cursor:pointer;filter:drop-shadow(0 0 0 var(--gold));animation:bob 1s ease-in-out infinite}
+.chip.pick::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 2px var(--gold3)}
+.chip.pick:hover{filter:brightness(1.15)}
 @keyframes bob{50%{translate:0 -2px}}
+.slot.fut .chip{opacity:.78}
+.slot.fut .bn,.slot.fut .mid{opacity:.85}
+/* past beats are woven in: flattened to undyed flax, threads tied off */
+.slot.past{flex:0 0 76px;background:#d6c7a6}
+.slot.past .bn{color:var(--muted);font-size:16px}
+.slot.past .chip{background:var(--flax3);color:var(--ink2);min-width:0;padding:2px 10px;font-size:13px;box-shadow:none;animation:none}
+.slot.past .chip::before{border-color:rgba(94,83,67,.3)}
+.slot.past .chip>svg{display:none}
+.slot.past .mid .mt{background:none;box-shadow:none;color:var(--ink2);font-size:12px}
+.slot.past .mid .mt::before{width:14px;height:14px;opacity:.6}
+.slot.past.fresh{animation:woven .9s ease-out}
+@keyframes woven{0%{background-color:#f9efd2}100%{background-color:#d6c7a6}}
+/* the shuttle that crosses the beats as a turn resolves */
+#needle{position:absolute;top:0;bottom:0;left:0;width:3px;margin-left:-1.5px;z-index:5;pointer-events:none;opacity:0;transition:left .45s cubic-bezier(.5,0,.3,1),opacity .3s;background:var(--gold)}
+#needle.on{opacity:1}
+#needle::before{content:"";position:absolute;top:8px;left:50%;width:34px;height:12px;transform:translateX(-50%);border-radius:50%;background:var(--madder);box-shadow:inset 0 0 0 2px var(--gold3)}
+#threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:visible}
 
-/* Dock */
-.dock{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
-.sand{position:relative;width:150px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
-.sand>svg{position:absolute;inset:0;width:100%;height:100%}
-.sand .orbit{transform-origin:75px 75px;animation:spin 30s linear infinite}
-.sandnum{position:relative;font-family:var(--f-latin);font-weight:900;font-size:46px;line-height:1;color:var(--gold3);text-shadow:0 0 14px rgba(212,165,74,.7),0 2px 0 #000;font-variant-numeric:tabular-nums}
+/* Dock: the sand arch, the hand of embroidered card patches, the cloth tab that advances time */
+.dock{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 6px 12px}
+.sand{position:relative;width:150px;height:226px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:18px;flex:none;color:var(--gold3);
+  background:var(--indigo) var(--weave);border-radius:75px 75px 4px 4px;box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+.sand::after{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(178,138,69,.55);border-radius:66px 66px 2px 2px;pointer-events:none}
+.sand>span{position:absolute;top:22px;left:50%;width:84px;height:110px;transform:translateX(-50%)}
+.sand>span svg,.logo .knot svg,.roundel svg{display:block;width:100%;height:100%}
+.logo .knot{display:block}
+.sandnum{position:relative;font-family:var(--f-display);font-weight:900;font-size:58px;line-height:1;color:var(--gold3);font-variant-numeric:tabular-nums}
 .sandnum.bump{animation:bump .4s}
 @keyframes bump{40%{transform:scale(1.3)}}
-.grains{position:relative;display:flex;gap:4px;margin:6px 0 4px;min-height:16px;flex-wrap:wrap;justify-content:center;max-width:90px}
-.grains i{width:15px;height:15px;transform:rotate(45deg);background:linear-gradient(135deg,var(--gold3),var(--gold) 50%,#8a6524);box-shadow:0 0 8px rgba(247,220,150,.7)}
-.sandlbl{position:relative;font-size:14px;color:var(--text);letter-spacing:.15em}
-.debt{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:12px;color:#ff9585}
-.hand{display:flex;gap:10px;overflow-x:auto;padding:16px 12px 10px;min-width:0}
+.sandlbl{position:relative;font-family:var(--f-display);font-weight:700;font-size:16px;color:var(--flax2);letter-spacing:.2em;margin-top:2px}
+.debt{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:12px;color:var(--madder);font-weight:700}
+.hand{display:flex;gap:12px;overflow-x:auto;padding:18px 10px 8px;min-width:0}
 .hand>.card:first-child{margin-left:auto}.hand>.card:last-child{margin-right:auto}
-.hand.empty::before{content:"手牌已放回牌库，时间正在流动……";color:var(--muted);font-size:14px;align-self:center;padding:90px 0}
-.card{--tc:var(--t-move);flex:0 0 140px;height:252px;padding:0;border:none;background:none;position:relative;text-align:center;color:var(--ink);transition:transform .18s ease-out,filter .18s}
-.card .fr{position:absolute;inset:0;display:flex;flex-direction:column;border:2px solid #b8913f;background:linear-gradient(175deg,var(--parch),var(--parch2));overflow:hidden;
-  box-shadow:0 0 0 1px #3a2a10,inset 0 0 0 3px rgba(255,240,200,.35),inset 0 0 0 4px rgba(120,90,40,.5),0 10px 22px rgba(0,0,0,.6),inset 0 0 28px rgba(140,100,40,.3)}
-.card .art{height:104px;flex:none;position:relative;overflow:hidden;border-bottom:2px solid #b8913f;background:#111}
-.card .art i{position:absolute;inset:-4px;background-size:cover;background-position:center}
+.hand.empty::before{content:"手牌已放回牌库，时间正在流动……";color:var(--ink2);font-size:14px;align-self:center;padding:96px 0}
+.card{--tc:var(--t-move);flex:0 0 150px;height:236px;padding:0;border:none;background:none;position:relative;text-align:center;color:var(--ink);transition:transform .18s ease-out,filter .18s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.card .fr{position:absolute;inset:0;display:flex;flex-direction:column;padding:7px;background:var(--indigo) var(--weave);box-shadow:0 6px 14px rgba(32,45,58,.35)}
+.card .fr::after{content:"";position:absolute;inset:3px;border:1.5px dashed rgba(178,138,69,.7);pointer-events:none}
+.card .art{height:118px;flex:none;position:relative;overflow:hidden;background:color-mix(in srgb,var(--tc) 85%,#000) var(--weave);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.card .art i{position:absolute;inset:0;background-size:cover;background-position:center}
+.card .txt{flex:1;display:flex;flex-direction:column;align-items:center;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold);padding:0 6px 6px;min-height:0}
+.card .cn{font-family:var(--f-display);font-weight:900;font-size:18px;letter-spacing:.14em;line-height:1.2;padding:5px 0 3px;width:100%;border-bottom:1px solid rgba(178,138,69,.6)}
+.card .ct{font-size:10px;letter-spacing:.3em;color:var(--ink2);padding-top:2px}
+.card .cd{font-size:11.5px;line-height:1.45;padding:4px 2px 0;color:var(--ink);text-align:center;overflow:hidden}
+.card .cx{font-size:10.5px;color:var(--madder);letter-spacing:.04em;margin-top:auto;font-weight:700}
+.card .ks{font-size:10.5px;color:var(--gold);letter-spacing:.4em;margin-top:auto;font-weight:900}
 .card[data-t="挪移"]{--tc:var(--t-move)} .card[data-t="共鸣"]{--tc:var(--t-res)} .card[data-t="节奏"]{--tc:var(--t-rhy)} .card[data-t="守御"]{--tc:var(--t-grd)} .card[data-t="禁术"]{--tc:var(--t-frb)}
-.card[data-t="挪移"] .art i{background-image:url(img/art_move.jpg)}
-.card[data-t="共鸣"] .art i{background-image:url(img/art_res.jpg)}
-.card[data-t="节奏"] .art i{background-image:url(img/art_rhy.jpg)}
-.card[data-t="禁术"] .art i{background-image:url(img/art_frb.jpg)}
-.card[data-t="守御"] .art i{background-image:url(img/art_move.jpg);filter:grayscale(1) brightness(1.25) contrast(1.1)}
 .card[data-t="战士"]{--tc:var(--t-war)} .card[data-t="刺客"]{--tc:var(--t-rog)} .card[data-t="法师"]{--tc:var(--t-mag)}
-.card[data-t="法师"] .art i{background-image:url(img/art_rhy.jpg);filter:hue-rotate(150deg) saturate(1.4) brightness(.95)}
-.card[data-t="战士"] .art i{background-image:url(img/art_res.jpg);filter:hue-rotate(-28deg) saturate(1.6) contrast(1.15)}
-.card[data-t="刺客"] .art i{background-image:url(img/art_frb.jpg);filter:hue-rotate(-120deg) saturate(1.2) brightness(.9)}
-.card.ks .fr{border-color:#e9c46a;box-shadow:0 0 0 1px #3a2a10,inset 0 0 0 3px rgba(255,240,200,.5),inset 0 0 0 5px rgba(212,165,74,.8),0 0 18px rgba(247,220,150,.45),0 10px 22px rgba(0,0,0,.6),inset 0 0 28px rgba(140,100,40,.3)}
-.card .ks{font-size:11px;color:#8a5a0a;letter-spacing:.3em;margin-top:auto;padding-bottom:7px;font-weight:700}
-.card.ks .orn{display:none}
-.card.rg .cost::before{background:radial-gradient(circle at 35% 30%,#ffb08a,var(--rage) 45%,#7a1e08)}
-.card .cost small{position:absolute;bottom:-11px;left:0;right:0;font-size:10px;color:#ffd0b8;text-shadow:0 1px 2px #000;letter-spacing:0}
-.card .cost{position:absolute;top:-10px;left:-10px;width:40px;height:40px;z-index:3;display:flex;align-items:center;justify-content:center}
-.card .cost::before{content:"";position:absolute;inset:5px;transform:rotate(45deg);background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--tc) 55%,#fff),var(--tc) 45%,color-mix(in srgb,var(--tc) 45%,#000));border:2px solid #e6c472;box-shadow:0 0 0 1px #2a1d0a,0 0 10px var(--tc),0 3px 6px rgba(0,0,0,.6)}
-.card .cost span{position:relative;font-family:var(--f-latin);font-weight:900;font-size:20px;color:#fff;text-shadow:0 2px 2px rgba(0,0,0,.7)}
-.card .cn{font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.1em;margin-top:6px;line-height:1.25}
-.card .ct{font-size:11px;letter-spacing:.3em;color:var(--ink2);margin-bottom:4px}
-.card .cd{font-size:12px;line-height:1.5;padding:0 10px;color:var(--ink);text-align:left}
-.card .cx{font-size:11px;color:#a02414;letter-spacing:.06em;margin-top:2px;font-weight:700}
-.card .orn{margin-top:auto;padding-bottom:6px;display:flex;justify-content:center}
-.card .orn i{width:9px;height:9px;transform:rotate(45deg);background:var(--tc);border:1px solid #8a6524;box-shadow:0 0 6px var(--tc)}
-.card:hover:not(:disabled),.card:focus-visible{transform:translateY(-14px) scale(1.04);outline:none;z-index:3}
-.card:hover:not(:disabled) .fr,.card:focus-visible .fr{box-shadow:0 0 0 1px #3a2a10,inset 0 0 0 3px rgba(255,240,200,.35),0 0 0 3px var(--tc),0 0 26px var(--tc),0 18px 30px rgba(0,0,0,.6)}
-.card.sel{transform:translateY(-18px) scale(1.05);z-index:3}
-.card.sel .fr{box-shadow:0 0 0 1px #3a2a10,0 0 0 4px var(--azure2),0 0 30px var(--azure),0 18px 30px rgba(0,0,0,.6)}
-.card:disabled{filter:grayscale(.75) brightness(.5);cursor:not-allowed}
-.card.flying{animation:fly .55s ease-in forwards;pointer-events:none}
-@keyframes fly{0%{transform:translateY(-14px) scale(1.04);opacity:1}100%{transform:translateY(-200px) scale(.6);opacity:0;filter:brightness(2)}}
-.endwrap{display:flex;flex-direction:column;align-items:center;gap:10px}
-.endbtn{position:relative;display:flex;align-items:center;gap:14px;padding:18px 28px 18px 22px;color:var(--gold3);text-align:left;
-  background:radial-gradient(ellipse at 50% 0%,#5a4116,#2a1d0a 60%,#160f06);border:2px solid var(--gold);
-  box-shadow:0 0 0 3px #0a080d,0 0 0 4px var(--gold2),0 0 30px rgba(212,165,74,.4),inset 0 0 20px rgba(0,0,0,.6);transition:box-shadow .2s,transform .1s}
-.endbtn::before,.endbtn::after{content:"";position:absolute;top:50%;width:14px;height:14px;background:var(--gold2);transform:translateY(-50%) rotate(45deg);box-shadow:0 0 10px var(--gold)}
-.endbtn::before{left:-9px}.endbtn::after{right:-9px}
-.endbtn svg{width:34px;height:44px;flex:none;filter:drop-shadow(0 0 6px var(--gold))}
-.endbtn b{display:block;font-family:var(--f-display);font-weight:900;font-size:26px;letter-spacing:.14em;line-height:1.2;text-shadow:0 2px 0 #000}
-.endbtn small{display:block;font-size:13px;letter-spacing:.1em;color:#e4d3ae}
-.endbtn:hover:not(:disabled),.endbtn:focus-visible{box-shadow:0 0 0 3px #0a080d,0 0 0 4px var(--gold3),0 0 44px rgba(247,220,150,.65),inset 0 0 20px rgba(0,0,0,.6);outline:none}
+.card.ks .fr{background-color:#5a4521;box-shadow:0 0 0 2px var(--gold2),0 6px 14px rgba(32,45,58,.35)}
+.card.ks .fr::after{border-color:var(--gold3)}
+.card .cost{position:absolute;top:-8px;left:-8px;width:36px;height:36px;z-index:3;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--flax2);box-shadow:0 0 0 2px var(--gold),0 0 0 3.5px var(--indigo),0 2px 4px rgba(0,0,0,.4)}
+.card .cost::before{content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed rgba(94,83,67,.5)}
+.card .cost span{position:relative;font-family:var(--f-display);font-weight:900;font-size:20px;color:var(--ink);line-height:1}
+.card.rg .cost{background:var(--madder);width:auto;min-width:36px;padding:0 10px 0 11px;border-radius:18px;gap:4px}
+.card.rg .cost span{color:var(--flax2)}
+.card.rg .cost small{position:relative;font-size:11px;color:var(--gold3);letter-spacing:.06em;font-weight:700}
+.card:hover:not(:disabled),.card:focus-visible{transform:translateY(-14px) rotate(-1deg);outline:none;z-index:3}
+.card:hover:not(:disabled) .fr,.card:focus-visible .fr{box-shadow:0 0 0 2.5px var(--gold2),0 16px 26px rgba(32,45,58,.4)}
+.card.sel{transform:translateY(-20px);z-index:3}
+.card.sel .fr{box-shadow:0 0 0 3px var(--madder),0 0 0 5px var(--gold3),0 18px 28px rgba(32,45,58,.45)}
+.card:disabled{filter:grayscale(.7) brightness(.82) opacity(.75);cursor:not-allowed}
+.card.flying{pointer-events:none}
+.endwrap{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:250px}
+.endbtn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:168px;padding:16px 22px;color:var(--flax2);border:0;background:var(--madder) var(--linen);box-shadow:inset 0 0 0 4px var(--madder),inset 0 0 0 5.5px var(--gold),0 6px 14px rgba(32,45,58,.35);transition:filter .2s,transform .1s}
+.endbtn::after{content:"";position:absolute;inset:10px;border:1.5px dashed rgba(234,211,154,.6);pointer-events:none}
+.endbtn svg{width:120px;height:58px;flex:none}
+.endbtn b{display:block;font-family:var(--f-display);font-weight:900;font-size:34px;letter-spacing:.16em;line-height:1.2}
+.endbtn:hover:not(:disabled),.endbtn:focus-visible{filter:brightness(1.12);outline:none}
 .endbtn:active:not(:disabled){transform:translateY(1px)}
-.endbtn:disabled{opacity:.45;cursor:wait}
-.busy .endbtn svg .grain{animation:fall .5s linear infinite}
-@keyframes fall{from{transform:translateY(-6px);opacity:1}to{transform:translateY(8px);opacity:0}}
-.pilecount{font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+.endbtn:disabled{opacity:.6;cursor:wait}
+.busy .endbtn .shuttle{animation:weave .6s ease-in-out infinite alternate}
+@keyframes weave{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+.pilecount{text-align:center;padding:9px 6px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--ink);background:var(--flax2);box-shadow:inset 0 0 0 1.5px var(--ink2)}
 
-/* Chronicle */
-.chron{border-top:1px solid var(--line2);padding-top:4px}
-.chron summary{cursor:pointer;list-style:none;padding:6px 4px;display:flex;align-items:center;gap:10px}
+/* Chronicle: the battle log rolls up from an indigo band at the foot */
+.chron{background:var(--indigo) var(--weave);color:var(--flax2)}
+.chron summary{cursor:pointer;list-style:none;padding:10px 18px;display:flex;align-items:center;gap:16px}
 .chron summary::-webkit-details-marker{display:none}
-.chron summary:focus-visible{outline:1px solid var(--gold)}
-.chron .latest{font-size:14px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chron .tog{font-size:12px;color:var(--muted);letter-spacing:.1em;flex:none}
+.chron summary:focus-visible{outline:1.5px dashed var(--gold2);outline-offset:-4px}
+.chron .lbl{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:900;font-size:17px;letter-spacing:.16em;padding-right:16px;border-right:1.5px solid var(--gold);flex:none}
+.chron .lbl svg{width:20px;height:20px;color:var(--gold2)}
+.chron .latest{font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.06em}
+.chron .tog{color:var(--gold2);font-size:20px;flex:none;transition:transform .25s}
+.chron[open] .tog{transform:rotate(90deg)}
 .chron[open] .latest{visibility:hidden}
-.log{padding:0 4px 8px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px;max-height:180px;overflow:auto}
-.log p{margin:0} .log p:first-child{color:var(--text)}
-.t{display:inline-block;min-width:34px;font-family:var(--f-latin);color:var(--gold);margin-right:6px}
+.log{padding:0 18px 12px;font-size:13px;color:#c7cdd2;display:flex;flex-direction:column;gap:3px;max-height:200px;overflow:auto}
+.log p{margin:0} .log p:first-child{color:var(--flax2)}
+.t{display:inline-block;min-width:34px;font-family:var(--f-display);font-weight:700;color:var(--gold2);margin-right:6px}
 
-/* Full-page screens (briefing, spoils, defeat, summit), after kevin's Codex concept sheets in design/concepts:
-   a painted clock-tower plate fills the screen, the foe or hero looms on the left under a big gold title,
-   gilded night panels and parchment sheets sit on the right. */
-@keyframes fade{from{opacity:0}}
-.scr[hidden]{display:none}
-.scr{--cc:#26408f;position:fixed;inset:0;z-index:24;overflow:auto;color:var(--text);animation:fade .35s;background:#07070d}
-.scr-bg{position:fixed;inset:0;pointer-events:none;background:var(--bg,none) center/cover no-repeat,radial-gradient(ellipse 45% 55% at 22% 30%,rgba(212,165,74,.28),transparent 70%),radial-gradient(ellipse 70% 50% at 70% 0%,rgba(70,90,170,.35),transparent 70%),linear-gradient(180deg,#141a33,#07070d)}
-.scr-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 30%,rgba(5,5,10,.45) 70%,rgba(5,5,10,.6)),linear-gradient(0deg,rgba(5,5,10,.75),transparent 40%)}
-.scr.brief .scr-bg{--bg:url(img/ui/bg_tower.jpg)}
-.scr.win .scr-bg{--bg:url(img/ui/bg_victory.jpg)}
-.scr.lose .scr-bg{--bg:url(img/ui/bg_defeat.jpg);filter:saturate(.75)}
-.scr-in{position:relative;min-height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(440px,560px) auto;gap:0 26px;padding:22px 26px 22px 0}
-.scr.win .scr-in,.scr.lose .scr-in{grid-template-columns:minmax(0,.85fr) minmax(500px,1.15fr);padding-right:32px}
+/* ---------- Full-page screens: briefing, victory, defeat, summit ---------- */
+.scr[hidden],.pickscr[hidden]{display:none}
+.scr{position:fixed;inset:0;z-index:24;overflow:auto;background:var(--flax) var(--linen);color:var(--ink)}
+.scr-in{position:relative;min-height:100%;display:flex;flex-direction:column;max-width:1500px;margin:0 auto;padding:0 max(14px,env(safe-area-inset-right,0px)) 16px max(14px,env(safe-area-inset-left,0px))}
+.scr .mast .page{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.2em;display:flex;align-items:center;gap:10px}
+.scr .mast .page svg{width:18px;height:18px;color:var(--indigo)}
+.body{flex:1;display:grid;gap:14px;padding-top:10px}
+.pp{position:relative;padding:18px 22px 20px;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2),0 4px 10px rgba(32,45,58,.12)}
+.pp::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(146,63,53,.35);pointer-events:none}
+.ip{position:relative;background:var(--indigo) var(--weave);color:var(--flax2);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+.ip::after{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(178,138,69,.5);pointer-events:none}
+.sh{margin:0 0 12px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:var(--f-display);font-weight:900;font-size:26px;letter-spacing:.14em;color:var(--ink)}
+.sh::before,.sh::after{content:"";width:64px;height:22px;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 22'%3E%3Cpath d='M2 11c14 0 20-8 30-8M10 11c10 0 16 6 26 6' fill='none' stroke='%2369745c' stroke-width='1.4'/%3E%3Cpath d='M20 5c3-4 7-3 7-3-2 3-4 4-7 3zM22 16c4 3 7 2 7 2-2-3-5-3-7-2z' fill='%2369745c'/%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='54' cy='11' r='4'/%3E%3Ccircle cx='40' cy='5' r='2.4'/%3E%3C/g%3E%3Ccircle cx='54' cy='11' r='1.4' fill='%23b28a45'/%3E%3C/svg%3E") center/contain no-repeat}
+.sh::after{transform:scaleX(-1)}
+.sh.sm{font-size:20px}.sh.sm::before,.sh.sm::after{width:46px}
+.sh small{display:none}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.rules li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:center;padding:9px 0;border-top:1px solid rgba(94,83,67,.3);font-size:15px;line-height:1.6}
+.rules li:first-child{border-top:0}
+.rules li>i{width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
+.rules li:nth-child(3n+2)>i{background-color:var(--indigo)} .rules li:nth-child(3n)>i{background-color:var(--moss2)}
+.rules li>i svg{width:30px;height:30px}
+.scr b{color:var(--madder)}
+.scr .chip b{color:inherit}
+.ip b{color:var(--gold3)}
+/* buttons: madder cloth tabs for the main action, flax tabs for the way back */
+.acts{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+.btn{position:relative;flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 26px;font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.2em;color:var(--ink);border:0;
+  background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 2px var(--ink2),0 4px 10px rgba(32,45,58,.15);transition:filter .15s,transform .1s}
+.btn::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(178,138,69,.75);pointer-events:none}
+.btn svg{width:26px;height:26px;flex:none;color:var(--gold)}
+.btn.go,.btn.red{color:var(--flax2);background-color:var(--madder);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3);font-size:28px;flex:1.4}
+.btn.go svg,.btn.red svg{color:var(--gold3);width:64px;height:30px}
+.btn:hover,.btn:focus-visible{filter:brightness(1.08);outline:none}
+.btn:active{transform:translateY(1px)}
 
-/* left: logo, looming figure, big gold title */
-.scr-art{position:relative;min-height:calc(100vh - 44px);min-width:0}
-.scr-art .pk-logo{position:relative;z-index:2;padding-left:28px}
-.scr-fig{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);aspect-ratio:480/1000;max-width:100%;background:center/cover no-repeat;
-  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 48%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 48%,#000 62%,transparent 100%)}
-.scr-fig.hero{aspect-ratio:326/910;background-position:center top;-webkit-mask-image:radial-gradient(ellipse 50% 52% at 50% 46%,#000 38%,transparent 100%);mask-image:radial-gradient(ellipse 50% 52% at 50% 46%,#000 38%,transparent 100%)}
-.scr.lose .scr-fig{filter:grayscale(.55) brightness(.8) contrast(1.1)}
-.scr-title{position:absolute;left:28px;right:0;bottom:8px;z-index:2}
-.scr-title .kick{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:20px;letter-spacing:.14em;color:var(--gold3);text-shadow:0 2px 6px #000}
-.scr-title .kick em{font-style:normal;font-family:var(--f-latin);font-size:16px;letter-spacing:.24em}
-.scr-title h2{margin:2px 0 0;font-family:var(--f-display);font-weight:900;font-size:clamp(46px,6.4vw,84px);letter-spacing:.06em;line-height:1.05;
-  background:linear-gradient(180deg,var(--gold3) 0%,var(--gold2) 40%,var(--gold) 75%,#9a7228 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #000) drop-shadow(0 0 22px rgba(0,0,0,.8))}
-.scr-title p{margin:6px 0 0;max-width:30em;font-size:15px;color:#e8dcc0;text-shadow:0 1px 4px #000}
-
-/* right column */
-.scr-m{position:relative;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:12px 0;min-width:0}
-.frame.scr-p{box-shadow:0 0 0 3px rgba(5,5,10,.85),0 0 0 4px rgba(212,165,74,.5),0 18px 40px rgba(0,0,0,.6)}
-.pp{position:relative;padding:16px 20px 18px;color:var(--ink);border:1px solid #b8913f;
-  background:url(img/ui/parch.jpg) center/cover,radial-gradient(ellipse at 50% 30%,#fbf4e2,#eadcb8 85%);box-shadow:inset 0 0 0 4px rgba(255,250,240,.55),inset 0 0 0 5px rgba(184,145,63,.55)}
-.gp{position:relative;padding:16px 20px 18px;border:1px solid var(--golddim);background:linear-gradient(180deg,rgba(22,20,36,.9),rgba(8,8,14,.94));box-shadow:inset 0 0 0 4px rgba(8,8,14,.9),inset 0 0 0 5px rgba(212,165,74,.3)}
-.scr b{color:#7a2a18}
-.gp b{color:var(--gold2)}
-.sh{margin:0 0 12px;display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.16em;color:#1e150a}
-.sh svg{width:34px;height:34px;color:#9a7228;flex:none}
-.sh small{font-family:var(--f-latin);font-size:11px;letter-spacing:.3em;color:#9a8664;font-weight:500}
-.sh::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(184,145,63,.8),transparent);margin-left:6px}
-.pp ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:0}
-.pp li{position:relative;padding:8px 4px 8px 22px;font-size:14px;line-height:1.6;border-top:1px solid rgba(184,145,63,.35)}
-.pp li:first-child{border-top:0}
-.pp li::before{content:"";position:absolute;left:4px;top:1.05em;width:7px;height:7px;transform:rotate(45deg);background:#b8913f}
-.clsrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:8px}
-.crest{display:flex;flex-direction:column;align-items:center;gap:4px;width:150px;text-align:center;color:var(--cc)}
-.crest svg{width:70px;height:70px}
-.scr .crest b{font-family:var(--f-display);font-weight:900;font-size:16px;letter-spacing:.12em;color:var(--cc)}
-.hthumb{height:118px;background:center 22%/cover no-repeat;border:1px solid #b8913f;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}
-.pp.cls p{margin:0;font-size:13px;line-height:1.7;color:var(--ink2)}
-
-/* tower: vertical column of numeral medallions (briefing) */
-.tower{list-style:none;margin:0;padding:70px 0 20px;display:flex;flex-direction:column;justify-content:center;gap:16px;position:relative}
-.tower::before{content:"";position:absolute;left:50%;top:70px;bottom:20px;width:2px;transform:translateX(-50%);background:linear-gradient(180deg,var(--gold2),var(--golddim))}
-.tw{position:relative;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-latin);font-weight:900;font-size:19px;color:var(--gold2);
-  background:radial-gradient(circle at 50% 40%,#2a2440,#0a0912);border:2px solid var(--gold);box-shadow:0 0 0 3px #0a0912,0 0 0 4px var(--golddim),0 6px 14px rgba(0,0,0,.6)}
-.tw::before,.tw::after{content:"";position:absolute;left:50%;width:6px;height:6px;margin-left:-3px;transform:rotate(45deg);background:var(--gold2)}
-.tw::before{top:-11px}.tw::after{bottom:-11px}
-.tw.done{color:#1e150a;background:radial-gradient(circle at 50% 35%,var(--gold3),var(--gold) 60%,#8a6220)}
-.tw.cur{width:74px;height:74px;margin:-6px 0;font-size:23px;color:#e8f4ff;background:radial-gradient(circle at 50% 40%,#2f5fd0,#0d1840);border-color:#9fd0ff;
-  box-shadow:0 0 0 3px #0a0912,0 0 0 5px #5aa8ff,0 0 26px rgba(90,168,255,.9),0 0 60px rgba(90,168,255,.45)}
-.tw.cur,.tw.done{align-self:center}
-.tower{align-items:center}
-
-/* ribbons, titles, round medallions (results) */
-.ribbon{align-self:center;position:relative;padding:10px 64px;font-family:var(--f-latin);font-weight:700;font-size:26px;letter-spacing:.16em;color:var(--gold3);text-shadow:0 2px 0 #000;
-  background:linear-gradient(180deg,#24305e,#0f1530);border-block:2px solid var(--gold);clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%);box-shadow:inset 0 0 0 1px #000}
-.ribbon span{font-family:var(--f-display);font-weight:900}
-.scr.lose .ribbon{background:linear-gradient(180deg,#7a1a12,#3a0806)}
-.ttl{margin:0;text-align:center;font-family:var(--f-display);font-weight:900;font-size:clamp(40px,5vw,64px);letter-spacing:.1em;line-height:1.1;
-  background:linear-gradient(180deg,var(--gold3),var(--gold2) 40%,var(--gold) 75%,#9a7228);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #000) drop-shadow(0 0 18px rgba(0,0,0,.7))}
-.lead{margin:-4px 0 0;text-align:center;font-size:15px;color:#e8dcc0;text-shadow:0 1px 4px #000}
-.rms{display:flex;justify-content:center;gap:30px;position:relative;flex-wrap:wrap}
-.rms::before{content:"";position:absolute;left:12%;right:12%;top:50%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.rm{position:relative;width:138px;height:138px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
-  background:radial-gradient(circle at 50% 40%,#1f2446,#08080f 72%);border:2px solid var(--gold);box-shadow:0 0 0 4px rgba(8,8,15,.9),0 0 0 5px var(--golddim),0 0 0 9px rgba(8,8,15,.5),0 0 0 10px rgba(212,165,74,.35),0 10px 24px rgba(0,0,0,.6)}
-.rm .ic{color:var(--gold2);line-height:0}.rm .ic svg{width:28px;height:28px}
-.rm small{font-size:12px;letter-spacing:.2em;color:#e4d3ae;margin-top:4px}
-.scr .rm b{font-family:var(--f-latin);font-weight:900;font-size:24px;line-height:1.15;color:var(--gold3);white-space:nowrap}
-.scr .rm b.zh{font-family:var(--f-display);font-size:17px;letter-spacing:.06em}
-.rm i{font-style:normal;font-size:11px;color:#bfae88;max-width:108px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pp .rms::before{background:linear-gradient(90deg,transparent,#b8913f,transparent)}
-.pp .rm{background:radial-gradient(circle at 50% 40%,#fffaf0,#efe2c2 72%);border-color:#b8913f;box-shadow:0 0 0 4px #f6edd8,0 0 0 5px rgba(184,145,63,.6),0 0 0 9px rgba(246,237,216,.6),0 0 0 10px rgba(184,145,63,.35),0 8px 18px rgba(60,40,10,.25)}
-.pp .rm .ic{color:#9a2414}.pp .rm small{color:var(--ink2)}.scr .pp .rm b{color:#1e150a}.pp .rm i{color:var(--ink2)}
-
-/* spoils and deck */
-.sh2{margin:0 0 4px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:var(--f-display);font-weight:900;font-size:24px;letter-spacing:.2em;color:var(--gold2)}
-.sh2 small{font-family:var(--f-latin);font-size:13px;letter-spacing:.3em;color:var(--gold);font-weight:500}
-.sh2::before,.sh2::after{content:"";flex:1;max-width:160px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
-.sh2::after{transform:scaleX(-1)}
-.rewards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin:0;padding:20px 4px 8px}
-.rewards button.skipcard{flex:0 0 140px;height:252px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 12px;text-align:center;font:inherit;cursor:pointer;
-  color:var(--gold2);background:radial-gradient(ellipse at 50% 35%,rgba(60,50,30,.5),rgba(8,8,14,.95) 75%);border:2px dashed var(--golddim);box-shadow:inset 0 0 0 4px rgba(0,0,0,.5),0 10px 22px rgba(0,0,0,.45);transition:transform .18s,border-color .18s,box-shadow .18s}
-.rewards button.skipcard:hover,.rewards button.skipcard:focus-visible{transform:translateY(-14px) scale(1.04);border-style:solid;border-color:var(--gold2);box-shadow:inset 0 0 0 4px rgba(0,0,0,.5),0 0 26px rgba(212,165,74,.6),0 18px 30px rgba(0,0,0,.5);outline:none}
-.skipcard .sk-ic{width:72px;height:72px;color:var(--gold2);margin-bottom:6px}
-.skipcard .sk-ic svg{width:100%;height:100%}
-.scr .skipcard b{font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.14em;color:var(--gold3)}
-.skipcard i{font-style:normal;font-size:11px;letter-spacing:.3em;color:var(--gold)}
-.skipcard>span:last-child{font-size:12px;line-height:1.6;color:#cbbd9c;margin-top:6px}
-.rwnote{margin:0;text-align:center;font-size:12px;color:#bfae88;letter-spacing:.2em}
-.deck{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding-top:8px}
-.deck span{--tc:var(--t-move);padding:4px 12px 4px 10px;font-size:13px;color:var(--ink);background:linear-gradient(180deg,#fffaf0,#efe2c2);border:1px solid #b8913f;border-left:4px solid var(--tc)}
-.deck span[data-t="共鸣"]{--tc:var(--t-res)}.deck span[data-t="节奏"]{--tc:var(--t-rhy)}.deck span[data-t="守御"]{--tc:var(--t-grd)}.deck span[data-t="禁术"]{--tc:var(--t-frb)}
-.deck span[data-t="战士"]{--tc:var(--t-war)}.deck span[data-t="刺客"]{--tc:var(--t-rog)}.deck span[data-t="法师"]{--tc:var(--t-mag)}
-.deck em{font-style:normal;font-family:var(--f-latin);color:#9a7228;margin-left:4px}
-
-/* defeat sheet: the whole right side is one torn parchment page */
-.pp.sheet{display:flex;flex-direction:column;gap:16px;padding:26px 30px 24px}
-.pp.sheet .ttl{background:none;color:#2a1610;-webkit-text-fill-color:#2a1610;filter:drop-shadow(0 2px 0 rgba(255,255,255,.5));font-size:clamp(46px,6vw,76px)}
-.pp.sheet .lead{color:var(--ink2);text-shadow:none}
-
-/* buttons */
-.acts{display:flex;gap:18px;align-items:stretch;justify-content:flex-end;flex-wrap:wrap;padding-top:4px}
-.btn{position:relative;min-width:180px;padding:14px 30px;font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.28em;color:var(--gold3);cursor:pointer;text-shadow:0 2px 0 #000;
-  background:linear-gradient(180deg,#1d2140,#0b0d1c);border:2px solid var(--gold);box-shadow:0 0 0 3px rgba(5,5,10,.9),0 0 0 4px var(--golddim),0 8px 18px rgba(0,0,0,.5);transition:box-shadow .15s,filter .15s}
-.btn::before,.btn::after{content:"";position:absolute;top:50%;width:10px;height:10px;margin-top:-5px;transform:rotate(45deg);background:var(--gold2);box-shadow:0 0 8px var(--gold)}
-.btn::before{left:-7px}.btn::after{right:-7px}
-.btn.go{flex:1;max-width:340px;font-size:30px;letter-spacing:.5em;padding:14px 30px 14px 46px;background:radial-gradient(ellipse at 50% 0%,#4d7ae0,#1d3a9a 55%,#0d1a52);box-shadow:0 0 0 3px rgba(5,5,10,.9),0 0 0 4px var(--gold2),0 0 30px rgba(90,140,255,.45),0 8px 18px rgba(0,0,0,.5)}
-.btn.red{background:radial-gradient(ellipse at 50% 0%,#c0392b,#7a1a12 55%,#3a0806)}
-.btn:hover,.btn:focus-visible{filter:brightness(1.18);box-shadow:0 0 0 3px rgba(5,5,10,.9),0 0 0 4px var(--gold3),0 0 30px rgba(247,220,150,.55);outline:none}
-
-/* playtest floor jump, tucked away */
-.dbg{font-size:13px;color:#cbbd9c}
-.dbg summary{cursor:pointer;letter-spacing:.14em;width:max-content;max-width:100%}
+/* briefing: hunt tapestry at left, the foe's pattern and your class in the middle, the tower at right */
+.scr.brief .body{grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr) 110px}
+.hunt{position:relative;min-height:min(78vh,820px);overflow:hidden}
+.hunt .pic{position:absolute;inset:10px;background:center 30%/cover no-repeat}
+.hunt .flag{position:absolute;top:10px;left:34px;width:64px;height:120px;z-index:2;color:var(--gold3)}
+.cart{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:2;width:min(86%,520px);text-align:center;color:var(--flax2)}
+.cart .fl{display:inline-block;padding:2px 22px;font-family:var(--f-display);font-weight:900;font-size:20px;letter-spacing:.2em;background:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.cart .nm{position:relative;margin-top:-2px;padding:10px 60px 12px;background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 2px var(--gold);clip-path:polygon(28px 0,calc(100% - 28px) 0,100% 50%,calc(100% - 28px) 100%,28px 100%,0 50%)}
+.cart .nm::before,.cart .nm::after{content:"";position:absolute;top:50%;width:38px;height:38px;margin-top:-19px;background:var(--knot-g) center/contain no-repeat}
+.cart .nm::before{left:16px}.cart .nm::after{right:16px}
+.cart h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(40px,4.4vw,60px);letter-spacing:.12em;line-height:1.1}
+.cart .en{font-family:var(--f-latin);font-size:13px;letter-spacing:.32em;margin-top:6px;text-shadow:0 1px 3px var(--indigo)}
+:root{--knot-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23cfa95f' stroke-width='2.4'%3E%3Cpath d='M20 4c6 0 9 5 6 10l-12 12c-3 5 0 10 6 10s9-5 6-10L14 14c-3-5 0-10 6-10z'/%3E%3Cpath d='M4 20c0-6 5-9 10-6l12 12c5 3 10 0 10-6s-5-9-10-6L14 26c-5 3-10 0-10-6z'/%3E%3C/svg%3E")}
+.bmid{display:flex;flex-direction:column;gap:14px;min-width:0}
+.preview{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;border:1.5px solid var(--ink2);background:var(--flax)}
+.preview>div{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 6px 10px;border-left:1px solid rgba(94,83,67,.35)}
+.preview>div:first-child{border-left:0}
+.preview em{font-style:normal;font-family:var(--f-display);font-weight:900;font-size:17px}
+.preview .chip{min-width:0;width:100%;font-size:15px;padding:6px 8px}
+.preview .none{flex:1;width:100%;min-height:34px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:#e6dabf;box-shadow:inset 0 0 0 1px rgba(94,83,67,.3)}
+.cls{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:center}
+.crest{width:96px;height:110px;color:var(--cc,var(--madder))}
+.crest svg{width:100%;height:100%}
+.cls h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:34px;letter-spacing:.2em;line-height:1.1}
+.cls .sub{display:flex;align-items:center;gap:8px;margin:6px 0 4px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--ink)}
+.cls .sub svg{width:20px;height:20px;color:var(--indigo)}
+.cls p{grid-column:1/-1;margin:2px 0 0;font-size:13px;line-height:1.7;color:var(--ink2)}
+/* the clock tower: seven stacked stone storeys, the current one in madder */
+.tower{position:relative;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;padding:62px 10px 14px;margin:0;list-style:none;background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+.tower::before{content:"";position:absolute;top:18px;left:50%;width:0;height:0;transform:translateX(-50%);border:0 solid transparent;border-width:0 16px 32px;border-bottom-color:#c9c3b5}
+.tw{position:relative;width:70px;flex:1;min-height:56px;max-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:var(--f-display);font-weight:900;font-size:22px;color:var(--ink);
+  background:#c9c3b5 repeating-linear-gradient(0deg,transparent 0 13px,rgba(32,45,58,.18) 13px 14px);border-top:3px solid #a9a397}
+.tw::after{content:"";width:12px;height:16px;border-radius:6px 6px 0 0;background:var(--indigo);opacity:.65}
+.tw:first-child{width:84px}
+.tw.done{background-color:#d8c99f;color:var(--ink2)}
+.tw.done::after{background:var(--gold);opacity:1}
+.tw.cur{background:var(--madder) var(--linen);color:var(--gold3);box-shadow:0 0 0 2px var(--gold2);z-index:1}
+.tw.cur::after{background:var(--gold3);opacity:1}
+.dbg{font-size:13px;color:var(--ink2)}
+.dbg summary{cursor:pointer;letter-spacing:.1em;width:max-content;max-width:100%}
 .floors{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .floors .fl{display:flex;gap:6px;align-items:baseline}
 .floors .fl em{font-style:normal;font-size:12px;width:4.5em;flex:none}
 .floors .fl div{display:flex;flex-wrap:wrap;gap:6px}
-.floors button{padding:3px 10px;font:700 13px var(--f-body);letter-spacing:.06em;background:rgba(8,8,14,.7);color:var(--gold2);border:1px solid var(--golddim);cursor:pointer}
-.floors button.cur,.floors button:hover{background:linear-gradient(180deg,#2f5fd0,#0d1840);color:#fff;border-color:#9fd0ff}
-.chip.h.rev{border-color:var(--t-frb);color:#ecdcff;background:linear-gradient(180deg,#3d1d5e,#1c0c2c);box-shadow:0 0 12px rgba(154,90,216,.7)}
-.chip.e.mir{border-color:var(--t-frb);border-style:dashed;color:#ecdcff;background:rgba(154,90,216,.14);font-size:14px}
-.chip.e.fin{border-color:#ff5a3a;background:linear-gradient(180deg,#8a1606,#2a0402);color:#fff;animation:pulse 1.1s infinite}
-.tag.sh{border-color:#5fb8c8;color:#a9e6f0}
-.tag.rg{border-color:var(--rage);color:#ffc2a8}
-.tag.cb{border-color:var(--t-rog);color:#a8f0dc}
-.chip.w{border-color:var(--rage);color:#ffd6c4;border-style:dashed;background:rgba(255,106,61,.10);font-size:14px}
-.chip.d{border-color:var(--t-rog);color:#c8fff0;border-style:dashed;background:rgba(63,181,154,.12);font-size:14px}
-.chip.k{border-color:var(--t-rog);color:#c8fff0;border-style:dotted;background:rgba(63,181,154,.12);font-size:13px;min-width:0;padding:2px 8px}
-.chip.e.na{border-color:#8a8070;border-style:dashed;color:#d8d0c0;background:rgba(138,128,112,.14);font-size:14px}
-.chip.h.fx{border-color:var(--rage);background:linear-gradient(180deg,#6a2410,#2a0c04);box-shadow:0 0 12px rgba(255,106,61,.6)}
-.chip.sp{--ec:var(--fire);border-color:var(--ec);color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--ec) 45%,#000),#0c0a14);box-shadow:0 0 12px color-mix(in srgb,var(--ec) 60%,transparent);font-size:14px;padding:3px 8px}
-.chip.sp[data-el="冰"]{--ec:var(--ice)} .chip.sp[data-el="雷"]{--ec:var(--bolt)}
-.chip.spw{--ec:var(--fire);border-color:var(--ec);border-style:dotted;color:color-mix(in srgb,var(--ec) 70%,#fff);background:none;font-size:12px;min-width:0;padding:1px 8px;font-weight:500}
-.chip.spw[data-el="冰"]{--ec:var(--ice)} .chip.spw[data-el="雷"]{--ec:var(--bolt)}
-.tag.mg{border-color:var(--t-mag);color:#c8d2ff}
-.chip.e.sh{border-color:#9aa6b8;border-style:double;border-width:3px;color:#e6ecf5;background:rgba(154,166,184,.16);font-size:14px}
-.slot.smk{background-image:repeating-linear-gradient(135deg,rgba(160,160,170,.07) 0 8px,transparent 8px 16px)}
-.cl b{display:block;font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.12em;color:var(--ink)}
-.cl i{font-style:normal;font-size:12px;color:var(--ink2);letter-spacing:.08em}
-.tag.mr{border-color:var(--t-frb);color:#d9c2ff}
-.cancel{background:none;border:1px solid var(--azure2);color:var(--azure2);padding:1px 10px;font-size:12px}
-.cancel:hover,.cancel:focus-visible{background:rgba(90,168,255,.2);outline:none}
+.floors button{padding:3px 10px;font:700 13px var(--f-body);background:var(--flax2);color:var(--ink);border:1px solid var(--ink2)}
+.floors button.cur,.floors button:hover{background:var(--madder);color:var(--flax2);border-color:var(--madder)}
 
-/* Loom of fate: the timeline in three layers (past stone, present blue threads, future runes) */
-.wrap{max-width:1400px}
-.loom{display:grid;grid-template-columns:minmax(0,1fr)}
-.loom>*{min-width:0}
-.loomhead{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:0 4px 8px}
-.loomhead .ttl{display:flex;align-items:center;gap:10px}
-.loomhead .ttl svg{width:26px;height:36px;flex:none}
-.loomhead .ttl b{display:block;font-family:var(--f-display);font-weight:900;font-size:27px;letter-spacing:.3em;line-height:1.1;background:linear-gradient(180deg,var(--gold3),var(--gold) 70%,#9a7228);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #000)}
-.loomhead .ttl small{display:block;font-family:var(--f-latin);font-size:10px;letter-spacing:.34em;color:var(--gold)}
-.loomhead .tsub{font-size:13px;color:var(--muted)}
-.loomhead .win{margin-left:auto;border:1px solid var(--golddim);padding:3px 12px;font-size:13px;color:var(--gold2);background:rgba(0,0,0,.4);white-space:nowrap}
-.loomhead .win b{font-family:var(--f-latin);color:var(--azure2)}
-.ribbon .hint{padding:0 4px 8px}
-.tlscroll{position:relative;background:#0b0a12;scrollbar-color:var(--line2) transparent}
-.tlwrap{position:relative;min-width:max-content}
-.tl{display:flex;grid-auto-flow:unset}
-.lanes{flex:none;width:112px;grid-template-rows:40px 70px 64px 70px}
-.lanes div{flex-direction:column;gap:0;line-height:1.2}
-.lanes div span{display:flex;flex-direction:column;align-items:center}
-.lanes small{font-size:10px;color:var(--muted);letter-spacing:.05em}
-.lanes div svg{margin-bottom:2px}
-.slot{flex:1 0 86px;grid-template-rows:40px 70px 64px 70px;background-image:none}
-.slot .bn span{width:30px;height:30px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:13px;background:#0e0c15}
-.slot.now{background:linear-gradient(180deg,rgba(50,110,210,.26),rgba(30,70,150,.14));background-color:transparent}
-.slot.now::before{border-left:1px solid rgba(120,180,255,.5);border-right:1px solid rgba(120,180,255,.5);box-shadow:inset 0 0 30px rgba(90,168,255,.18)}
-.slot.now .bn span{border-color:var(--azure2);color:#fff;box-shadow:0 0 10px var(--azure),inset 0 0 8px rgba(90,168,255,.5);background:#14284a}
-.slot .lane,.slot .mid{position:relative}
-.slot .lane::before,.slot .mid::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;pointer-events:none;z-index:0}
-.slot .lane.e::before{background:rgba(216,67,47,.32)}
-.slot .mid::before{background:rgba(212,165,74,.26)}
-.slot .lane.h::before{background:rgba(90,168,255,.32)}
-.slot.now .lane.e::before{height:2px;margin-top:-1px;background:linear-gradient(90deg,#c8442c,#ffb09a 50%,#c8442c);box-shadow:0 0 8px #d8432f}
-.slot.now .mid::before{height:2px;margin-top:-1px;background:linear-gradient(90deg,#a87a28,#ffe7a8 50%,#a87a28);box-shadow:0 0 8px rgba(212,165,74,.8)}
-.slot.now .lane.h::before{height:2px;margin-top:-1px;background:linear-gradient(90deg,#4d8fe6,#d8eeff 50%,#4d8fe6);box-shadow:0 0 10px #5aa8ff}
-.slot.fut .lane::before,.slot.fut .mid::before{background:repeating-linear-gradient(90deg,rgba(150,170,220,.28) 0 6px,transparent 6px 11px)}
-.slot.fut .chip{opacity:.62;filter:saturate(.6);border-style:dashed;box-shadow:none;backdrop-filter:blur(1px)}
-.slot.fut .bn{opacity:.75}
-.slot.fut .mid{opacity:.75}
-.slot.far{opacity:.55}
-.chip{position:relative;z-index:1}
-.mid .mt{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(11,10,18,.88);padding:2px 6px;line-height:1.25}
-.mid .mt:empty{display:none}
-.mid em{font-style:normal;font-family:var(--f-latin);font-weight:700;font-size:12px}
-.mid em.tk{color:#ff8a72}.mid em.dl{color:var(--gold2)}.mid em.hl{color:#c9a0ff}
-.mid .old{font-size:10px;color:var(--muted);text-decoration:line-through}
-/* past: frozen stone */
-.slot.past{flex:0 0 76px;background:repeating-linear-gradient(160deg,#1b1a20 0 9px,#17161b 9px 18px);filter:grayscale(1);opacity:.8}
-.slot.past .bn span{border-color:#5a5860;color:#9d9aa4;background:#1d1c22;box-shadow:none}
-.slot.past .chip{background:#2a2930;border-color:#6a6870;border-style:solid;color:#c3c0c8;box-shadow:none;min-width:0;padding:2px 6px;font-size:13px}
-.slot.past .lane::before,.slot.past .mid::before{background:#55535b;height:1px;box-shadow:none}
-.slot.past .mid .mt{background:#1d1c22}
-.slot.past.fresh{animation:petrify .9s ease-out}
-@keyframes petrify{0%{filter:grayscale(0) brightness(1.8);opacity:1}100%{filter:grayscale(1);opacity:.8}}
-.slot.hit .chip{animation:lit .5s ease-out}
-@keyframes lit{0%{filter:brightness(2.4);transform:scale(1.15)}100%{filter:none}}
-/* drag preview */
-#needle{position:absolute;top:0;bottom:0;left:0;width:4px;margin-left:-2px;z-index:5;pointer-events:none;opacity:0;transition:left .45s cubic-bezier(.5,0,.3,1),opacity .3s;
-  background:linear-gradient(180deg,#fff,#bfe2ff 30%,#5aa8ff 75%,rgba(90,168,255,0));box-shadow:0 0 12px #5aa8ff,0 0 28px rgba(90,168,255,.7)}
-#needle.on{opacity:1}
-#needle::before{content:"";position:absolute;top:3px;left:50%;width:14px;height:14px;transform:translate(-50%,0) rotate(45deg);background:#fff;box-shadow:0 0 12px #9fd0ff,0 0 24px #5aa8ff}
-.card{user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.card .art b.ic{position:absolute;left:50%;top:50%;width:66px;height:58px;transform:translate(-50%,-50%);background-size:cover;background-position:center;border:2px solid #e6c472;box-shadow:0 0 0 1px #2a1d0a,0 0 14px var(--tc),0 4px 8px rgba(0,0,0,.6)}
+/* victory and summit headings */
+.vban{align-self:center;position:relative;margin:-6px auto 0;padding:10px 70px 12px;text-align:center;color:var(--gold3);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 86%,0 100%)}
+.vban b{display:block;font-family:var(--f-display);font-weight:900;font-size:40px;letter-spacing:.3em;line-height:1.1;color:var(--gold3)}
+.vban span{font-family:var(--f-latin);font-size:13px;letter-spacing:.4em;color:var(--flax2)}
+.scr.win .body{grid-template-columns:minmax(300px,.62fr) minmax(0,1.38fr)}
+.hero-col{display:flex;flex-direction:column;gap:12px}
+.hero-col>.fig{flex:1;display:flex;padding:10px;min-height:340px}
+.hero-col .pic{flex:1;background:center 18%/cover no-repeat}
+.vmain .lead{margin:-10px 0 0;text-align:center;font-size:14px;color:var(--ink2);letter-spacing:.1em}
+.seam{height:0;margin:-4px auto 0;width:min(520px,80%);border-top:2px dashed var(--madder)}
+.seven{display:block;width:100%;height:70px}
+.acts.end{justify-content:center}.acts.end .btn{max-width:440px}
+.stat small+small,.stat b+small{font-size:11px;letter-spacing:.04em;color:var(--muted);font-weight:500}
+.foecrest{display:flex;align-items:center;justify-content:center;padding:14px;background:var(--madder) var(--linen);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold)}
+.foecrest i{width:min(220px,70%);aspect-ratio:2/1;background:center/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:inset 0 0 0 3px var(--gold)}
+.best{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:16px 20px}
+.best .v{text-align:center;padding:0 6px}
+.best .v small{display:block;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.14em}
+.best .v b{display:block;font-family:var(--f-display);font-weight:900;font-size:56px;line-height:1.05;color:var(--gold3)}
+.best .v em{font-style:normal;font-family:var(--f-display);font-size:15px}
+.best .cards{font-size:13px;line-height:1.7;color:#d3d7da;border-left:1.5px solid rgba(178,138,69,.6);padding-left:14px}
+.vmain{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ttl{margin:4px 0 0;text-align:center;font-family:var(--f-display);font-weight:900;font-size:clamp(38px,4.6vw,62px);letter-spacing:.1em;line-height:1.15;color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 12px;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.stat>i{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
+.stat>i svg{width:26px;height:26px}
+.stat>i.ind{background-color:var(--indigo)} .stat>i.mo{background-color:var(--moss2)}
+.stat small{display:block;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.1em;color:var(--ink2)}
+.stat b{display:block;font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1.15;color:var(--indigo);white-space:nowrap}
+.stat b em{font-style:normal;color:var(--madder)}
+.stat b.zh{font-size:21px;letter-spacing:.06em}
+.rewards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin:0;padding:14px 4px 4px}
+.rewards .card{flex-basis:170px;height:262px}
+.rewards .card .art{height:136px}
+.rewards .card .cd{font-size:12.5px}
+.skipcard{flex:0 0 170px;height:262px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:16px 14px 18px;text-align:center;font:inherit;cursor:pointer;border:0;color:var(--ink);
+  background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2),0 6px 14px rgba(32,45,58,.2);transition:transform .18s,box-shadow .18s;position:relative}
+.skipcard::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(178,138,69,.7);pointer-events:none}
+.skipcard .sk-ic{flex:1;width:100%;color:var(--indigo);display:flex;align-items:center;justify-content:center}
+.skipcard .sk-ic svg{width:96px;height:120px}
+.skipcard b{font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.16em;color:var(--ink)!important;border-bottom:1px solid rgba(178,138,69,.7);padding-bottom:4px;width:100%}
+.skipcard i{font-style:normal;font-size:13px;color:var(--ink2)}
+.skipcard:hover,.skipcard:focus-visible{transform:translateY(-14px) rotate(1deg);box-shadow:inset 0 0 0 1.5px var(--ink2),0 0 0 2.5px var(--gold2),0 16px 26px rgba(32,45,58,.3);outline:none}
+.rwnote{display:inline-block;margin:0 auto;padding:6px 26px;font-family:var(--f-display);font-weight:700;letter-spacing:.14em;font-size:15px;color:var(--flax2);background:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--gold)}
+/* the journey frieze: the red thread runs past every floor, a knot at each one cleared */
+.journey{position:relative;display:flex;justify-content:space-between;align-items:center;padding:30px 40px 34px;overflow:hidden}
+.journey::before{content:"";position:absolute;left:30px;right:30px;top:50%;border-top:2px dashed var(--madder3)}
+.journey .jn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--f-display);font-size:12px;color:#cfd3d6;letter-spacing:.06em}
+.journey .jn i{width:18px;height:18px;border-radius:50%;background:var(--indigo);box-shadow:0 0 0 2px var(--stone)}
+.journey .jn.done i{background:var(--gold2);box-shadow:0 0 0 2px var(--gold3)}
+.journey .jn.next i{width:26px;height:26px;background:var(--madder);box-shadow:0 0 0 2px var(--gold3),0 0 0 6px rgba(146,63,53,.35)}
+.journey .jn b{font-weight:900;font-size:14px;color:var(--flax2)!important}
+.journey .jn span{position:absolute;top:100%;margin-top:4px;white-space:nowrap}
+.journey .jn em{position:absolute;bottom:100%;margin-bottom:4px;font-style:normal;font-family:var(--f-latin);font-size:11px;letter-spacing:.14em;color:var(--gold2)}
 
-/* Class pick: parchment banners, after kevin's mockup */
-.pickscr[hidden]{display:none}
-.pickscr{position:fixed;inset:0;z-index:25;overflow:auto;display:grid;grid-template-columns:300px minmax(0,1fr);color:var(--ink);animation:fade .3s;
-  background:radial-gradient(ellipse 60% 50% at 80% 10%,rgba(255,255,255,.55),transparent 70%),radial-gradient(ellipse 50% 60% at 60% 100%,rgba(180,140,70,.22),transparent 70%),linear-gradient(170deg,#f3ead4,#e4d6b4)}
-.pk-left{position:sticky;top:0;height:100vh;min-height:560px;display:flex;flex-direction:column;padding:26px 22px 18px;overflow:hidden;color:var(--text);
-  background:radial-gradient(ellipse 90% 50% at 50% 70%,rgba(90,140,230,.22),transparent 70%),linear-gradient(180deg,#1b1828,#0a0910);border-right:2px solid var(--golddim);box-shadow:6px 0 24px rgba(0,0,0,.35)}
-.pk-logo b{display:block;font-family:var(--f-display);font-weight:900;font-size:40px;letter-spacing:.06em;line-height:1.1;background:linear-gradient(180deg,var(--gold3),var(--gold2) 40%,var(--gold) 75%,#9a7228);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #000)}
-.pk-logo span{display:block;font-family:var(--f-latin);letter-spacing:.3em;font-size:12px;color:var(--gold2);margin-top:2px}
-.pk-quote{font-family:var(--f-display);font-size:16px;line-height:1.8;margin:16px 0 0;border-left:2px solid var(--gold);padding-left:12px;white-space:pre-line;color:#f1e6cc;min-height:58px}
-.pk-body{flex:1;min-height:200px;margin:8px -22px 0;background:center bottom/contain no-repeat;filter:drop-shadow(0 0 22px rgba(90,168,255,.3));transition:opacity .25s}
-.pk-body.swap{opacity:0}
-.pk-lore{font-size:12px;color:var(--muted);line-height:1.7;margin:8px 0 0}
-.pk-main{padding:24px 32px 22px;min-width:0;display:flex;flex-direction:column;gap:14px}
-.pk-main h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:42px;letter-spacing:.22em;color:#1e150a;display:flex;align-items:baseline;gap:6px 20px;flex-wrap:wrap;line-height:1.15}
-.pk-main h2 small{font-family:var(--f-latin);font-size:12px;letter-spacing:.4em;color:#8a7350;font-weight:500}
-.pk-intro{margin:-6px 0 0;font-size:14px;color:var(--ink2)}
-.pk-rows{display:flex;flex-direction:column;gap:14px}
-.pk-row{--cc:#9a2414;position:relative;display:grid;grid-template-columns:44% minmax(0,1fr);min-height:226px;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;
-  border:1px solid rgba(120,90,40,.45);background:linear-gradient(90deg,#fffaf0,#f6edd8);box-shadow:0 6px 18px rgba(60,40,10,.18);transition:box-shadow .2s,transform .2s}
-.pk-row:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(60,40,10,.25)}
-.pk-row:focus-visible{outline:2px solid var(--cc);outline-offset:3px}
-.pk-row.on{border-color:var(--cc);box-shadow:0 0 0 2px #fff8e6,0 0 0 4px var(--cc),0 0 26px color-mix(in srgb,var(--cc) 55%,transparent),0 10px 26px rgba(60,40,10,.25)}
-.pk-por{position:relative;clip-path:polygon(0 0,100% 0,89% 100%,0 100%);background:color-mix(in srgb,var(--cc) 70%,#000);overflow:hidden}
-.pk-por .fig{position:absolute;top:0;bottom:0;right:0;aspect-ratio:400/275;max-width:100%;background:25% 0/cover no-repeat;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
-.pk-por::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--cc) 82%,#000) 0%,color-mix(in srgb,var(--cc) 70%,#000) 30%,color-mix(in srgb,var(--cc) 30%,transparent) 48%,transparent 62%)}
-.pk-por .em{z-index:2;position:absolute;left:12px;top:50%;transform:translateY(-50%);width:96px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#f3e2b0;font-family:var(--f-latin);letter-spacing:.22em;font-size:12px;text-shadow:0 1px 3px #000}
-.pk-por .em svg{width:76px;height:76px;filter:drop-shadow(0 0 6px rgba(0,0,0,.6))}
-.pk-inf{padding:16px 22px 14px 8px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.pk-inf h3{margin:0;display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-weight:900;font-size:27px;letter-spacing:.14em;color:var(--cc);flex-wrap:wrap;padding-right:100px}
-.pk-inf h3 svg{width:42px;height:42px;flex:none}
-.pk-inf h3 small{font-family:var(--f-latin);font-size:11px;letter-spacing:.3em;color:#9a8664;font-weight:500}
-.pk-st{display:flex;gap:6px 20px;flex-wrap:wrap;font-size:14px}
-.pk-st span{display:flex;align-items:center;gap:6px}
-.pk-st svg{width:17px;height:17px;color:var(--cc);flex:none}
-.pk-pitch{margin:0;font-size:14px;line-height:1.65}
-.pk-cards{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
-.pk-cards>b{font-size:13px;color:var(--ink);padding-top:16px;border-left:3px solid var(--cc);padding-left:6px;line-height:1;margin-right:4px;align-self:center;padding-top:0}
-.pk-cards figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;width:56px;text-align:center}
-.pk-cards i{display:block;width:54px;height:47px;background:center/cover no-repeat #333;border:1px solid color-mix(in srgb,var(--cc) 60%,#c9a85a);box-shadow:0 2px 5px rgba(0,0,0,.3)}
-.pk-badge{position:absolute;right:-1px;top:14px;color:#fff6e0;padding:5px 18px 5px 22px;font-family:var(--f-display);font-weight:900;letter-spacing:.2em;font-size:15px;opacity:0;transition:opacity .2s;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--cc) 75%,#fff),var(--cc) 60%,color-mix(in srgb,var(--cc) 60%,#000));clip-path:polygon(12px 0,100% 0,100% 100%,12px 100%,0 50%);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+/* defeat: the story frays at its lower edge */
+.scr.lose .body{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}
+.fray{position:relative;min-height:min(80vh,840px);overflow:hidden}
+.fray .pic{position:absolute;inset:10px 10px 0;background:center 30%/cover no-repeat}
+.fray svg.threads{position:absolute;left:10px;right:10px;bottom:0;width:calc(100% - 20px);height:34%;overflow:visible;pointer-events:none}
+.lmain{display:flex;flex-direction:column;gap:14px;padding:22px 26px}
+.lmain .kick{text-align:center;font-family:var(--f-latin);font-size:22px;letter-spacing:.5em;color:var(--madder)}
+.lmain .ttl{color:var(--madder);font-size:clamp(52px,6vw,84px);margin:0}
+.where{position:relative;padding:12px;text-align:center;font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.14em;color:var(--flax2);background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold)}
+.where::before,.where::after{content:"⚜";position:absolute;top:50%;transform:translateY(-50%);color:var(--gold2);font-size:24px}
+.where::before{left:18px}.where::after{right:18px}
+.lmain .stat{flex-direction:row}
+.lmain .rules li{grid-template-columns:44px minmax(0,1fr)}
+.lmain .rules li>i{width:44px;height:44px}
+.lmain .rules li>i svg{width:24px;height:24px}
+.coda{text-align:center;font-family:var(--f-display);font-size:13px;letter-spacing:.3em;color:var(--ink2)}
+
+/* summit: the whole seven-floor journey unrolled */
+.scr.end .body{grid-template-columns:1fr}
+.pano{position:relative;height:clamp(300px,42vw,560px);overflow:hidden}
+.pano .pic{position:absolute;inset:10px;background:center 40%/cover no-repeat}
+.pano svg.path{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px);pointer-events:none}
+.pano .cap{position:absolute;left:34px;bottom:30px;text-align:center;padding:10px 40px;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2),0 6px 14px rgba(32,45,58,.35)}
+.pano .cap h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(40px,5vw,66px);letter-spacing:.16em;line-height:1.1;color:var(--madder)}
+.pano .cap span{font-family:var(--f-latin);font-size:13px;letter-spacing:.4em;color:var(--ink2)}
+.deck{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:4px 0 6px}
+.deck span{display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:6px 6px 6px;font-family:var(--f-display);font-weight:700;font-size:13px;color:var(--ink);background:var(--flax2);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.deck span i{width:100%;aspect-ratio:1;background:var(--indigo) center/cover;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.deck em{font-style:normal;color:var(--madder);margin-left:2px}
+
+/* ---------- Class pick: three heraldic banners ---------- */
+.pickscr{position:fixed;inset:0;z-index:25;overflow:auto;color:var(--ink);background:var(--flax) var(--linen)}
+.pk-in{max-width:1500px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 max(14px,env(safe-area-inset-right,0px)) 14px max(14px,env(safe-area-inset-left,0px))}
+.pk-in .mast h2{margin:0 auto;font-family:var(--f-display);font-weight:900;font-size:clamp(24px,3vw,34px);letter-spacing:.18em}
+.pk-field{flex:1;display:flex;gap:clamp(12px,3vw,46px);justify-content:center;align-items:flex-start;padding:20px clamp(10px,3vw,46px) 56px;background:var(--flax3) var(--sprig);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.pk-row{--cc:var(--madder);position:relative;flex:1;max-width:400px;display:flex;flex-direction:column;align-items:stretch;padding:24px 18px 16px;border:0;font:inherit;text-align:center;color:var(--flax2);
+  background:var(--cc) var(--linen);box-shadow:inset 0 0 0 4px var(--cc),inset 0 0 0 5.5px var(--gold),0 10px 24px rgba(32,45,58,.3);transform-origin:50% 0;transition:transform .3s,box-shadow .3s}
+.pk-row::before{content:"";position:absolute;left:-12px;right:-12px;top:-10px;height:10px;background:var(--gold);border-radius:5px;box-shadow:0 2px 0 var(--madder2)}
+.pk-row::after{content:"";position:absolute;inset:10px;border:1.5px dashed rgba(207,169,95,.6);pointer-events:none}
+.pk-row .tas{position:absolute;left:8px;right:8px;top:100%;height:40px;background:repeating-linear-gradient(90deg,transparent 0 6px,var(--cc) 6px 14px,transparent 14px 20px);-webkit-mask-image:linear-gradient(180deg,#000 60%,transparent);mask-image:linear-gradient(180deg,#000 60%,transparent)}
+.pk-row .tas::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--gold)}
+.pk-row:hover{transform:rotate(-.6deg)}
+.pk-row:focus-visible{outline:none}
+.pk-row.on{box-shadow:inset 0 0 0 4px var(--cc),inset 0 0 0 6px var(--gold3),0 0 0 3px var(--gold2),0 16px 34px rgba(32,45,58,.4)}
+.pk-row .nm{display:block;position:relative;z-index:1;margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(34px,3.4vw,50px);letter-spacing:.2em;line-height:1.1}
+.pk-row .la{font-family:var(--f-latin);font-size:12px;letter-spacing:.3em}
+.pk-row .mt{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.12em;margin-top:6px}
+.pk-row .fig{position:relative;height:clamp(180px,calc(100vh - 630px),340px);margin:10px 0 0;background:center 15%/cover no-repeat;box-shadow:inset 0 0 0 1.5px rgba(207,169,95,.6)}
+.pk-badge{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:6px 28px;font-family:var(--f-display);font-weight:900;letter-spacing:.24em;font-size:17px;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold3);opacity:0;transition:opacity .2s;white-space:nowrap}
 .pk-row.on .pk-badge{opacity:1}
-.pk-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px;flex-wrap:wrap}
-.pk-foot span{font-size:12px;color:#8a7350;letter-spacing:.2em;text-align:center;flex:1}
-.pk-foot .back{background:linear-gradient(180deg,#2a2232,#141019);color:var(--gold2);border:1px solid var(--golddim);padding:10px 26px;font-family:var(--f-display);font-weight:900;letter-spacing:.2em;font-size:16px}
-.pk-foot .go{--cc:#26408f;background:linear-gradient(180deg,color-mix(in srgb,var(--cc) 80%,#fff 0%),color-mix(in srgb,var(--cc) 55%,#000));color:#f7e7c0;border:2px solid var(--gold);padding:12px 34px;font-family:var(--f-display);font-weight:900;font-size:20px;letter-spacing:.24em;box-shadow:0 0 0 3px #f3ead4,0 0 0 4px var(--golddim),0 6px 16px rgba(0,0,0,.35)}
-.pk-foot button:hover,.pk-foot button:focus-visible{filter:brightness(1.15);outline:none}
+.pk-st{position:relative;z-index:1;display:flex;justify-content:center;gap:4px 14px;flex-wrap:wrap;padding:8px 0 6px;font-size:13px;letter-spacing:.04em}
+.pk-st span{display:flex;align-items:center;gap:4px}
+.pk-st svg{width:14px;height:14px;color:var(--gold3)}
+.pk-cards{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pk-cards .fc{display:flex;flex-direction:column;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold);padding:4px;color:var(--ink)}
+.pk-cards i{display:block;aspect-ratio:1/.8;background:var(--indigo) center/cover no-repeat;box-shadow:inset 0 0 0 1px var(--gold)}
+.pk-cards .fc b{font-family:var(--f-display);font-weight:900;font-size:15px;letter-spacing:.1em;padding-top:4px;color:var(--ink)}
+.pk-cards small{font-size:11px;color:var(--ink2);letter-spacing:.06em}
+.pk-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;margin-top:14px;padding:14px 20px}
+.pk-foot .crest{width:64px;height:74px}
+.pk-foot .who b{display:block;font-family:var(--f-display);font-weight:900;font-size:30px;letter-spacing:.16em;line-height:1.1;color:var(--ink)}
+.pk-foot .who span{font-family:var(--f-latin);font-size:11px;letter-spacing:.3em;color:var(--ink2)}
+.pk-foot .pitch{display:flex;align-items:center;gap:18px}
+.pk-foot .pitch p{margin:0;padding-left:18px;border-left:1.5px solid var(--gold);font-family:var(--f-display);font-size:16px;line-height:1.6}
+.pk-foot .btns{display:flex;gap:10px}
+.pk-foot .btn{min-width:0;flex:none;padding:14px 22px}
+.pk-foot .btn.go{min-width:220px}
 
 @media (max-width:1100px){
+  .loom{grid-template-columns:1fr}
+  .loomhead{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:6px 16px;padding:0 4px 8px}
+  .loomhead .ttl b{font-size:26px;display:inline}.loomhead .ttl small{display:inline;margin-left:10px}
+  .loomhead .sprigs{display:none}
+  .scr.brief .body{grid-template-columns:minmax(0,1fr) minmax(340px,1fr)}
+  .tower{grid-column:1/-1;flex-direction:row;padding:10px 14px;gap:4px}
+  .tower::before{display:none}
+  .tw{flex:1;max-height:none;min-height:46px;width:auto}.tw:first-child{width:auto}
+  .pk-foot{grid-template-columns:1fr}
 }
 @media (max-width:820px){
-  .scr-in,.scr.win .scr-in,.scr.lose .scr-in{grid-template-columns:1fr;padding:14px 16px 20px;gap:12px}
-  .scr-art{min-height:340px;margin:0 -16px}
-  .scr-title{left:16px}
-  .scr-title h2{font-size:44px}
-  .tower{flex-direction:row;padding:6px 0;gap:10px;justify-content:center;order:-1;grid-row:2}
-  .tower::before{left:20px;right:20px;top:50%;bottom:auto;width:auto;height:2px;transform:translateY(-50%)}
-  .tw{width:36px;height:36px;font-size:12px}.tw.cur{width:44px;height:44px;margin:0 -4px;font-size:14px}
-  .tw::before,.tw::after{display:none}
-  .scr-m{grid-row:3}
-  .rms{gap:12px}.rm{width:100px;height:100px}.rm .ic svg{width:20px;height:20px}.scr .rm b{font-size:17px}.scr .rm b.zh{font-size:13px}.rm small{font-size:10px;letter-spacing:.1em}.rm i{display:none}
-  .ribbon{font-size:18px;padding:8px 40px}
-  .btn{min-width:0;flex:1;padding:12px 16px;font-size:16px;letter-spacing:.16em}.btn.go{font-size:22px;letter-spacing:.3em;padding-left:24px}
-  .pp.sheet{padding:20px 16px}
-  .clsrow{grid-template-columns:1fr}.hthumb{display:none}.crest{flex-direction:row;width:auto}.crest svg{width:40px;height:40px}
-  .lanes{width:60px}
-  .lanes small{display:none}
-  .slot{flex-basis:76px}
-  .slot.past{flex-basis:50px}
-  .slot.past .chip{font-size:11px;padding:1px 4px}
-  .loomhead .ttl b{font-size:21px}
-  .loomhead .tsub{display:none}
-  .pickscr{grid-template-columns:1fr;align-content:start}
-  .pk-left{position:relative;height:auto;min-height:auto;overflow:visible;display:grid;grid-template-columns:120px 1fr;grid-template-areas:"logo logo" "body quote" "body lore";gap:0 14px;padding:18px 16px 12px;border-right:0;border-bottom:2px solid var(--golddim)}
-  .pk-logo{grid-area:logo}.pk-logo b{font-size:30px}
-  .pk-body{grid-area:body;height:210px;min-height:0;margin:8px 0 0;background-position:center top;background-size:cover}
-  .pk-quote{grid-area:quote;font-size:15px;margin-top:12px}
-  .pk-lore{grid-area:lore}
-  .pk-main{padding:16px 16px 18px}
-  .pk-main h2{font-size:30px}
-  .pk-row{grid-template-columns:1fr}
-  .pk-por{clip-path:none;height:150px}
-  .pk-inf{padding:12px 14px}
-  .pk-inf h3{font-size:22px;padding-right:0}
-  .pk-badge{top:10px;font-size:13px}
-}
-
-@media (max-width:820px){
-  .arena{height:250px}
-  .vs{width:76px;height:76px;top:34%}
-  .name{font-size:16px;letter-spacing:.02em}
-  .sub{font-size:11px}
-  .plate{padding:0 8px 10px;gap:4px}
-  .status{font-size:12px;gap:5px}
-  .tag{padding:0 6px;font-size:11px}
+  .mast{padding:8px 2px 6px;gap:6px 12px}.vine{display:none}
+  .meta{font-size:14px;flex-wrap:wrap}.meta>*{padding:2px 10px}.tbtn{font-size:14px}
+  .arena{height:240px}
+  .roundel{width:84px;top:36%}
+  .lr{min-width:0;padding:5px 22px 9px;gap:8px}.lr .nm{font-size:14px;letter-spacing:.04em}.lr .hp{font-size:14px}.lr .res{display:none}
+  .plate{bottom:6px;max-width:calc(100% - 12px)}.half.hero .plate{left:6px}.half.foe .plate{right:6px}
+  .tag{font-size:11px;padding:0 6px}
   .mood{width:26px;height:26px}
-  .lanes{width:64px}
-  .lanes div{flex-direction:column;gap:0;font-size:12px}
-  .lanes svg{width:18px;height:18px}
-  .tl{grid-auto-columns:minmax(84px,1fr)}
-  .chip{min-width:62px;padding:3px 8px;font-size:14px}
-  .dock{grid-template-columns:auto 1fr}
-  .sand{width:118px;height:118px}
-  .sandnum{font-size:36px}
-  .endwrap{grid-column:2}
-  .endbtn{padding:12px 16px}
-  .endbtn b{font-size:20px}
-  .endbtn svg{width:26px;height:34px}
+  .lanes{width:52px}.lanes div{font-size:14px;letter-spacing:0}
+  .slot{flex-basis:86px}.slot.past{flex-basis:54px}
+  .chip{min-width:62px;padding:4px 10px;font-size:14px}.chip>svg{display:none}
+  .slot.past .chip{font-size:11px;padding:1px 4px}
+  .dock{grid-template-columns:auto 1fr;gap:10px}
+  .sand{width:110px;height:150px;padding-bottom:10px}.sand>span{width:50px;height:64px;top:16px}.sandnum{font-size:40px}.sandlbl{font-size:13px}
+  .endwrap{width:auto}
+  .endbtn{height:118px}.endbtn b{font-size:26px}.endbtn svg{width:90px;height:40px}
   .hand{grid-column:1/-1;order:3;justify-content:flex-start}
-  .card{flex-basis:140px;height:248px}
-  .card .art{height:96px}
-  .panel{grid-template-columns:1fr}
-  .panel .pic{min-height:140px;border-right:0;border-bottom:2px solid #b8913f}
+  .card{flex-basis:140px;height:226px}.card .art{height:104px}
   .banner b{font-size:22px}
+  .scr.brief .body,.scr.win .body,.scr.lose .body{grid-template-columns:1fr}
+  .hunt{min-height:420px}.fray{min-height:380px}
+  .hero-col>.fig{min-height:300px}
+  .stats{grid-template-columns:1fr}
+  .journey{padding:26px 14px 30px}.journey .jn span{display:none}
+  .pk-field{flex-direction:column;align-items:stretch;padding:18px 14px 60px;gap:56px}
+  .pk-row{max-width:none}
+  .pk-foot{position:sticky;bottom:0;z-index:2}
+  .pk-foot .pitch{flex-direction:column;align-items:flex-start}.pk-foot .pitch p{padding-left:0;border-left:0}
+  .pk-foot .btns{flex-wrap:wrap}.pk-foot .btn,.pk-foot .btn.go{flex:1;min-width:0}
+  .cart .nm{padding:8px 46px}.cart .nm::before,.cart .nm::after{width:26px;height:26px;margin-top:-13px}
 }
-@media (max-width:820px){.rewards{gap:12px 10px;padding:16px 0 4px}}
-@media (max-width:460px){h1 .la{display:none}.endbtn svg{display:none}}
+@media (max-width:460px){.logo span{display:none}.btn{font-size:17px;letter-spacing:.1em}.btn.go,.btn.red{font-size:21px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
-<canvas id="dust" aria-hidden="true"></canvas>
-
 <div class="wrap">
-  <header>
-    <h1><span class="zh">时之勇者</span><span class="la">CHRONO · REQUIEM</span></h1>
+  <header class="mast">
+    <h1 class="logo"><span class="knot" data-svg="KNOT"></span><b>时之勇者</b><span>CHRONO REQUIEM</span></h1>
+    <span class="vine" aria-hidden="true"></span>
     <div class="meta">
-      <span class="rt"><b id="floorNo">第 1 层</b>　第 <b id="turnNo">1</b> 回合　时刻 <b id="beatNo">I</b></span>
-      <button class="gbtn" id="rulesBtn">规则</button>
-      <button class="gbtn" id="resetBtn">重开</button>
-      <button class="gbtn ic" id="logBtn" aria-label="战斗编年史"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/><circle cx="12" cy="12" r="6.5"/></svg></button>
+      <span><b id="floorNo">第 1 层</b></span>
+      <span>第 <b id="turnNo">1</b> 回合</span>
+      <button class="tbtn" id="rulesBtn"><span data-svg="GEAR"></span>规则</button>
+      <button class="tbtn" id="resetBtn"><span data-svg="REDO"></span>重开</button>
     </div>
   </header>
+  <div class="trim"></div>
 
-  <section class="arena frame" id="arena" aria-label="战斗">
-    <span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span>
+  <section class="arena" id="arena" aria-label="战斗">
     <div class="half hero">
       <div class="art" id="heroArt"></div>
       <div class="floats" id="heroFloats"></div>
       <div class="plate">
-        <div class="name" id="heroName">时之勇者</div>
-        <div class="sub" id="heroSub">被时间之神眷顾的归来者</div>
-        <div class="bar"><i class="lag" id="hpLag"></i><i class="cur" id="hpBar"></i><span id="hpTxt"></span></div>
         <div class="status" id="heroStatus"></div>
+        <div class="lr"><span class="nm" id="heroName">勇者</span><span class="hp" id="hpTxt"></span><span class="res" id="heroRes"></span><span class="gauge"><i class="lag" id="hpLag"></i><i class="cur" id="hpBar"></i></span></div>
       </div>
     </div>
     <div class="half foe" id="foeHalf">
       <div class="art" id="enemyArt"></div>
       <div class="floats" id="enemyFloats"></div>
       <div class="plate">
-        <div class="name" id="foeName">黑铁骑士</div>
-        <div class="sub" id="foeSub">魔王麾下，看守时间的骑士</div>
-        <div class="bar"><i class="lag" id="ehpLag"></i><i class="cur" id="ehpBar"></i><span id="ehpTxt"></span></div>
         <div class="status" id="enemyStatus"></div>
+        <div class="lr"><span class="nm" id="foeName">黑铁骑士</span><span class="hp" id="ehpTxt"></span><span class="gauge"><i class="lag" id="ehpLag"></i><i class="cur" id="ehpBar"></i></span></div>
       </div>
     </div>
-    <div class="seam"></div>
-    <div class="vs" aria-hidden="true"><svg viewBox="0 0 120 120">
-      <defs><linearGradient id="vg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1c8"/><stop offset=".5" stop-color="#f7dc96"/><stop offset="1" stop-color="#a87a28"/></linearGradient></defs>
-      <circle cx="60" cy="60" r="46" fill="rgba(8,7,12,.82)" stroke="#d4a54a" stroke-width="2"/>
-      <g class="ring" fill="none" stroke="#d4a54a"><circle cx="60" cy="60" r="54" stroke-dasharray="2 5" opacity=".7"/><path d="M60 0v12M60 108v12M0 60h12M108 60h12" stroke-width="2"/></g>
-      <circle cx="60" cy="60" r="40" fill="none" stroke="#80632a"/>
-      <text x="60" y="74" text-anchor="middle" font-family="Cinzel,serif" font-weight="900" font-size="40" fill="url(#vg)" stroke="#2a1d0a" stroke-width="1">VS</text>
-    </svg></div>
+    <div class="roundel" aria-hidden="true" data-svg="ROUNDEL"></div>
     <div class="flash" id="flash"></div>
     <div class="banner" id="banner"><b></b><span></span></div>
   </section>
+  <div class="trim"></div>
 
   <section class="loom">
-    <div class="ribbon frame">
-      <span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span>
-      <div class="loomhead">
-        <span class="ttl"><svg viewBox="0 0 20 28" fill="none" stroke="#d4a54a" stroke-width="1.4"><path d="M2 2h16M2 26h16M4 2c0 7 5 8 5 12s-5 5-5 12M16 2c0 7-5 8-5 12s5 5 5 12"/><path d="M6 23h8" stroke="#9fd0ff" stroke-width="2.4"/><path d="M8 8h4" stroke="#9fd0ff" stroke-width="1.6"/></svg><span><b>命运织机</b><small>LOOM OF FATE</small></span></span>
-        <span class="tsub">以时间为线，编织不同的可能。</span>
-        <span class="win" id="winTxt"></span>
-      </div>
+    <div class="loomhead">
+      <span class="ttl"><b>命运织机</b><small>LOOM OF FATE</small></span>
       <div class="hint" id="hint"></div>
-      <div class="tlscroll" id="tlscroll"><div class="tlwrap" id="tlwrap"><div class="tl" id="timeline"></div><div id="needle" aria-hidden="true"></div></div></div>
+      <span class="sprigs" aria-hidden="true"></span>
     </div>
+    <div class="tlscroll" id="tlscroll"><div class="tlwrap" id="tlwrap"><div class="tl" id="timeline"></div><div id="needle" aria-hidden="true"></div><svg id="threads" aria-hidden="true"></svg></div></div>
   </section>
+  <div class="trim"></div>
 
   <section class="dock" id="dock">
     <div class="sand">
-      <svg viewBox="0 0 150 150" aria-hidden="true">
-        <defs><radialGradient id="sb" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#1b2440"/><stop offset="1" stop-color="#07080f"/></radialGradient></defs>
-        <circle cx="75" cy="75" r="70" fill="url(#sb)" stroke="#80632a" stroke-width="2"/>
-        <circle cx="75" cy="75" r="62" fill="none" stroke="#5aa8ff" stroke-width="2" opacity=".75" style="filter:drop-shadow(0 0 6px #5aa8ff)"/>
-        <g class="orbit" fill="none" stroke="#d4a54a"><circle cx="75" cy="75" r="70" stroke-dasharray="1 7" stroke-width="3" opacity=".8"/></g>
-        <path d="M75 1l5 6-5 6-5-6z M75 137l5 6-5 6-5-6z" fill="#d4a54a"/>
-      </svg>
+      <span data-svg="GLASS"></span>
       <div class="sandnum" id="sandNum">3</div>
-      <div class="grains" id="grains"></div>
       <div class="sandlbl">时之砂</div>
       <div class="debt" id="debt"></div>
     </div>
     <div class="hand" id="hand"></div>
     <div class="endwrap">
-      <button class="endbtn" id="endBtn"><svg viewBox="0 0 34 44" fill="none" stroke="#f7dc96" stroke-width="2"><path d="M3 2h28M3 42h28"/><path d="M6 2c0 11 9 13 9 20S6 31 6 42M28 2c0 11-9 13-9 20s9 9 9 20"/><path d="M10 37h14" stroke-width="3"/><circle class="grain" cx="17" cy="24" r="1.3" fill="#f7dc96" stroke="none"/></svg><span><b>推进时间</b><small>结算本回合 3 拍</small></span></button>
+      <button class="endbtn" id="endBtn"><span data-svg="SHUTTLE"></span><b>推进时间</b></button>
       <div class="pilecount" id="piles"></div>
     </div>
   </section>
 
   <details class="chron" id="chron">
-    <summary><span class="latest" id="latest"></span><span class="tog">战斗编年史 ▾</span></summary>
+    <summary><span class="lbl"><span data-svg="FLEUR"></span>战斗记录</span><span class="latest" id="latest"></span><span class="tog">›</span></summary>
     <div class="log" id="log" aria-live="polite"></div>
   </details>
 </div>
 
-<div class="scr" id="scr" hidden role="dialog"><div class="scr-bg"></div><div class="scr-in" id="scrIn"></div></div>
+<div class="scr" id="scr" hidden role="dialog"><div class="scr-in" id="scrIn"></div></div>
 
 <div class="pickscr" id="pick" hidden role="dialog" aria-label="选择职业">
-  <div class="pk-left">
-    <div class="pk-logo"><b>时之勇者</b><span>CHRONO REQUIEM</span></div>
-    <p class="pk-quote" id="pkQuote"></p>
-    <div class="pk-body" id="pkBody" role="img" aria-label="角色预览"></div>
-    <p class="pk-lore">同样的少年，在无数流转的瞬间中走向不同的道路。而你，将选择怎样的时间的力量？</p>
-  </div>
-  <div class="pk-main">
-    <h2>选择职业<small>CHRONO REQUIEM</small></h2>
-    <p class="pk-intro">时之砂和五张时间牌（迅步、迟滞、错位、残影、预知）所有职业通用，其余是职业牌。爬塔途中不能转职。</p>
-    <div class="pk-rows" id="pkRows"></div>
-    <div class="pk-foot"><button class="back" id="pkBack">‹ 返回</button><span>时间会记录下你的选择。</span><button class="go" id="pkGo">确认职业 ›</button></div>
+  <div class="pk-in">
+    <header class="mast"><div class="logo"><span class="knot" data-svg="KNOT"></span><b>时之勇者</b><span>CHRONO REQUIEM</span></div><h2>选择你的命运</h2></header>
+    <div class="trim"></div>
+    <div class="pk-field" id="pkRows"></div>
+    <div class="pk-foot pp">
+      <div class="pitch"><span class="crest" id="pkCrest"></span><span class="who" id="pkWho"></span><p id="pkPitch"></p></div>
+      <div class="btns"><button class="btn" id="pkBack">返回</button><button class="btn go" id="pkGo">确认职业</button></div>
+    </div>
   </div>
 </div>
 
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/DrawSVGPlugin.min.js"></script>
 
 <script>
 const CARDS={
@@ -771,21 +723,21 @@ const REACT={'火冰':{n:'碎裂',dmg:10},'冰火':{n:'碎裂',dmg:10},'冰雷':
 // the time cards are shared by every class; each class starts with the same five
 const GENERAL=['swift','slow','swap','ghost','foresee'];
 const CLASSES={
-  warrior:{n:'战士',title:'断钟之刃',hp:80,col:'var(--t-war)',atk:{every:2,dmg:7},
+  warrior:{n:'战士',hp:80,atk:{every:2,dmg:7},
     sub:'迎着刀上，以伤换伤',
     rule:'你每 <b>2 拍</b>自动攻击一次（7 点）。<b>怒气</b>：举盾挡下伤害、被打中（+2）、弹反（+2）都会攒怒气，上限 10，整场战斗不清空。红色费用的牌花的是怒气。',
     arch:{wall:'铁壁',rage:'重击',blood:'背水'},
     pitch:'想要敌人出手的拍。把盾放在敌人的攻击上，挡下的伤害变成怒气，再用怒气打出不能挪动的重击。',
     deck:['shield','shield','shield','bash','grudge','taunt','cleave','warcry','ironwall'],
     pool:['shield','bash','taunt','cleave','warcry','backwater','ironwall','frenzy','riposte','towershield','lure','wrath','skybreaker','whet','bloodlust','gamble','drain','undying','steadfast','breaker','quake','bloodwar','grudge']},
-  rogue:{n:'刺客',title:'无影',hp:70,col:'var(--t-rog)',atk:{every:1,dmg:2},
+  rogue:{n:'刺客',hp:70,atk:{every:1,dmg:2},
     sub:'在缝隙里连刺',
     rule:'你<b>每一拍</b>都自动攻击一次（2 点）。<b>连击</b>：没有敌人干扰的拍命中一次，连击 +1，每 2 层让每拍伤害 +1（上限 8 层）。你那一拍被敌人攻击（哪怕拼刀赢了）或没攻击，连击归零。<b>背刺</b>：敌人不出手的拍，伤害 +1。<b>毒</b>：敌人每拍受到 毒层数 点伤害（无视护甲），然后毒减 1 层，最多 15 层。',
     arch:{combo:'连击',venom:'淬毒',mark:'标记'},
     pitch:'想要连续的空拍。避开敌人的攻击拍，在中间连续出手，越连越痛。和敌人拼刀反而会断掉连击。',
     deck:['dodge','dodge','poison','shift','shadow','finisher','boomerang','mark','smoke'],
     pool:['dodge','poison','shadow','finisher','smoke','boomerang','mark','assassinate','momentum','vanish','flurry','ready','venomblade','corrode','detonate','converge','expose','clone','shift','zanshin','toxin','plague','omen']},
-  mage:{n:'法师',title:'刻律术士',hp:90,sand:4,col:'var(--t-mag)',atk:{every:3,dmg:4},
+  mage:{n:'法师',hp:90,sand:4,atk:{every:3,dmg:4},
     sub:'守住时间的空窗',
     rule:'你每 <b>3 拍</b>自动攻击一次（4 点），每回合 <b>4 粒时之砂</b>。<b>吟唱</b>：法术要吟唱好几拍，在最后一拍释放；吟唱期间你被敌人打中就会中断，法术作废、沙不退。<b>释放那一拍法术也参与拼刀</b>：法术伤害高过敌人那一击就弹反，挡下它。<b>元素反应</b>：火、冰、雷两种不同元素在同一拍或相邻两拍释放，触发碎裂（火+冰 +10）、感电（冰+雷 +8，敌人下一击延后）或爆燃（雷+火 +12）。<b>连锁</b>：反应一个接一个，每多一环反应伤害 +4。<b>霜冻</b>：你每把敌人的行动推迟一次，霜冻 +1，到 3 层时敌人下一次未锁定的攻击被冻碎。',
     arch:{chain:'连锁',grand:'大咒',ice:'冰封'},
@@ -801,14 +753,43 @@ const roman=n=>{const k=((n-1)%12)+1;const lap=Math.floor((n-1)/12);return ROM[k
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-const CORNER='<svg viewBox="0 0 26 26" fill="none" stroke="#d4a54a" stroke-width="1.5"><path d="M2 24V8l6-6h16"/><path d="M6 24V10l4-4h14" opacity=".6"/><path d="M2 2l5 5" stroke="#f7dc96"/><circle cx="2.5" cy="2.5" r="2" fill="#f7dc96" stroke="none"/></svg>';
-document.querySelectorAll('.frame>.cn').forEach(e=>e.innerHTML=CORNER);
-const LANE={
-  foe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2 4h-4z"/><path d="M5 12c0-4 3-6 7-6s7 2 7 6v6l-3 3H8l-3-3z"/><path d="M7 12h10M12 12v5"/></svg>',
-  clash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l13 13M20 4L7 17"/><path d="M15 19l4-4M5 15l4 4M2 22l3-3M22 22l-3-3"/></svg>',
-  hero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 12c0-4 3-7 7-7s7 3 7 7v5l-3 4H8l-3-4z"/><path d="M6 12h12M10 12v4M14 12v4"/><path d="M12 5c1-2 3-3 5-3" stroke-width="1.8"/></svg>'
+/* Embroidered glyphs, all drawn in currentColor so a patch or tab can dye them */
+const star=(cx,cy,n,ro,ri)=>'M'+Array.from({length:n*2},(_,i)=>{const r=i%2?ri:ro,a=Math.PI*i/n-Math.PI/2;return (cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1)}).join('L')+'Z';
+const SVG={
+  KNOT:`<svg viewBox="0 0 48 48"><path d="${star(24,24,8,23,15)}" fill="currentColor"/><g fill="none" stroke="#f1e7d1" stroke-width="1.6"><rect x="15" y="15" width="18" height="18"/><rect x="15" y="15" width="18" height="18" transform="rotate(45 24 24)"/><circle cx="24" cy="24" r="4.5"/></g></svg>`,
+  GEAR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/><circle cx="12" cy="12" r="6.5"/></svg>',
+  REDO:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 3.5v5h-5"/></svg>',
+  FLEUR:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2 3-2.5 6-1 9-2-1-5-1-6.5 1 1.5 0 3 .5 4 2-2 0-3 1-3.5 2.5 2-.5 4-.2 5.5 1.5L12 22l1.5-4c1.5-1.7 3.5-2 5.5-1.5-.5-1.5-1.5-2.5-3.5-2.5 1-1.5 2.5-2 4-2-1.5-2-4.5-2-6.5-1 1.5-3 1-6-1-9z"/></svg>',
+  ROUNDEL:`<svg viewBox="0 0 120 120"><g class="rays" stroke="#cfa95f" stroke-width="1.6">${Array.from({length:32},(_,i)=>{const a=i*Math.PI/16,r1=48,r2=i%2?55:62;return `<line x1="${(60+r1*Math.cos(a)).toFixed(1)}" y1="${(60+r1*Math.sin(a)).toFixed(1)}" x2="${(60+r2*Math.cos(a)).toFixed(1)}" y2="${(60+r2*Math.sin(a)).toFixed(1)}"/>`}).join('')}</g>
+    <circle cx="60" cy="60" r="44" fill="#202d3a" fill-opacity=".72" stroke="#cfa95f" stroke-width="2.4"/><circle cx="60" cy="60" r="39" fill="none" stroke="#b28a45" stroke-dasharray="3 3"/>
+    <path d="M26 92q34-12 68 0v4H26z" fill="#69745c"/>
+    <g fill="#e8d9b9"><path d="M60 8l-6 22h12z"/><path d="M54 30h12v14H54z"/><path d="M51 44h18v20H51z"/><path d="M48 64h24v30H48z"/><path d="M38 94V74h9v20zM73 94V74h9v20z"/><path d="M42.5 64l-4.5 10h9zM77.5 64l-4.5 10h9z"/></g>
+    <g fill="#202d3a"><rect x="58" y="34" width="4" height="7" rx="2"/><rect x="57" y="49" width="6" height="10" rx="3"/><rect x="56" y="72" width="8" height="14" rx="4"/><rect x="41" y="79" width="3" height="6" rx="1.5"/><rect x="76" y="79" width="3" height="6" rx="1.5"/></g>
+    <g fill="#ead39a"><path d="${star(32,40,4,5,1.4)}"/><path d="${star(88,36,4,4,1.2)}"/><path d="${star(86,64,4,3,1)}"/><path d="${star(30,66,4,3,1)}"/></g></svg>`,
+  GLASS:`<svg viewBox="0 0 84 110" fill="currentColor"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 8h36M24 102h36"/><path d="M29 8c0 26 13 30 13 47S29 76 29 102M55 8c0 26-13 30-13 47s13 21 13 47"/></g><path d="M34 30h16c-2 7-8 11-8 18 0-7-6-11-8-18z" opacity=".75"/><path d="M42 70c-6 6-9 14-10 26h20c-1-12-4-20-10-26z"/>
+    <g fill="none" stroke="#69745c" stroke-width="1.6"><path d="M14 104C4 76 4 40 16 10M70 104C80 76 80 40 68 10"/></g><g fill="#69745c">${[20,34,48,62,76,90].map(y=>`<ellipse cx="${y<50?11:8}" cy="${y}" rx="5" ry="2.2" transform="rotate(-35 ${y<50?11:8} ${y})"/><ellipse cx="${84-(y<50?11:8)}" cy="${y}" rx="5" ry="2.2" transform="rotate(35 ${84-(y<50?11:8)} ${y})"/>`).join('')}</g></svg>`,
+  SHUTTLE:'<svg viewBox="0 0 120 50"><path d="M2 42C28 12 46 48 64 26" fill="none" stroke="#ead39a" stroke-width="1.6" stroke-dasharray="4 3"/><g class="shuttle"><path d="M16 27C40 12 82 11 116 20 84 33 42 39 16 27z" fill="#e8d9b9" stroke="#ead39a" stroke-width="1.6"/><path d="M28 26c22-7 52-8 74-5" fill="none" stroke="#b28a45" stroke-width="1.2"/><rect x="50" y="19" width="24" height="9" rx="2" fill="#73302a" stroke="#ead39a" stroke-width="1.2"/><path d="M55 19v9M60 19v9M65 19v9M70 19v9" stroke="#ead39a" stroke-width=".9"/></g></svg>',
+  CLAW:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 3c3 6 3 12-1 18M12 2c3 7 3 13-1 20M18 3c3 6 3 12-1 18"/></svg>',
+  BURST:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="${star(12,12,8,11,4.6)}"/></svg>`,
+  SWORD:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 3l-9.5 9.5M20 3h-4.5M20 3v4.5"/><path d="M6.5 11.5l6 6M8.5 15.5l-5 5"/></svg>',
+  SHIELD:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.5l8 3v6.5c0 4.5-3.4 7.6-8 9.5-4.6-1.9-8-5-8-9.5V5.5z"/><path d="M12 7l1.3 3.5H17l-3 2.2 1.1 3.6L12 14l-3.1 2.3 1.1-3.6-3-2.2h3.7z" fill="currentColor" stroke="none"/></svg>',
+  FIRE:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3-1-3 0-6 1-9z"/></svg>',
+  ICE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>',
+  BOLT:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2L5 14h6l-2 8 10-13h-6z"/></svg>',
+  HEART:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>',
+  SAND:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/><path d="M9.5 18.5h5l-2.5-3z" fill="currentColor"/></svg>',
+  STAIRS:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h5v-5h5v-5h5V5h3"/></svg>',
+  TOWER:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l-3 6h6zM9.5 7h5v4h-5zM8.5 11h7v5h-7zM7 16h10v6H7z"/></svg>',
+  CARDS:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="11" height="15" rx="1" transform="rotate(-10 8.5 13.5)"/><rect x="10" y="3" width="11" height="15" rx="1"/></svg>',
+  FLAG:`<svg viewBox="0 0 64 120"><path d="M2 0h60v104l-30-18-30 18z" fill="#923f35"/><path d="M8 6h48v88l-24-14-24 14z" fill="none" stroke="#cfa95f" stroke-width="1.6" stroke-dasharray="3 2"/><path d="${star(32,44,8,18,8)}" fill="#e8d9b9"/><circle cx="32" cy="44" r="5" fill="#923f35" stroke="#cfa95f" stroke-width="1.5"/></svg>`,
+  SKIP:'<svg viewBox="0 0 96 120"><path d="M10 120V48a38 38 0 0 1 76 0v72" fill="none" stroke="currentColor" stroke-width="2"/><path d="M48 16l-3 14h6z" fill="#b28a45"/><path d="M48 6v8M44 10h8" stroke="#b28a45" stroke-width="1.6"/><path d="M42 30h12v14H42zM38 44h20v16H38zM34 60h28v14H34zM24 74h48v12H24zM16 86h64v14H16zM10 100h76v20H10z" fill="currentColor" opacity=".85"/><g fill="#e8d9b9"><rect x="46" y="34" width="4" height="6" rx="2"/><rect x="45" y="48" width="6" height="8" rx="3"/></g></svg>'
 };
-const DIAM='<svg viewBox="0 0 16 16"><path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg>';
+const crest=(cls,col)=>{const em={warrior:`<path d="${star(48,48,8,22,11)}" fill="#e8d9b9"/><circle cx="48" cy="48" r="6" fill="${col}" stroke="#cfa95f" stroke-width="2"/>`,
+    rogue:'<path d="M58 22a26 26 0 1 0 0 52 20 20 0 1 1 0-52z" fill="#e8d9b9"/><path d="M30 76l36-36M34 40l30 30" stroke="#cfa95f" stroke-width="3" stroke-linecap="round"/>',
+    mage:`<path d="${star(48,48,4,26,7)}" fill="#e8d9b9"/><path d="${star(48,48,4,14,4)}" fill="#cfa95f" transform="rotate(45 48 48)"/>`}[cls];
+  return `<svg viewBox="0 0 96 110"><path d="M5 5h86v42c0 30-21 50-43 60C26 97 5 77 5 47z" fill="${col}" stroke="#b28a45" stroke-width="3"/><path d="M12 12h72v35c0 25-17 42-36 51-19-9-36-26-36-51z" fill="none" stroke="#cfa95f" stroke-width="1.4" stroke-dasharray="3 2.5"/>${em}</svg>`};
+document.querySelectorAll('[data-svg]').forEach(e=>{e.innerHTML=SVG[e.dataset.svg];e.removeAttribute('data-svg')});
+const DIAM=SVG.KNOT;
 
 // how much one raised shield blocks (a tower shield carries its own v)
 const SHIELD=6;
@@ -829,8 +810,7 @@ const gainRage=(n,why)=>{if(S.run.cls!=='warrior'||n<=0)return;const was=S.rage;
 
 /* ---------- The foes: floors 1-5 each draw one of three, then the knight and the Demon King ---------- */
 const FOES=[
- {key:'wolf',floor:'第 1 层',name:'灰鬃野狼',lane:'野狼',hp:70,sub:'在塔底游荡的饿狼',
-  lore:'它不懂时间，只懂扑咬。快，但不痛。',
+ {key:'wolf',floor:'第 1 层',name:'灰鬃野狼',lane:'野狼',hp:70,
   rules:['<b>扑咬</b>：每 3 拍里扑咬 2 次，每次 9 点。','<b>狂性</b>：生命 ≤ 30 后每一拍都咬，每次 7 点。','战士：每一口都是怒气。刺客：咬的那拍会断连击，用「闪身」躲开。'],
   reward:['echo','charge','haste'],stagger:2,
   open:'黑暗里亮起一双眼睛。开战。',
@@ -840,8 +820,7 @@ const FOES=[
   status:()=>S.E.mad?'<span class="tag p2">狂性</span>':'',
   rage:()=>S.E.mad},
 
- {key:'bat',floor:'第 1 层',name:'吸血蝠',lane:'蝙蝠',hp:65,sub:'倒挂在钟楼横梁上的大蝙蝠',
-  lore:'咬得不重，可每一口喝到的血都会变成它自己的。',
+ {key:'bat',floor:'第 1 层',name:'吸血蝠',lane:'蝙蝠',hp:65,
   rules:['<b>撕咬</b>：每 3 拍里咬 2 次，每次 9 点。','<b>吸血</b>：撕咬真正打到你身上的伤害，蝙蝠全部回给自己。格挡、闪身、残影、弹反都能让它喝不到血。','战士：盾放在撕咬上，挡下的就是它喝不到的。刺客：第 III、VI、IX 拍它不咬，正好背刺。法师：吟唱被咬断就是双亏，先用寒冰枪把撕咬推开。'],
   reward:['echo','charge','ghost'],stagger:2,
   open:'头顶传来一阵扑翅声。开战。',
@@ -850,8 +829,7 @@ const FOES=[
   onHeroHit(es,x){if(!es.length||x<=0||S.ehp<=0)return;const h=Math.min(x,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','吸血 +'+h,'heal');log(`吸血：蝙蝠回复 ${h} 点生命。`)}},
   status:()=>'<span class="tag">吸血 · 咬到多少回多少</span>'},
 
- {key:'skeleton',floor:'第 1 层',name:'骷髅兵',lane:'骷髅',hp:55,sub:'守着楼梯不肯倒下的老兵',
-  lore:'打散了还会自己拼回去，除非一下把骨头砸碎。',
+ {key:'skeleton',floor:'第 1 层',name:'骷髅兵',lane:'骷髅',hp:55,
   rules:['<b>骨刃</b>：每 3 拍里砍 2 次，每次 10 点。','<b>重组</b>：第一次被打倒时，骨头会拼回去，带着 25 点生命再站起来。','<b>粉碎</b>：打倒它的那一下如果单次 15 点及以上（共鸣、蓄时、裂地斩、火球……），骨头直接碎掉，不会重组。','战士留一记共鸣或裂地斩收尾；刺客攒一手绝杀；法师把火球留到最后。'],
   reward:['echo','charge','haste'],
   open:'一堆白骨咔咔作响地站了起来。开战。',
@@ -862,8 +840,7 @@ const FOES=[
   status:()=>S.E.up?'<span class="tag p2">已重组</span>':'<span class="tag">重组 · 最后一击 ≥15 才能粉碎</span>',
   rage:()=>S.E.up},
 
- {key:'beetle',floor:'第 2 层',name:'铁壳甲虫',lane:'甲虫',hp:95,sub:'背着铁甲的巨型甲虫',
-  lore:'刀砍上去只有火星。要么一下打穿，要么从缝里下毒。',
+ {key:'beetle',floor:'第 2 层',name:'铁壳甲虫',lane:'甲虫',hp:95,
   rules:['<b>铁甲</b>：单拍低于 7 点的伤害无效。毒伤无视铁甲。','<b>蜷缩</b>：每 4 拍蜷成一团（灰色「缩」），那一拍你的攻击全部无效。蜷缩可以被「迟滞」「错位」挪开。','<b>撞击</b>：每 3 拍里撞 2 次，每次 11 点。','刺客的小刀很难打穿它，靠共鸣、标记和淬毒。'],
   reward:['stasis','gather','rewind'],
   open:'铁壳摩擦石地，发出刺耳的声音。开战。',
@@ -872,8 +849,7 @@ const FOES=[
   mod:(x,o)=>{if(o.src==='poison'||o.src==='true')return x;if(o.beat&&at(o.beat,'e').some(e=>e.na))return 0;return x<7?0:x},modNote:'铁甲 · 无效',modShort:'铁甲',
   status:()=>'<span class="tag">铁甲 · 低于 7 无效</span>'},
 
- {key:'spider',floor:'第 2 层',name:'剧毒织蛛',lane:'蜘蛛',hp:90,sub:'在齿轮之间结网的毒蛛',
-  lore:'毒牙本身不痛，痛的是之后一拍一拍渗进来的毒。',
+ {key:'spider',floor:'第 2 层',name:'剧毒织蛛',lane:'蜘蛛',hp:90,
   rules:['<b>毒牙</b>：每 3 拍里咬 2 次，每次 8 点。','<b>蛛毒</b>：毒牙咬中你，你身上叠 3 层毒（最多 6 层）；之后每拍掉 1 点生命、毒减 1 层。蛛毒不会打断吟唱，也不给怒气。','别让它咬到：战士举盾、拼刀；刺客闪身；法师用寒冰枪和迟滞把毒牙推开。「回溯」也能把毒掉的血一起拿回来。'],
   reward:['stasis','gather','rewind'],
   open:'齿轮缝里垂下一根发亮的丝。开战。',
@@ -883,8 +859,7 @@ const FOES=[
   afterBeat(){if(S.E.tox>0&&!S.over){S.E.tox--;log('蛛毒发作，你掉了 1 点生命。');dealHero(1,[],{thorn:true})}},
   status:()=>'<span class="tag">毒牙 · 咬中叠 3 层毒</span>'+(S.E.tox?`<span class="tag p2">你中毒 ${S.E.tox}</span>`:'')},
 
- {key:'gargoyle',floor:'第 2 层',name:'钟楼石像鬼',lane:'石像鬼',hp:95,sub:'蹲在钟楼檐角的石像',
-  lore:'只有扑下来的那一瞬间它是血肉，其余时候都是石头。',
+ {key:'gargoyle',floor:'第 2 层',name:'钟楼石像鬼',lane:'石像鬼',hp:95,
   rules:['<b>俯扑</b>：每 3 拍里扑 2 次，每次 11 点。','<b>石肤</b>：它不俯扑的拍，以及立刻结算的牌，伤害减半。只有它俯扑的那一拍吃全额伤害。毒伤无视石肤。','战士：普攻撞上俯扑就是全额，用战吼、蓄时把拼刀打赢。刺客：在俯扑拍闪身白打，或者靠淬毒。法师：把释放拍对准俯扑，用屏障护住吟唱。'],
   reward:['stasis','gather','rewind'],
   open:'檐角的石像慢慢转过了脖子。开战。',
@@ -893,8 +868,7 @@ const FOES=[
   mod:(x,o)=>{if(o.src==='poison'||(o.beat&&atkE(o.beat).length))return x;return Math.floor(x/2)},modNote:'石肤 · 减半',modShort:'石肤',
   status:()=>'<span class="tag">石肤 · 只有俯扑拍吃全额</span>'},
 
- {key:'slime',floor:'第 3 层',name:'分裂史莱姆',lane:'史莱姆',hp:100,sub:'越打越多的软泥',
-  lore:'重重一刀下去，它会裂成好几团。',
+ {key:'slime',floor:'第 3 层',name:'分裂史莱姆',lane:'史莱姆',hp:100,
   rules:['<b>黏击</b>：每 3 拍里黏 2 次，基础 9 点。','<b>分裂</b>：单次受到 15 点及以上的伤害就分裂一次（最多 3 次），之后每次黏击 +3。','<b>细碎</b>：低于 15 的伤害不会让它分裂。刺客的连击、毒、小刀都很合适；战士的裂地斩和大共鸣要算好时机再用。'],
   reward:['unity','stop','paradox'],
   open:'一团软泥蠕动着挡住了楼梯。开战。',
@@ -905,8 +879,7 @@ const FOES=[
   status:()=>`<span class="tag">分裂 ${S.E.split}/3</span>`,
   rage:()=>S.E.split>=3},
 
- {key:'mirror',floor:'第 3 层',name:'镜之妖精',lane:'妖精',hp:90,sub:'住在钟面玻璃里的妖精',
-  lore:'它把镜子立在时间上。砍进镜子里的刀，什么也碰不到。',
+ {key:'mirror',floor:'第 3 层',name:'镜之妖精',lane:'妖精',hp:90,
   rules:['<b>镜影</b>：第 III、VI、IX、XII 拍各有一面镜影，那一拍你的攻击全部被吞掉；法术、毒和残影反击不受影响。用「迅步」「蓄时」把攻击挪出去，或用「错位」把镜影换走。','<b>镜饲</b>：镜影每吞掉一拍攻击，妖精回复 6 点生命。','<b>碎光</b>：镜影之间的两拍各一次，每次 9 点。','法师几乎不怕镜影；战士和刺客得学会挪动自己的攻击。'],
   reward:['unity','stop','paradox'],
   open:'钟面玻璃里，有个影子对你眨了眨眼。开战。',
@@ -915,8 +888,7 @@ const FOES=[
   onMirror(){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`镜饲：妖精回复 ${h} 点生命。`)}},
   status:()=>'<span class="tag">镜影 · 每 3 拍吞掉攻击</span>'},
 
- {key:'puppet',floor:'第 3 层',name:'发条傀儡',lane:'傀儡',hp:100,sub:'钟匠留下的发条人偶',
-  lore:'你越想拨慢它的时间，它的发条就拧得越紧。',
+ {key:'puppet',floor:'第 3 层',name:'发条傀儡',lane:'傀儡',hp:100,
   rules:['<b>锤击</b>：每 3 拍里锤 2 次，基础 8 点。','<b>上弦</b>：它的行动每被你的牌延后一次（迟滞、错位、静滞领域、时停、寒冰枪、感电），发条就拧紧一圈，之后每次锤击 +2（最多 5 圈）。','<b>松弦</b>：拼刀弹反它，发条松掉 2 圈。','别拖它，正面接：战士举盾拼刀；刺客用闪身和残影；法师少用冰，靠屏障硬扛。'],
   reward:['echo','haste','ghost'],
   open:'咔哒、咔哒，傀儡背上的发条转了起来。开战。',
@@ -929,8 +901,7 @@ const FOES=[
   status:()=>`<span class="tag ${S.E.wind>=4?'p2':''}">上弦 ${S.E.wind}/5</span>`,
   rage:()=>S.E.wind>=4},
 
- {key:'treant',floor:'第 4 层',name:'荆棘树人',lane:'树人',hp:110,sub:'浑身长刺的老树',
-  lore:'每砍它一刀，刺就扎回你身上。可它挥一次枝要很久。',
+ {key:'treant',floor:'第 4 层',name:'荆棘树人',lane:'树人',hp:110,
   rules:['<b>荆棘</b>：每次受到伤害，反刺你 2 点（毒伤除外）。反刺不会打断吟唱，也不给怒气。','<b>横扫</b>：每 5 拍一次 22 点，很慢但很痛。','<b>藤鞭</b>：横扫之间连抽 2 次，每次 7 点。','<b>生长</b>：每回合结束回复 6 点生命。','刺客出手次数多，被扎得最狠，靠淬毒和绝杀；战士举盾挡横扫；法师一发大火球最划算。'],
   reward:['stasis','haste','rewind'],
   open:'枝条沙沙作响，荆棘一根根竖起。开战。',
@@ -940,8 +911,7 @@ const FOES=[
   turnEnd(){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`生长：树人回复 ${h} 点生命。`)}},
   status:()=>'<span class="tag">荆棘 · 每击反刺 2</span><span class="tag">每回合回 5</span>'},
 
- {key:'ogre',floor:'第 4 层',name:'独眼巨魔',lane:'巨魔',hp:140,sub:'扛着钟锤的独眼巨魔',
-  lore:'它的钟锤砸下来，连时间都会晃一下。',
+ {key:'ogre',floor:'第 4 层',name:'独眼巨魔',lane:'巨魔',hp:140,
   rules:['<b>连拳</b>：每 6 拍里连打 3 拳，每拳 8 点。','<b>钟锤</b>：连拳之后隔一拍砸下钟锤，26 点，被时间锁定。','<b>震荡</b>：钟锤打到你身上，下回合少 1 粒时之砂。','血厚但慢：战士把盾放在钟锤上；刺客在钟锤拍闪身；法师在两锤之间吟唱大法术。'],
   reward:['stasis','haste','rewind'],
   open:'地板随着它的脚步一下下震动。开战。',
@@ -952,8 +922,7 @@ const FOES=[
   status:()=>'<span class="tag">钟锤 · 锁定</span>'+(S.E.daze?'<span class="tag p2">你被震荡</span>':''),
   rage:()=>foeE(e=>e.label==='钟锤'&&e.beat<S.beat+3).length>0},
 
- {key:'banshee',floor:'第 4 层',name:'哀泣女妖',lane:'女妖',hp:115,sub:'在钟声里哭泣的亡灵',
-  lore:'她没有身体可砍。再重的一刀，穿过去也只剩一点点。',
+ {key:'banshee',floor:'第 4 层',name:'哀泣女妖',lane:'女妖',hp:115,
   rules:['<b>虚体</b>：单次伤害最多 12 点，多出来的穿体而过（毒伤除外）。','<b>冥爪</b>：每 6 拍里抓 3 次，每次 9 点。','<b>尖啸</b>：每 6 拍一次 14 点，紧跟在第一爪后面。尖啸打到你身上，下回合少抽 1 张牌。','大招打她很亏：刺客的多段和毒最合适；战士多拼刀、少攒重击；法师用雷链和元素反应凑多段。'],
   reward:['echo','haste','ghost'],
   open:'钟声里混进了一声长长的哭嚎。开战。',
@@ -964,8 +933,7 @@ const FOES=[
   turnStart(first){if(!first)S.E.hush=0},
   status:()=>'<span class="tag">虚体 · 单次最多 12</span>'+(S.E.hush?'<span class="tag p2">下回合少抽 1</span>':'')},
 
- {key:'shaman',floor:'第 5 层',name:'哥布林萨满',lane:'萨满',hp:110,sub:'躲在图腾后面念咒的哥布林',
-  lore:'它自己很少出手，打它之前先得砸烂那根图腾。',
+ {key:'shaman',floor:'第 5 层',name:'哥布林萨满',lane:'萨满',hp:110,
   rules:['<b>图腾</b>（12 点）：图腾在的时候，你的每一下伤害都先打在图腾上，打碎图腾那一下不会溢出到萨满身上。图腾在场时萨满每回合结束回复 6 点。','<b>重立图腾</b>：图腾碎了，每 3 回合会重新立起来。','<b>巫火</b>：每 3 拍里 2 次，每次 11 点。','战士难攒怒气；刺客的多段小刀砸图腾最快；法师的一发大招打在图腾上很浪费，先用小法术或普攻敲碎它。'],
   reward:['unity','stop','paradox'],
   open:'图腾上的眼睛亮了。开战。',
@@ -976,8 +944,7 @@ const FOES=[
   turnStart(first){if(!first&&S.E.totem<=0&&S.turn-S.E.broke>=3){S.E.totem=12;log('萨满重新立起了图腾。');flt('enemy','图腾','info')}},
   status:()=>S.E.totem>0?`<span class="tag sh">图腾 ${S.E.totem}/12</span>`:`<span class="tag ok">图腾已碎 · ${Math.max(0,3-(S.turn-S.E.broke))} 回合后重立</span>`},
 
- {key:'thief',floor:'第 5 层',name:'时之窃贼',lane:'窃贼',hp:115,sub:'偷走别人时间的蒙面人',
-  lore:'每被他划中一刀，你就丢掉一点时间，他的刀也更快一分。',
+ {key:'thief',floor:'第 5 层',name:'时之窃贼',lane:'窃贼',hp:115,
   rules:['<b>快刀</b>：每 3 拍里 2 刀，基础 10 点。','<b>窃时</b>：快刀打到你身上，你的下一次普通攻击延后 1 拍（重击不受影响）。','<b>得手</b>：每偷到一次，快刀永久 +1（最多 +4）。','开局要稳：战士趁刀还轻，用战吼、蓄时多拼刀弹反；刺客用闪身保住连击；法师怕他打断吟唱，屏障和寒冰枪要早用。'],
   reward:['stasis','gather','rewind'],
   open:'影子里有人轻轻笑了一声。开战。',
@@ -990,8 +957,7 @@ const FOES=[
   status:()=>`<span class="tag ${S.E.stole>=4?'p2':''}">得手 ${Math.min(4,S.E.stole)}/4</span>`,
   rage:()=>S.E.stole>=4},
 
- {key:'golem',floor:'第 5 层',name:'熔核魔像',lane:'魔像',hp:120,sub:'从钟楼锅炉里爬出来的魔像',
-  lore:'它越烧越烫，拳头也越来越重。只有一记重击或寒冰，才能让它冷下来。',
+ {key:'golem',floor:'第 5 层',name:'熔核魔像',lane:'魔像',hp:120,
   rules:['<b>熔拳</b>：每 3 拍里 2 拳，每拳 8 点 + 热度。','<b>升温</b>：每回合结束热度 +1（最多 8）。','<b>冷却</b>：单次 15 点及以上的伤害，或寒冰枪命中，热度清零。','<b>熔甲</b>：单拍低于 4 点的伤害无效（毒伤除外）。','战士用共鸣和裂地斩定时降温；刺客攒连击、上毒，用绝杀降温；法师的寒冰枪是天生的克星。'],
   reward:['unity','stop','paradox'],
   open:'锅炉门被一拳砸开，热浪扑面而来。开战。',
@@ -1005,9 +971,8 @@ const FOES=[
   status:()=>`<span class="tag">熔甲 · 低于 4 无效</span><span class="tag ${S.E.heat>=5?'p2':''}">热度 ${S.E.heat}/8</span>`,
   rage:()=>S.E.heat>=5},
 
- {key:'knight',floor:'第 6 层',name:'黑铁骑士',lane:'骑士',hp:180,sub:'魔王麾下的守门骑士',
- img:'img/knight.jpg',tint:'grayscale(.4) brightness(.85) contrast(1.1)',portrait:'img/knight_portrait.jpg',moods:true,
-  lore:'钟楼最后的守门人。击碎他，通往魔王的门才会打开。',
+ {key:'knight',floor:'第 6 层',name:'黑铁骑士',lane:'骑士',hp:180,
+ moods:true,
   rules:['<b>重甲</b>：单拍伤害低于 10 会被减半。','<b>盾反</b>：灰色「盾」的那一拍，你打过去的伤害一半弹回你身上，骑士不受伤。盾可以被「迟滞」「错位」挪开。','<b>斩击</b>：除了举盾的拍，每 3 拍里斩 2 次，每次 10 点。','<b>重劈</b>：每 12 拍一次 28 点，被时间锁定。','<b>怒斩</b>：血量过半后斩击变成 13 点。','三个职业都得用上全部本事：没有专门针对谁。'],
   reward:['echo','haste','ghost','charge'],
   open:'黑铁甲胄轰然落地。开战。',
@@ -1020,9 +985,8 @@ const FOES=[
   rage:()=>S.E.phase===2,
   mood:()=>S.E.phase===2?'rage':foeE(e=>e.label==='重劈'&&e.beat<S.beat+3).length?'judge':'calm'},
 
- {key:'king',floor:'塔顶',name:'永夜魔王',lane:'魔王',hp:320,sub:'把钟拨回零点的人',
+ {key:'king',floor:'塔顶',name:'永夜魔王',lane:'魔王',hp:320,
  boss:true,
-  lore:'你曾倒在他脚下。你手里的时间，也曾属于他。',
   rules:['<b>齿轮护甲</b>：全程单拍低于 10 的伤害减半。','<b>一·倒转钟面</b>：刻刃每 3 拍里 2 次，每次 10 点。每 2 回合把你视野内最晚的一次攻击标成「逆」，逆攻击会给他回血，除非它共鸣或拼刀赢了。','<b>二·看穿</b>（≤225）：你布下的残影、盾、闪身、标记和蓄时加成被抹掉，审判每 8 拍一次（锁定）。他会看穿你的职业：<br>对战士，刻刃放慢到每 3 拍一次（10 点），他边打边蓄力，每回合蓄力 +3（上限 8），审判改为每 6 拍一次，伤害 = 25 + 3×蓄力，单次打他 15 点以上能打散 2 层蓄力；<br>对刺客，他披上反甲，每挨一下反刺 1 点（毒伤除外）；<br>对法师，刻刃变成每 2 拍 6 点，专打你的吟唱。','<b>三·永夜</b>（≤120）：视野缩到 6 拍，刻刃变成每 2 拍 14 点。15 拍后终焉钟鸣 99 点，残影无效，每次弹反推迟 1 拍。'],
   reward:[],
   open:'钟针归零。永夜魔王，开战。',
@@ -1070,9 +1034,8 @@ const FOES=[
   rage:()=>S.E.phase===3}
 ];
 const FOE=Object.fromEntries(FOES.map(f=>[f.key,f]));
-/* Painted art: list a foe key here once img/foe_<key>.jpg (arena, ~3:1) and img/foe_<key>_p.jpg (portrait, ~1:2) exist; others keep their SVG plate. Prompts live in tools/foe_art_prompts.md. */
-const PAINTED=new Set(['wolf','bat','skeleton','beetle','spider','gargoyle','slime','mirror','puppet','treant','ogre','banshee','shaman','thief','golem','king']);
-PAINTED.forEach(k=>{const f=FOE[k];f.img??=`img/foe_${k}.jpg`;f.portrait??=`img/foe_${k}_p.jpg`});
+/* Tapestry art (tools/art/tapestry_art_brief.md): img/foe_<key>.jpg is the right half of the arena frieze (2:1), img/foe_<key>_p.jpg the briefing hunt scene */
+FOES.forEach(f=>{f.img=`img/foe_${f.key}.jpg`;f.portrait=`img/foe_${f.key}_p.jpg`});
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];
 const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
 const FL=()=>FOE[S.run.foes[S.stage]];
@@ -1282,9 +1245,11 @@ function apply(key,target){
 
 function flyCard(i){
   const el=document.querySelector(`.card[data-i="${i}"]`);if(!el)return;
-  const r=el.getBoundingClientRect();const c=el.cloneNode(true);c.classList.add('flying');c.classList.remove('sel','dragging');c.disabled=true;
-  c.style.cssText=`position:fixed;left:${r.left}px;top:${r.top+14}px;width:${r.width/1.05}px;height:${r.height/1.05}px;margin:0;z-index:30`;
-  document.body.appendChild(c);setTimeout(()=>c.remove(),600);
+  if(CALM)return;
+  const r=el.getBoundingClientRect();const c=el.cloneNode(true);c.classList.add('flying');c.classList.remove('sel');c.disabled=true;
+  c.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;margin:0;z-index:30`;
+  document.body.appendChild(c);
+  gsap.to(c,{y:-180,scale:.55,rotation:-8,opacity:0,duration:.5,ease:'power2.in',onComplete:()=>c.remove()});
 }
 // everything a card does to the state, with no screen effects; the real play and the preview both go through here
 function commit(i,target){
@@ -1302,10 +1267,11 @@ function commit(i,target){
   return null;
 }
 function playCard(i,target){
+  const before=chipPos();
   const err=commit(i,target);
   if(err){setHint(err);return}
   flyCard(i);
-  S.pending=null;render();
+  S.pending=null;render();pullThreads(before);
   if(S.over)setTimeout(showEnd,700);
 }
 let hintMsg='';function setHint(m){hintMsg=m;render();setTimeout(()=>{if(hintMsg===m){hintMsg='';render()}},2200)}
@@ -1448,7 +1414,7 @@ function react(el,b){
 // what the timeline showed for a beat just before it resolved, kept as a stone fragment of the past
 function snapBeat(b){
   return {b,e:at(b,'e').map(e=>({l:e.label,d:e.dmg,na:e.na})).concat(at(b,'g').map(()=>({l:'残影',na:1})),at(b,'w').map(()=>({l:'盾',na:1})),at(b,'d').map(()=>({l:'闪身',na:1}))),
-    h:at(b,'h').map(e=>({l:e.fx?'斩':'击',d:e.dmg})).concat(at(b,'c').map(c=>({l:c.n,na:1})))};
+    h:at(b,'h').map(e=>({l:e.fx?'重击':'击',d:e.dmg})).concat(at(b,'c').map(c=>({l:c.n,na:1})))};
 }
 // after the turn's three beats: end-of-turn effects, then everything that lasts "this turn" wears off and the next hand is drawn
 function nextTurn(){
@@ -1475,7 +1441,7 @@ async function endTurn(){
     await sleep(520);
     const snap=snapBeat(b);snap.rec=stepBeat(b);
     S.hist.forEach(h=>h.fresh=false);snap.fresh=true;S.hist.push(snap);
-    render();
+    render();beatFx(snap);
     await sleep(650);
     if(S.over)break;
   }
@@ -1490,34 +1456,32 @@ async function endTurn(){
 }
 
 const MOODS={calm:'静默',judge:'蓄力',rage:'狂怒'};
-const STAIRS='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 40h9v-8h9v-8h9v-8h9"/><path d="M30 8h12v12"/><path d="M42 8L28 22"/></svg>';
-const ICONS=new Set(['shield','bash','taunt','cleave','warcry','ironwall','dodge','poison','shadow','finisher','boomerang','mark','smoke','fireball','icelance','chain','barrier','quick','meditate','frostarmor']);
 const SPELLS=new Set(Object.values(CARDS).filter(C=>C.cast).map(C=>C.n));
 
 let lastSand=null;
 function render(){renderTop();renderBoard();renderHand()}
 function renderTop(){
   const F=FL();
-  $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;$('beatNo').textContent=roman(S.beat);
-  $('foeName').textContent=`${F.name} · ${F.floor}`;$('foeSub').textContent=F.sub;
-  const art=$('enemyArt');art.style.backgroundImage=`url(${F.img||`img/foe_${F.key}.svg`})`;art.style.filter=F.tint||'';
+  $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;
+  $('foeName').textContent=F.name;
+  $('enemyArt').style.backgroundImage=`url(${F.img})`;
   document.querySelector('.half.hero').style.setProperty('--hero',`url(img/hero_${S.run.cls}.jpg)`);
   const hp=(S.hp/S.maxhp*100)+'%',ehp=(S.ehp/S.emax*100)+'%';
-  $('hpBar').style.width=hp;$('hpLag').style.width=hp;$('hpTxt').textContent=`${S.hp}/${S.maxhp}`;
-  $('ehpBar').style.width=ehp;$('ehpLag').style.width=ehp;$('ehpTxt').textContent=`${S.ehp}/${S.emax}`;
+  $('hpBar').style.width=hp;$('hpLag').style.width=hp;$('hpTxt').textContent=`${S.hp} / ${S.maxhp}`;
+  $('ehpBar').style.width=ehp;$('ehpLag').style.width=ehp;$('ehpTxt').textContent=`${S.ehp} / ${S.emax}`;
   $('foeHalf').classList.toggle('rage',!!(F.rage&&F.rage()));
-  const K=CL();$('heroName').textContent=`时之勇者 · ${K.n}`;$('heroSub').textContent=`${K.title} · ${K.sub}`;
+  const K=CL();$('heroName').textContent=K.n;
+  $('heroRes').textContent=S.run.cls==='warrior'?`怒气 ${S.rage}/${S.rageMax}`:S.run.cls==='rogue'?`连击 ${S.combo}/${S.comboMax}`:`霜冻 ${S.frost}/${FROST}`;
   const T=(c,on,t)=>on?`<span class="tag ${c}">${t}</span>`:'';
-  $('heroStatus').innerHTML=(S.run.cls==='warrior'?T('rg',1,`怒气 ${S.rage}/${S.rageMax}`)+T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,S.hp*2<S.maxhp?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')+T('rg',S.steady,'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
-      :S.run.cls==='rogue'?T('cb',1,`连击 ${S.combo}/${S.comboMax}`)+T('cb',S.keep,'余势')+T('cb',S.venom,'毒刃')+T('cb',S.toxin,'毒发')+T('cb',S.zanshin,'残心')+T('cb',S.plague,'瘟疫')+T('cb',S.omen,'死兆')
-      :T('mg',1,`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.frost,`霜冻 ${S.frost}/${FROST}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.ff,`霜火 +${S.ff}`)+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
+  $('heroStatus').innerHTML=(S.run.cls==='warrior'?T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,S.hp*2<S.maxhp?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')+T('rg',S.steady,'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
+      :S.run.cls==='rogue'?T('cb',S.keep,'余势')+T('cb',S.venom,'毒刃')+T('cb',S.toxin,'毒发')+T('cb',S.zanshin,'残心')+T('cb',S.plague,'瘟疫')+T('cb',S.omen,'死兆')
+      :T('mg',S.events.some(e=>e.side==='c'),`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.ff,`霜火 +${S.ff}`)+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
   let st='';
   if(F.moods){const m=F.mood();st+=`<span class="mood ${m}" style="background-image:url(img/kx_${m}.jpg)" title="${MOODS[m]}"></span>`}
   $('enemyStatus').innerHTML=st+(F.status?F.status():'')+(S.poison?`<span class="tag p2">中毒 ${S.poison} 层</span>`:'');
   $('dock').classList.toggle('busy',S.busy);
   $('sandNum').textContent=S.sand;
   if(lastSand!==null&&lastSand!==S.sand)restart($('sandNum'),'bump',450);lastSand=S.sand;
-  $('grains').innerHTML='<i></i>'.repeat(Math.min(S.sand,6));
   $('debt').textContent=S.debt?`下回合 −${S.debt}`:'';
   $('endBtn').disabled=S.busy||!!S.over;
   $('piles').textContent=`牌库 ${S.deck.length} · 弃牌 ${S.discard.length}`;
@@ -1526,8 +1490,8 @@ function renderTop(){
 }
 const archName=a=>Object.values(CLASSES).map(K=>K.arch[a]).find(Boolean);
 // one card face, shared by the hand and the reward screen; opt.i is its hand index, opt.off disables it
-function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:#3a4ca8">吟唱 ${castLen(C)} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''} ${C.ks?'ks':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
-    <span class="fr"><span class="art"><i></i>${ICONS.has(k)?`<b class="ic" style="background-image:url(img/ic_${k}.jpg)"></b>`:''}</span><span class="cn">${C.n}</span><span class="ct">${C.t}${C.a?' · '+archName(C.a):' · 通用'}</span><span class="cd">${C.d}</span>${ex}${C.ks?'<span class="ks">基石</span>':C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}<span class="orn"><i></i></span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
+function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:var(--indigo)">吟唱 ${castLen(C)} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''} ${C.ks?'ks':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
+    <span class="fr"><span class="art"><i style="background-image:url(img/ic_${k}.jpg)"></i></span><span class="txt"><span class="cn">${C.n}</span><span class="ct">${C.a?archName(C.a):'通用'}</span><span class="cd">${C.d}</span>${ex}${C.ks?'<span class="ks">基石</span>':C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}</span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
 function renderHand(){
   $('hand').classList.toggle('empty',!S.hand.length);
   $('hand').innerHTML=S.hand.map((k,i)=>{const C=CARDS[k];return cardHtml(k,{cls:S.pending===i?'sel':'',attr:`data-i="${i}"`,off:C.c>S.sand||(C.r&&S.rage<C.r)||S.busy||S.over})}).join('');
@@ -1552,12 +1516,15 @@ function midRec(r,bs){
   if(!h&&r.es.length)h='<span>无伤</span>';
   return {h,c:r.took>0?'bad':t?t.c:r.net>0?'res':'',chg};
 }
-const lanesHtml=F=>`<div class="lanes"><div>拍</div><div>${LANE.foe}<span>${F.lane}<small>敌方行动</small></span></div><div>${LANE.clash}<span>交锋<small>冲突判定</small></span></div><div>${LANE.hero}<span>勇者<small>我方行动</small></span></div></div>`;
+const lanesHtml=()=>'<div class="lanes"><div></div><div class="le">敌方</div><div class="lc">交锋</div><div class="lh">勇者</div></div>';
+// the glyph sewn on each patch
+const EL={'火':SVG.FIRE,'冰':SVG.ICE,'雷':SVG.BOLT};
+const foeGlyph=e=>e.na?'':e.kind==='j'||e.fin?SVG.BURST:SVG.CLAW;
 function pastSlot(h){
   const m=midRec(h.rec);
   return `<div class="slot past ${h.fresh?'fresh':''}" data-pb="${h.b}"><div class="bn"><span>${roman(h.b)}</span></div>
     <div class="lane e">${h.e.map(x=>`<div class="chip st">${x.l}${x.na?'':` <b>${x.d}</b>`}</div>`).join('')}</div>
-    <div class="mid"><span class="mt">${m.h}</span></div>
+    <div class="mid ${m.c}"><span class="mt">${m.h}</span></div>
     <div class="lane h">${h.h.map(x=>`<div class="chip st">${x.l}${x.na?'':` <b>${x.d}</b>`}</div>`).join('')}</div></div>`;
 }
 // the analytic guess for beats past this turn: what the board looks like if nothing else changes
@@ -1590,11 +1557,11 @@ function liveSlot(b,o){
   const now=b<S.beat+3,far=b>=S.beat+baseView();
   const tg=pend?pend.tg:null;
   const tgt=(tg==='pair'&&b<S.beat+W()-1)||tg==='any'||tg==='h'||tg==='e'||(tg==='b4'&&b<=S.beat+3)||(tg==='cast'&&b>=S.beat+castLen(pend)-1);
-  const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${tg==='e'&&!e.locked?'pick':''} " data-id="${e.id}">${e.label}${e.na?'':` <b>${e.dmg}</b>`}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
-    +gs.map(()=>`<div class="chip g">残影</div>`).join('')+ws.map(w=>`<div class="chip w">${w.v?'塔盾':'盾'} −${w.v||SHIELD}</div>`).join('')+ds.map(()=>`<div class="chip d">闪身</div>`).join('')+ms.map(()=>`<div class="chip e mir">镜影</div>`).join('');
-  const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'逆':e.fx?'斩':'击'} <b>${e.dmg}</b></div>`).join('')
+  const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${tg==='e'&&!e.locked?'pick':''} " data-id="${e.id}">${foeGlyph(e)}${e.label}${e.na?'':` <b>${e.dmg}</b>`}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
+    +gs.map(()=>`<div class="chip g">残影</div>`).join('')+ws.map(w=>`<div class="chip w">${SVG.SHIELD}${w.v?'塔盾':'盾'} −${w.v||SHIELD}</div>`).join('')+ds.map(()=>`<div class="chip d">闪身</div>`).join('')+ms.map(()=>`<div class="chip e mir">镜影</div>`).join('');
+  const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'':SVG.SWORD}${e.rev?'逆':e.fx?'重击':'击'} <b>${e.dmg}</b></div>`).join('')
     +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')
-    +cs.map(e=>`<div class="chip sp" data-el="${e.el}" data-id="${e.id}">${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
+    +cs.map(e=>`<div class="chip sp" data-el="${e.el}" data-id="${e.id}">${EL[e.el]}${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
   const m=now?midRec(o.rec):guessMid(b,F);
   return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} " data-b="${b}">
     <div class="bn"><span>${roman(b)}</span></div><div class="lane e">${ech}</div><div class="mid ${m.c}"><span class="mt">${m.h}</span></div><div class="lane h">${hch}</div></div>`;
@@ -1604,10 +1571,9 @@ function renderBoard(){
   const F=FL();
   const pend=S.pending!=null?CARDS[S.hand[S.pending]]:null;
   const fc=forecast(),recs=fc.base.out;
-  let html=lanesHtml(F)+S.hist.filter(h=>h.b>=S.beat-3).map(pastSlot).join('');
+  let html=lanesHtml()+S.hist.filter(h=>h.b>=S.beat-3).map(pastSlot).join('');
   for(let b=S.doneUpTo+1;b<S.beat+W();b++)html+=liveSlot(b,{pend,rec:recs.find(r=>r.b===b)});
   $('timeline').innerHTML=html;
-  const lo=S.doneUpTo+1;$('winTxt').innerHTML=`◆ 当前结算区间：<b>${roman(Math.min(lo,S.beat+2))} – ${roman(S.beat+2)}</b>`;
   // keep this turn's beats in view when the ribbon scrolls
   const sc=$('tlscroll'),first=document.querySelector('#timeline .slot[data-b]'),sk=S.beat+':'+S.doneUpTo;
   if(first&&sk!==scrollKey){scrollKey=sk;if(sc.scrollWidth>sc.clientWidth){const lw=document.querySelector('#timeline .lanes').offsetWidth;sc.scrollLeft=Math.max(0,first.offsetLeft-lw-70)}}
@@ -1619,7 +1585,7 @@ function renderHint(pend){
   let h=hintMsg;
   if(!h&&pend)h=HINTS[pend.tg];
   if(!h&&S.busy)h='时针正在走过本回合的 3 拍……';
-  if(!h&&!S.busy)h='亮蓝色的 3 拍会在本回合结算，交锋一栏是它们的结果';
+  if(!h&&!S.busy)h='亮色的 3 拍会在本回合结算，交锋一栏是它们的结果。';
   const el=$('hint');
   el.className='hint'+(hintMsg?' err':pend?' pend':'');
   el.innerHTML=DIAM+`<span>${h}</span>`+(pend&&!hintMsg?'<button class="cancel" id="cancelBtn">取消</button>':'');
@@ -1646,112 +1612,125 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.
 $('endBtn').addEventListener('click',endTurn);
 $('rulesBtn').addEventListener('click',()=>showRules(false));
 $('resetBtn').addEventListener('click',()=>{startFight(S.run);render();banner('第 1 回合','HORA I')});
-$('logBtn').addEventListener('click',()=>{const d=$('chron');d.open=!d.open;if(d.open)d.scrollIntoView({behavior:'smooth',block:'nearest'})});
 addEventListener('resize',()=>{if(S)renderBoard()});
 
-/* ---------- Full-page screens ---------- */
+/* ---------- Full-page screens: briefing, victory, defeat, summit ---------- */
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-const foePic=F=>F.portrait||`img/foe_${F.key}_p.svg`;
-const SH=(zh,la)=>`<h4 class="sh">${COMPASS}<span>${zh}</span><small>${la}</small></h4>`;
-const LOGO='<div class="pk-logo"><b>时之勇者</b><span>CHRONO REQUIEM</span></div>';
-const CN='<span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span>';
-const figFoe=F=>`<div class="scr-fig" style="background-image:url(${foePic(F)})" role="img" aria-label="${F.name}"></div>`;
-const figHero=()=>`<div class="scr-fig hero" style="background-image:url(img/body_${S.run.cls}.jpg)" role="img" aria-label="${CL().n}"></div>`;
-const floorTag=i=>i===TOWER.length-1?'APEX':'FLOOR '+ROMAN[i];
-// numeral medallions up the tower: cleared ones gilded, the current one glowing blue
+const EN={wolf:'THE GREYMANE WOLF',bat:'THE VAMPIRE BAT',skeleton:'THE BONE SENTRY',beetle:'THE IRONSHELL BEETLE',spider:'THE VENOM WEAVER',gargoyle:'THE BELFRY GARGOYLE',slime:'THE SUNDERING SLIME',mirror:'THE MIRROR FAE',puppet:'THE CLOCKWORK PUPPET',
+  treant:'THE THORN TREANT',ogre:'THE ONE-EYED OGRE',banshee:'THE WAILING BANSHEE',shaman:'THE GOBLIN SHAMAN',thief:'THE TIME THIEF',golem:'THE MOLTEN GOLEM',knight:'THE BLACK IRON KNIGHT',king:'THE KING OF ENDLESS NIGHT'};
+// each class banner shows one starting card from each of its three archetypes
+const PICK={warrior:{col:'#923f35',la:'WARRIOR',mt:'以剑守护当下',show:['shield','cleave','grudge']},
+  rogue:{col:'#4f5a44',la:'ASSASSIN',mt:'以影为步',show:['dodge','poison','mark']},
+  mage:{col:'#2c3d4f',la:'MAGE',mt:'以时间为语',show:['fireball','chain','icelance']}};
+const LOGO=`<div class="logo"><span class="knot">${SVG.KNOT}</span><b>时之勇者</b><span>CHRONO REQUIEM</span></div>`;
+const MAST=right=>`<header class="mast">${LOGO}<span class="vine" aria-hidden="true"></span>${right||''}</header><div class="trim"></div>`;
+const metaHtml=()=>`<div class="meta"><span><b>${FL().floor}</b></span><span>第 <b>${S.turn}</b> 回合</span></div>`;
+const rulesList=rs=>`<ul class="rules">${rs.map((r,i)=>`<li><i>${[SVG.CLAW,SVG.SAND,SVG.BURST][i%3]}</i><span>${r}</span></li>`).join('')}</ul>`;
+const stat=(ic,c,lb,v,o={})=>`<div class="stat"><i class="${c}">${ic}</i><span><small>${lb}</small><b class="${o.zh?'zh':''}">${v}</b>${o.sm?`<small>${o.sm}</small>`:''}</span></div>`;
+// the clock tower: storeys from I at the foot to VII, cleared ones gilded, the current one in madder
 const towerCol=()=>`<ol class="tower" aria-label="钟楼">${S.run.foes.map((k,i)=>`<li class="tw ${i<S.stage?'done':i===S.stage?'cur':''}" title="${i<=S.stage?FOE[k].name:FOE[k].floor}">${ROMAN[i]}</li>`).join('')}</ol>`;
-const rm=(ic,lb,v,sm,zh)=>`<div class="rm"><span class="ic">${ic}</span><small>${lb}</small><b class="${zh?'zh':''}">${v}</b>${sm?`<i>${sm}</i>`:''}</div>`;
-const ribbon=t=>`<div class="ribbon">${t}</div>`;
-function openScr(mode,art,main,side,focus){
-  const s=$('scr');s.className='scr '+mode;s.style.setProperty('--cc',PICK[S.run.cls].col);
-  $('scrIn').innerHTML=`<div class="scr-art">${LOGO}${art}</div><div class="scr-m">${main}</div>${side||''}`;
-  s.querySelectorAll('.frame>.cn').forEach(e=>e.innerHTML=CORNER);
-  s.hidden=false;s.scrollTop=0;delete s.dataset.end;const f=$(focus);if(f)f.focus({preventScroll:true});
+const patch=e=>`<div class="chip e ${e.na?'na':''} ${e.kind==='j'?'j':''}">${foeGlyph(e)}${e.label}${e.na?'':` <b>${e.dmg}</b>`}</div>`;
+function openScr(mode,mast,main,focus){
+  const s=$('scr');calmDown();s.className='scr '+mode;
+  $('scrIn').innerHTML=mast+main;
+  s.hidden=false;s.scrollTop=0;delete s.dataset.end;
+  enter(mode);
+  const f=$(focus);if(f)f.focus({preventScroll:true});
 }
-function closePanel(){$('scr').hidden=true}
+function closePanel(){calmDown();$('scr').hidden=true}
 function floorPicker(){
   return `<details class="dbg"><summary>试玩：直接跳到任一只怪（从头开始的生命和牌组）</summary><div class="floors">${TOWER.map((p,i)=>`<div class="fl"><em>${FOE[p[0]].floor}</em><div>${p.map(k=>`<button data-fl="${i}" data-k="${k}" class="${i===S.stage&&k===FL().key?'cur':''}">${FOE[k].name}</button>`).join('')}</div></div>`).join('')}</div></details>`;
 }
 function wireFloors(){document.querySelectorAll('.floors button').forEach(b=>b.onclick=()=>{newRun(+b.dataset.fl,S.run.cls,b.dataset.k);render();showRules(true)})}
-const PICK={warrior:{col:'#9a2414',la:'WARRIOR',q:'以剑守护当下，\n以时间开创未来。'},rogue:{col:'#1d6a5c',la:'ASSASSIN',q:'以影为步，\n以时间为刃。'},mage:{col:'#26408f',la:'MAGE',q:'以时间为语，\n以星轨为笔。'}};
-const COMPASS='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="40" cy="40" r="25"/><circle cx="40" cy="40" r="31" stroke-dasharray="2 3"/><path d="M40 2l5 33 33 5-33 5-5 33-5-33-33-5 33-5z" fill="currentColor" fill-opacity=".18"/><path d="M40 18l3 19 19 3-19 3-3 19-3-19-19-3 19-3z" fill="currentColor" fill-opacity=".5"/><path d="M22 22l12 12M58 22L46 34M22 58l12-12M58 58L46 46"/><circle cx="40" cy="40" r="3" fill="currentColor"/></svg>';
-const PI={hp:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>',
-  sand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg>',
-  atk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4l12 12M20 4L8 16M14 18l4-4M6 14l4 4M3 21l3-3M21 21l-3-3"/></svg>'};
-const ART_T={'战士':'img/art_res.jpg','刺客':'img/art_frb.jpg','法师':'img/art_rhy.jpg'};
+
+/* Class pick: three heraldic banners hung over a millefleur field */
 let pickSel='warrior';
 function pkRow(k){
-  const C=CLASSES[k],P=PICK[k],cards=[...new Set(C.deck)];
+  const C=CLASSES[k],P=PICK[k];
   return `<button class="pk-row" data-cl="${k}" style="--cc:${P.col}" aria-pressed="false">
-    <span class="pk-por"><span class="fig" style="background-image:url(img/hero_${k}.jpg)"></span><span class="em">${COMPASS}${P.la}</span></span>
-    <span class="pk-inf"><h3>${COMPASS}${C.n} · ${C.title}<small>${P.la}</small></h3>
-      <span class="pk-st"><span>${PI.hp}生命 ${C.hp}</span><span>${PI.sand}每回合 ${C.sand||3} 粒时之砂</span><span>${PI.atk}每${C.atk.every===1?'':` ${C.atk.every} `}拍自动攻击 ${C.atk.dmg} 点</span></span>
-      <p class="pk-pitch">${C.pitch}</p>
-      <span class="pk-cards"><b>职业牌</b>${cards.map(x=>`<figure><i style="background-image:url(${ICONS.has(x)?`img/ic_${x}.jpg`:ART_T[C.n]})"></i>${CARDS[x].n}</figure>`).join('')}</span></span>
-    <span class="pk-badge">当前选择</span></button>`;
+    <span class="nm">${C.n}</span><span class="la">${P.la}</span><span class="mt">— ${P.mt} —</span>
+    <span class="fig" style="background-image:url(img/body_${k}.jpg)"><span class="pk-badge">当前选择</span></span>
+    <span class="pk-st"><span>${SVG.HEART}生命 ${C.hp}</span><span>${SVG.SAND}每回合 ${C.sand||3} 沙</span><span>${SVG.SWORD}每${C.atk.every===1?'':` ${C.atk.every} `}拍攻击 ${C.atk.dmg}</span></span>
+    <span class="pk-cards">${P.show.map(x=>`<span class="fc"><i style="background-image:url(img/ic_${x}.jpg)"></i><b>${CARDS[x].n}</b><small>${C.arch[CARDS[x].a]}</small></span>`).join('')}</span>
+    <span class="tas"></span></button>`;
 }
 function updatePick(){
   document.querySelectorAll('.pk-row').forEach(r=>{const on=r.dataset.cl===pickSel;r.classList.toggle('on',on);r.setAttribute('aria-pressed',on)});
-  const b=$('pkBody');b.classList.add('swap');
-  setTimeout(()=>{b.style.backgroundImage=`url(img/body_${pickSel}.jpg)`;b.setAttribute('aria-label',`${CLASSES[pickSel].n}的角色形象`);b.classList.remove('swap')},120);
-  $('pkQuote').textContent=PICK[pickSel].q;
-  $('pkGo').style.setProperty('--cc',PICK[pickSel].col);$('pkGo').textContent=`确认职业 · ${CLASSES[pickSel].n} ›`;
+  const C=CLASSES[pickSel],P=PICK[pickSel];
+  $('pkCrest').innerHTML=crest(pickSel,P.col);
+  $('pkWho').innerHTML=`<b>${C.n}</b><span>${P.la}</span>`;
+  $('pkPitch').textContent=C.pitch;
 }
 function showClassPick(first){
   closePanel();
   pickSel=(first!==true&&S&&S.run&&S.run.cls)||'warrior';
   $('pkRows').innerHTML=Object.keys(CLASSES).map(pkRow).join('');
-  document.querySelectorAll('.pk-row').forEach(r=>{r.onclick=()=>{pickSel=r.dataset.cl;updatePick()};r.ondblclick=()=>$('pkGo').click()});
+  document.querySelectorAll('.pk-row').forEach(r=>{r.onclick=()=>{pickSel=r.dataset.cl;updatePick();sway(r)};r.ondblclick=()=>$('pkGo').click()});
   $('pkBack').hidden=first===true;
   $('pick').hidden=false;$('pick').scrollTop=0;updatePick();
+  if(!CALM)gsap.from('.pk-row',{y:-70,rotation:i=>(i-1)*3,opacity:0,stagger:.12,duration:.8,ease:'back.out(1.3)',clearProps:'transform,opacity'});
   const f=document.querySelector('.pk-row.on');if(f)f.focus({preventScroll:true});
 }
 $('pkGo').onclick=()=>{$('pick').hidden=true;newRun(0,pickSel);render();showRules(true)};
 $('pkBack').onclick=()=>{$('pick').hidden=true;if(S.over)showEnd()};
+
+/* Briefing: the hunt tapestry, the foe's pattern with its first three beats, your class, the tower */
 function showRules(intro){
   const F=FL(),C=CL(),k=S.run.cls,fresh=S.turn===1&&!S.busy;
-  openScr('brief',`${figFoe(F)}<div class="scr-title"><span class="kick">${F.floor} · <em>${floorTag(S.stage)}</em></span><h2>${F.name}</h2><p>${F.lore}</p></div>`,
-  `<section class="pp frame scr-p">${CN}${SH('敌方行动','FOE PATTERN')}<ul>${F.rules.map(r=>`<li>${r}</li>`).join('')}</ul></section>
-  <section class="pp frame scr-p cls">${CN}${SH('你的职业','YOUR CLASS')}<div class="clsrow"><div class="crest">${COMPASS}<b>${C.n} · ${C.title}</b></div><span class="hthumb" style="background-image:url(img/hero_${k}.jpg)"></span></div><p>${C.rule}</p></section>
-  ${intro?'':`<section class="pp frame scr-p">${CN}${SH('时间法则','RULES OF TIME')}<ul>
-    <li>时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。</li>
-    <li><b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。</li>
-    <li>高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，回复 20% 最大生命，并挑一张新牌。</li>
-  </ul></section>`}
-  ${floorPicker()}
-  <div class="acts"><button class="btn" id="pickBtn">换职业重来</button><button class="btn go" id="startBtn">${fresh?'开战':'继续'}</button></div>`,towerCol(),'startBtn');
+  const first=[0,1,2].map(i=>{const b=S.beat+i,es=at(b,'e');return `<div><em>${roman(b)}</em>${es.length?es.map(patch).join(''):'<span class="none">—</span>'}</div>`}).join('');
+  openScr('brief',MAST(`<span class="page">${SVG.FLEUR}战前情报${SVG.FLEUR}</span>`),`<div class="body">
+    <div class="hunt ip"><div class="pic" style="background-image:url(${F.portrait})" role="img" aria-label="${F.name}"></div><span class="flag">${SVG.FLAG}</span>
+      <div class="cart"><span class="fl">${F.floor}</span><div class="nm"><h2>${F.name}</h2></div><div class="en">${EN[F.key]}</div></div></div>
+    <div class="bmid">
+      <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
+      <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
+      ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
+        '<b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。',
+        '高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，回复 20% 最大生命，并挑一张新牌。'])}</section>`}
+      ${floorPicker()}
+      <div class="acts"><button class="btn" id="pickBtn">${SVG.REDO}换职业重来</button><button class="btn go" id="startBtn">${SVG.SHUTTLE}${fresh?'开战':'继续'}</button></div>
+    </div>
+    ${towerCol()}</div>`,'startBtn');
   wireFloors();$('pickBtn').onclick=()=>showClassPick();
   $('startBtn').onclick=()=>{closePanel();if(fresh)banner(F.floor,F.name)};
 }
+
 function showEnd(){
   if(!$('scr').hidden&&$('scr').dataset.end===String(S.uid))return;
-  const F=FL(),win=S.over==='win',last=S.stage===TOWER.length-1;
-  const turns=rm(PI.sand,'回合',S.turn);
-  const B=S.best,best=B?rm(PI.atk,'最高一拍',B.d,`${B.b?`第 ${roman(B.b)} 拍`:'一张牌'}${B.cards.length?' · '+B.cards.join('、'):''}`):'';
+  const F=FL(),win=S.over==='win',last=S.stage===TOWER.length-1,B=S.best,cls=S.run.cls;
+  const bestAt=B?(B.b?`第 ${roman(B.b)} 拍`:'一张牌'):'';
   if(!win){
-    openScr('lose',figFoe(F),`<div class="pp frame scr-p sheet">${CN}${ribbon('DEFEAT · <span>败北</span>')}<h2 class="ttl">时间终结</h2>
-      <p class="lead">你倒在了${F.floor}，${F.name}面前。钟针没有停下，但你还记得它的节奏。</p>
-      <div class="rms">${turns}${best||rm(PI.hp,'所在',F.floor,'',1)}${rm(PI.atk,F.lane+'剩余',`${S.ehp}/${S.emax}`,`削去 ${Math.round(100*(1-S.ehp/S.emax))}%`)}</div>
-      <section>${SH('它的节奏','KNOW THY FOE')}<ul>${F.rules.map(r=>`<li>${r}</li>`).join('')}</ul></section>
-      <div class="acts"><button class="btn" id="runBtn">重新选职业</button><button class="btn red" id="retryBtn">重试本层</button></div></div>`,'','retryBtn');
+    openScr('lose',MAST(),`<div class="body">
+      <div class="fray ip"><div class="pic" style="background-image:url(img/defeat_${cls}.jpg)" role="img" aria-label="倒下的${CL().n}"></div><svg class="threads" id="frayThreads" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      <div class="lmain pp"><div class="kick">DEFEAT</div><h2 class="ttl">时间终结</h2><div class="where">${F.floor} · ${F.name}</div>
+        <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.BURST,'ind','最高一拍',B?B.d:0,{sm:B?bestAt+(B.cards.length?' · '+B.cards.join('、'):''):''})}${stat(SVG.CLAW,'mo','敌方剩余',S.ehp)}</div>
+        <h4 class="sh sm">它的节奏</h4>${rulesList(F.rules)}
+        <div class="acts"><button class="btn" id="runBtn">${SVG.REDO}重新选职业</button><button class="btn red" id="retryBtn">${SVG.SHUTTLE}重试本层</button></div>
+        <p class="coda">钟针仍在前行</p></div></div>`,'retryBtn');
     $('retryBtn').onclick=()=>{closePanel();startFight(S.run);render();banner(FL().floor,FL().name)};
     $('runBtn').onclick=()=>showClassPick();
   }else if(last){
-    openScr('win',figHero(),`${ribbon('VICTORY · <span>登顶</span>')}<h2 class="ttl">永夜终结</h2>
-      <p class="lead">第 ${S.turn} 回合，魔王的钟针停下了。七层钟楼的钟声一起响起：这一次，时间站在你这边。</p>
-      <div class="rms">${turns}${best}${rm(PI.hp,'生命',`${S.hp}/${S.maxhp}`)}${rm(PI.atk,'牌组',`${S.run.deck.length} 张`,'',1)}</div>
-      <section class="gp frame scr-p">${CN}<h4 class="sh2"><span>登顶的牌组</span><small>THE WINNING DECK</small></h4><div class="deck">${[...new Set(S.run.deck)].map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span data-t="${CARDS[k].t}">${CARDS[k].n}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
-      <div class="acts"><button class="btn go" id="runBtn">再登钟楼</button></div>`,'','runBtn');
+    const ks=[...new Set(S.run.deck)];
+    openScr('end',MAST(),`<div class="body">
+      <div class="pano ip"><div class="pic" style="background-image:url(img/end_panorama.jpg)" role="img" aria-label="七层钟楼"></div><div class="cap"><h2>永夜终结</h2><span>THE SEVENTH THREAD</span></div></div>
+      <svg class="seven" viewBox="0 0 1400 70" preserveAspectRatio="none" aria-hidden="true"><path d="M10 35C110 5 160 65 210 35S310 5 410 35 510 65 610 35 710 5 810 35 910 65 1010 35 1110 5 1210 35 1310 65 1390 35" fill="none" stroke="#923f35" stroke-width="3"/>${ROMAN.slice(0,7).map((r,i)=>`<g class="kn" transform="translate(${110+i*200} 35)"><circle r="16" fill="#202d3a" stroke="#cfa95f" stroke-width="2.5"/><text y="5.5" text-anchor="middle" font-family="Noto Serif SC,serif" font-weight="900" font-size="15" fill="#ead39a">${r}</text></g>`).join('')}</svg>
+      <div class="stats">${stat(SVG.TOWER,'','七层登顶',`第 ${S.turn} 回合`,{zh:1})}${stat(SVG.BURST,'ind','最高一拍',B?B.d:0,{sm:B?bestAt:''})}${stat(SVG.CARDS,'mo','牌组',`${S.run.deck.length} 张`)}</div>
+      <section class="pp"><h4 class="sh sm">登顶的牌组</h4><div class="deck">${ks.map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span><i style="background-image:url(img/ic_${k}.jpg)"></i>${CARDS[k].n}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
+      <div class="acts end"><button class="btn go" id="runBtn">${SVG.SHUTTLE}再登钟楼</button></div></div>`,'runBtn');
     $('runBtn').onclick=()=>showClassPick();
   }else{
     const N=FOE[S.run.foes[S.stage+1]],pool=rewardPool(S.run,F);
-    openScr('win',figHero(),`${ribbon('VICTORY · <span>胜利</span>')}<h2 class="ttl">${F.name}倒下了</h2>
-      <p class="lead">第 ${S.turn} 回合，你击败了${F.name}。最大生命 +5，喘口气，往上一层。</p>
-      <div class="rms">${turns}${best}${rm(PI.hp,'生命',`${S.hp} → ${healTo()}`,`上限 ${S.maxhp+5}`)}${rm(STAIRS,'下一层',N.name,N.floor,1)}</div>
-      <section class="gp frame scr-p">${CN}<h4 class="sh2"><span>战利品</span><small>SPOILS</small></h4>
-      <div class="rewards">${pool.map(k=>cardHtml(k,{cls:'rw',attr:`data-k="${k}"`})).join('')}
-        <button class="skipcard" id="skipBtn"><span class="sk-ic">${COMPASS}</span><b>直接上楼</b><i>不拿牌</i><span>牌组保持精简，<br>更容易抽到核心牌。</span></button></div>
-      <p class="rwnote">挑一张牌加入牌组 · 当前牌组 ${S.run.deck.length} 张</p></section>`);
+    openScr('win',MAST(metaHtml()),`<div class="vban"><b>胜利</b><span>VICTORY</span></div><div class="body">
+      <div class="hero-col"><div class="ip fig"><div class="pic" style="background-image:url(img/body_${cls}.jpg)" role="img" aria-label="${CL().n}"></div></div>
+        <div class="foecrest"><i style="background-image:url(${F.img})"></i></div>
+        ${B?`<div class="best ip"><div class="v"><small>最高一拍</small><b>${B.d}</b><em>${bestAt}</em></div><div class="cards">${B.cards.length?B.cards.join('、'):'自动攻击'}</div></div>`:''}</div>
+      <div class="vmain"><h2 class="ttl">${F.name}倒下了</h2><div class="seam"></div>
+        <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} → <em>${healTo()}</em>`,{sm:`上限 ${S.maxhp+5}`})}${stat(SVG.STAIRS,'ind','下一层',N.name,{zh:1})}</div>
+        <h4 class="sh">战利品</h4><p class="lead">挑一张牌加入牌组</p>
+        <div class="rewards">${pool.map(k=>cardHtml(k,{cls:'rw',attr:`data-k="${k}"`})).join('')}
+          <button class="skipcard" id="skipBtn"><span class="sk-ic">${SVG.SKIP}</span><b>直接上楼</b><i>不拿牌</i></button></div>
+        <div class="journey ip">${S.run.foes.map((k,i)=>`<span class="jn ${i<=S.stage?'done':i===S.stage+1?'next':''}"><em>${ROMAN[i]}</em><i></i><span>${i<=S.stage+1?FOE[k].name:''}</span></span>`).join('')}</div>
+        <p class="lead"><span class="rwnote">当前牌组 ${S.run.deck.length} 张</span></p></div></div>`);
     const next=k=>{nextFloor(k);render();showRules(true)};
     document.querySelectorAll('.rewards .card').forEach(b=>b.onclick=()=>next(b.dataset.k));
     $('skipBtn').onclick=()=>next(null);
@@ -1759,14 +1738,99 @@ function showEnd(){
   $('scr').dataset.end=String(S.uid);
 }
 
-// embers
-(function(){
-  const cv=$('dust'),ctx=cv.getContext('2d');let w,h,ps=[];
-  const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  function size(){const d=Math.min(devicePixelRatio||1,2);w=cv.width=innerWidth*d;h=cv.height=innerHeight*d;ps=Array.from({length:Math.round(innerWidth/20)},()=>({x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.5+.4)*d,v:(Math.random()*.3+.08)*d,a:Math.random()*.5+.15,p:Math.random()*6.28}))}
-  function tick(){ctx.clearRect(0,0,w,h);for(const p of ps){p.y-=p.v;p.p+=.01;p.x+=Math.sin(p.p)*.2;if(p.y<-4){p.y=h+4;p.x=Math.random()*w}ctx.globalAlpha=p.a*(.6+.4*Math.sin(p.p*3));ctx.fillStyle='#ffd88a';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);ctx.fill()}if(!still)requestAnimationFrame(tick)}
-  addEventListener('resize',size);size();tick();
-})();
+/* ---------- Motion (GSAP): a move pulls a thread, a resonance ties a knot, a parry cuts the foe's patch and folds it back;
+   victory is stitched in, defeat frays at the lower edge, the summit unrolls ---------- */
+const CALM=matchMedia('(prefers-reduced-motion:reduce)').matches||!window.gsap;
+if(!CALM&&window.DrawSVGPlugin)gsap.registerPlugin(DrawSVGPlugin);
+const NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+const wrapBox=()=>$('tlwrap').getBoundingClientRect();
+const centre=(el,o)=>{const r=el.getBoundingClientRect();return {x:r.left-o.left+r.width/2,y:r.top-o.top+r.height/2,l:r.left,t:r.top,w:r.width,h:r.height}};
+// where every patch on the loom sits, taken just before a card changes the board
+function chipPos(){if(CALM)return null;const o=wrapBox(),m=new Map();document.querySelectorAll('#timeline .chip[data-id]').forEach(c=>m.set(c.dataset.id,centre(c,o)));return m}
+function pullThreads(before){
+  if(!before)return;
+  const g=$('threads'),o=wrapBox();
+  document.querySelectorAll('#timeline .chip[data-id]').forEach(c=>{
+    const now=centre(c,o),was=before.get(c.dataset.id);
+    if(!was){gsap.from(c,{scale:.3,rotation:-14,opacity:0,duration:.5,ease:'back.out(2)'});return}
+    const dx=was.l-now.l,dy=was.t-now.t;if(Math.abs(dx)<3&&Math.abs(dy)<3)return;
+    const p=svgEl('path',{d:`M${was.x} ${was.y}Q${(was.x+now.x)/2} ${Math.min(was.y,now.y)-48} ${now.x} ${now.y}`,fill:'none',stroke:'#b28a45','stroke-width':2.4,'stroke-linecap':'round'},g);
+    gsap.timeline({onComplete:()=>p.remove()}).fromTo(p,{drawSVG:'0%'},{drawSVG:'100%',duration:.45,ease:'power2.inOut'}).to(p,{drawSVG:'100% 100%',duration:.35,ease:'power1.in'},'+=.12');
+    gsap.from(c,{x:dx,y:dy,duration:.55,ease:'power2.inOut'});
+  });
+}
+const KNOT_D=['M0 -16c6 0 9 5 6 10l-12 12c-3 5 0 10 6 10s9-5 6-10l-12-12c-3-5 0-10 6-10z','M-16 0c0-6 5-9 10-6l12 12c5 3 10 0 10-6s-5-9-10-6l-12 12c-5 3-10 0-10-6z'];
+const slotAt=b=>document.querySelector(`#timeline [data-pb="${b}"]`)||document.querySelector(`#timeline [data-b="${b}"]`);
+function tieKnot(b){
+  const slot=slotAt(b);if(CALM||!slot)return;
+  const g=$('threads'),o=wrapBox(),m=centre(slot.querySelector('.mid'),o),grp=svgEl('g',{},g);
+  const strands=[...slot.querySelectorAll('.lane .chip')].map(c=>{const p=centre(c,o);return svgEl('path',{d:`M${p.x} ${p.y}C${p.x+26} ${(p.y+m.y)/2} ${m.x-26} ${(p.y+m.y)/2} ${m.x} ${m.y}`,fill:'none',stroke:'#b28a45','stroke-width':2,'stroke-linecap':'round'},grp)});
+  const pin=svgEl('g',{transform:`translate(${m.x} ${m.y})`},grp),k=svgEl('g',{},pin);
+  KNOT_D.forEach(d=>svgEl('path',{d,fill:'none',stroke:'#cfa95f','stroke-width':3.2},k));
+  gsap.timeline({onComplete:()=>grp.remove()})
+    .fromTo(strands,{drawSVG:'0%'},{drawSVG:'100%',duration:.35,stagger:.06,ease:'power2.in'})
+    .fromTo(k,{scale:0,rotation:-200,transformOrigin:'50% 50%'},{scale:1.5,rotation:0,duration:.45,ease:'back.out(2.2)'},'-=.08')
+    .to(strands,{drawSVG:'100% 100%',duration:.3},'<')
+    .to(k,{scale:.9,opacity:0,duration:.35,delay:.25});
+}
+function cutThread(b){
+  const slot=slotAt(b),chip=slot&&slot.querySelector('.lane.e .chip');if(CALM||!chip)return;
+  const g=$('threads'),o=wrapBox(),c=centre(chip,o),wrap=$('tlwrap');
+  const cut=svgEl('path',{d:`M${c.x-c.w/2-8} ${c.y+c.h/2+6}L${c.x+c.w/2+8} ${c.y-c.h/2-6}`,stroke:'#f1e7d1','stroke-width':3,'stroke-linecap':'round'},g);
+  const back=svgEl('path',{d:`M${c.x} ${c.y}C${c.x+60} ${c.y-50} ${c.x+70} ${c.y+20} ${c.x+24} ${c.y+12}`,fill:'none',stroke:'#923f35','stroke-width':2.2,'stroke-linecap':'round'},g);
+  const halves=['polygon(0 0,100% 0,100% 30%,0 70%)','polygon(0 70%,100% 30%,100% 100%,0 100%)'].map(cp=>{const h=chip.cloneNode(true);
+    h.style.cssText=`position:absolute;left:${c.x-c.w/2}px;top:${c.y-c.h/2}px;width:${c.w}px;height:${c.h}px;margin:0;z-index:7;clip-path:${cp}`;wrap.appendChild(h);return h});
+  chip.style.visibility='hidden';
+  gsap.timeline({onComplete:()=>{cut.remove();back.remove();halves.forEach(h=>h.remove());chip.style.visibility=''}})
+    .fromTo(cut,{drawSVG:'0%'},{drawSVG:'100%',duration:.16,ease:'power3.in'})
+    .to(halves[0],{x:18,y:-18,rotation:-16,duration:.55,ease:'power2.out'},'+=.04')
+    .to(halves[1],{x:24,y:16,rotation:12,duration:.55,ease:'power2.out'},'<')
+    .fromTo(back,{drawSVG:'0%'},{drawSVG:'100%',duration:.4,ease:'power1.inOut'},'<')
+    .to([...halves,cut,back],{opacity:0,duration:.3},'+=.05');
+}
+// after a beat resolves: tie a knot where attacks met, cut the foe's patch on a parry
+function beatFx(h){const t=h.rec&&tagOf(h.rec);if(!t)return;if(t.t==='弹反'){tieKnot(h.b);cutThread(h.b)}else if(t.c==='res')tieKnot(h.b)}
+function sway(el){if(!CALM)gsap.fromTo(el,{rotation:-2.2},{rotation:0,duration:1.4,ease:'elastic.out(1,.35)',clearProps:'transform'})}
+// the defeat illustration loses its lower edge into hanging threads that keep swaying
+function fray(){
+  const svg=$('frayThreads');if(!svg)return;
+  const cols=['#923f35','#b4574a','#e8d9b9','#b28a45','#3b5064','#69745c','#923f35'];
+  const ps=Array.from({length:64},(_,i)=>{const x=i*9.4+4+Math.random()*5,len=50+Math.random()*140,sw=(Math.random()-.5)*28;
+    const d=s=>`M${x} 0C${x+s*.3} ${len*.35} ${x-s*.6} ${len*.65} ${x+s} ${len}`;
+    const p=svgEl('path',{d:d(sw),fill:'none',stroke:cols[i%cols.length],'stroke-width':1.6+Math.random()*2.2,'stroke-linecap':'round',opacity:.9},svg);p._d=[d(sw),d(-sw*.8)];return p});
+  if(CALM)return;
+  gsap.fromTo(ps,{drawSVG:'0%'},{drawSVG:'100%',duration:1.6,ease:'power2.out',stagger:{each:.02,from:'random'},delay:.3});
+  ps.forEach(p=>gsap.to(p,{attr:{d:p._d[1]},duration:2+Math.random()*2.5,ease:'sine.inOut',repeat:-1,yoyo:true,delay:Math.random()}));
+  gsap.from('.fray .pic',{clipPath:'inset(0 0 0 0)',duration:1.8,ease:'power2.inOut'});
+}
+function calmDown(){if(!CALM)gsap.killTweensOf('#frayThreads path')}
+function enter(mode){
+  if(CALM)return;
+  gsap.from('#scrIn',{opacity:0,duration:.35});
+  if(mode==='brief'){
+    gsap.from('.hunt',{clipPath:'inset(0 0 100% 0)',duration:.9,ease:'power2.out'});
+    gsap.from('.bmid>*',{x:30,opacity:0,stagger:.08,duration:.5,ease:'power2.out',delay:.2,clearProps:'transform,opacity'});
+    gsap.from('.tw',{opacity:0,y:-12,stagger:.07,duration:.35,delay:.4});
+    gsap.from('.tw.cur',{scale:1.25,duration:.6,ease:'back.out(2.5)',delay:.95});
+  }else if(mode==='win'){
+    gsap.from('.vban',{scaleY:0,transformOrigin:'50% 0',duration:.7,ease:'back.out(1.6)'});
+    gsap.from('.hero-col>*,.vmain>.ttl,.vmain>.stats,.vmain>.sh,.vmain>.lead',{y:22,opacity:0,stagger:.06,duration:.5,ease:'power2.out',delay:.15,clearProps:'transform,opacity'});
+    gsap.from('.seam',{clipPath:'inset(0 100% 0 0)',duration:1,ease:'power2.inOut',delay:.4});
+    gsap.from('.rewards>*',{y:70,rotation:i=>(i-1.5)*7,opacity:0,stagger:.09,duration:.65,ease:'back.out(1.4)',delay:.55,clearProps:'transform,opacity'});
+    gsap.from('.journey',{clipPath:'inset(0 100% 0 0)',duration:1.2,ease:'power2.inOut',delay:.7});
+    gsap.from('.journey .jn.next i',{scale:0,duration:.5,ease:'back.out(3)',delay:1.7});
+  }else if(mode==='lose'){
+    fray();
+    gsap.from('.lmain>*',{y:18,opacity:0,stagger:.07,duration:.5,ease:'power2.out',delay:.2,clearProps:'transform,opacity'});
+  }else if(mode==='end'){
+    gsap.from('.pano',{clipPath:'inset(0 50% 0 50%)',duration:1.5,ease:'power3.inOut'});
+    gsap.from('.pano .cap',{y:30,opacity:0,duration:.6,delay:1.2});
+    gsap.fromTo('.seven path',{drawSVG:'0%'},{drawSVG:'100%',duration:1.8,ease:'power1.inOut',delay:.8});
+    gsap.from('.seven .kn',{scale:0,transformOrigin:'50% 50%',stagger:.24,duration:.4,ease:'back.out(3)',delay:1});
+    gsap.from('.scr.end .stats,.scr.end .pp,.scr.end .acts',{y:24,opacity:0,stagger:.1,duration:.5,delay:1.6,clearProps:'transform,opacity'});
+  }
+}
 
 function start(data){
   if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.rageMax??=10;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.over)showEnd()}
