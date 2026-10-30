@@ -1,0 +1,621 @@
+/* page reset */
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+
+/* 命运织锦 · Fate Tapestry (design/fate-tapestry). The whole game is one woven medieval tapestry: flax linen carries
+   the information, ink-indigo carries story and figures, madder red marks danger and the main action, ochre-gold thread
+   marks selection and the moments where threads cross. Texture stays at the edges and in the art; text fields stay quiet.
+   Seven floors of the clock tower: floors 1-5 each draw one of three minor foes, then the black knight, then the Demon King. */
+:root{
+  --flax:#e8d9b9; --flax2:#f1e7d1; --flax3:#d9c6a0; --flax4:#c9b48a;
+  --indigo:#202d3a; --indigo2:#2c3d4f; --indigo3:#3b5064;
+  --madder:#923f35; --madder2:#73302a; --madder3:#b4574a;
+  --gold:#b28a45; --gold2:#cfa95f; --gold3:#ead39a;
+  --moss:#69745c; --moss2:#4f5a44; --stone:#8d8a80;
+  --ink:#2a241c; --ink2:#5e5343; --muted:#857a66;
+  --fire:#b8562f; --ice:#5f8296; --bolt:#b28a45;
+  --t-move:var(--indigo2); --t-res:#9a7535; --t-rhy:var(--moss); --t-grd:#7c7a72; --t-frb:#5b2c3a;
+  --t-war:var(--madder); --t-rog:var(--moss2); --t-mag:var(--indigo2); --rage:var(--madder3);
+  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-latin:"Cinzel","Trajan Pro","Times New Roman",serif;
+  --f-body:"Noto Serif SC","Songti SC","STSong",Georgia,serif;
+  /* textures: flax linen, indigo weave, millefleur sprigs, woven trim */
+  --linen:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .045' numOctaves='2' stitchTiles='stitch' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .24 0 0 0 0 .12 0 0 0 .9 -.3'/%3E%3C/filter%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.045 .9' numOctaves='2' stitchTiles='stitch' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .98 0 0 0 0 .9 0 0 0 .9 -.35'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23a)' opacity='.32'/%3E%3Crect width='220' height='220' filter='url(%23b)' opacity='.4'/%3E%3C/svg%3E");
+  --weave:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85 .05' numOctaves='2' stitchTiles='stitch' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .62 0 0 0 0 .72 0 0 0 .9 -.3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23a)' opacity='.22'/%3E%3C/svg%3E");
+  --sprig:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' fill-opacity='.5'%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='20' cy='22' r='2.6'/%3E%3Ccircle cx='24.5' cy='24' r='2.6'/%3E%3Ccircle cx='23' cy='28.5' r='2.6'/%3E%3Ccircle cx='17.5' cy='28' r='2.6'/%3E%3Ccircle cx='16.5' cy='23.5' r='2.6'/%3E%3Ccircle cx='96' cy='92' r='2.2'/%3E%3Ccircle cx='100' cy='95' r='2.2'/%3E%3Ccircle cx='97' cy='99' r='2.2'/%3E%3Ccircle cx='92.5' cy='97' r='2.2'/%3E%3Ccircle cx='93' cy='92.5' r='2.2'/%3E%3C/g%3E%3Cg fill='%23f6efe0'%3E%3Ccircle cx='86' cy='30' r='2.2'/%3E%3Ccircle cx='89.5' cy='32.5' r='2.2'/%3E%3Ccircle cx='88' cy='36.5' r='2.2'/%3E%3Ccircle cx='84' cy='36.5' r='2.2'/%3E%3Ccircle cx='82.5' cy='32.5' r='2.2'/%3E%3Ccircle cx='34' cy='106' r='2.2'/%3E%3Ccircle cx='37.5' cy='108.5' r='2.2'/%3E%3Ccircle cx='36' cy='112.5' r='2.2'/%3E%3Ccircle cx='32' cy='112.5' r='2.2'/%3E%3Ccircle cx='30.5' cy='108.5' r='2.2'/%3E%3C/g%3E%3Cg fill='%23b28a45'%3E%3Ccircle cx='20.5' cy='25.8' r='1.4'/%3E%3Ccircle cx='96' cy='95.5' r='1.2'/%3E%3Ccircle cx='86' cy='33.6' r='1.2'/%3E%3Ccircle cx='34' cy='109.6' r='1.2'/%3E%3Ccircle cx='60' cy='64' r='1.3'/%3E%3Ccircle cx='124' cy='128' r='1.3'/%3E%3C/g%3E%3Cg fill='none' stroke='%2369745c' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M20 31c-1 8 2 14 6 18M22 40c4-3 8-3 10-1M20 44c-4-2-8-1-9 2M93 101c-2 8 0 13 3 17M95 110c4-2 7-1 8 1M84 40c1 7-1 11-4 15M83 48c-4-1-6 0-7 2M33 116c0 7 3 11 6 14M36 123c3-2 6-2 8 0'/%3E%3C/g%3E%3C/svg%3E");
+  --trim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12'%3E%3Crect width='18' height='12' fill='%23e8d9b9'/%3E%3Crect width='18' height='2' fill='%23923f35'/%3E%3Crect y='10' width='18' height='2' fill='%23923f35'/%3E%3Cpath d='M0 6l3-3 3 3-3 3z' fill='%23202d3a'/%3E%3Cpath d='M9 6l3-3 3 3-3 3z' fill='%23923f35'/%3E%3Ccircle cx='7.5' cy='6' r='.9' fill='%23b28a45'/%3E%3Ccircle cx='16.5' cy='6' r='.9' fill='%23b28a45'/%3E%3C/svg%3E");
+  --trim-i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12'%3E%3Crect width='18' height='12' fill='%23202d3a'/%3E%3Crect width='18' height='1.4' fill='%23b28a45'/%3E%3Crect y='10.6' width='18' height='1.4' fill='%23b28a45'/%3E%3Cpath d='M0 6l3-3 3 3-3 3z' fill='%23923f35'/%3E%3Cpath d='M9 6l3-3 3 3-3 3z' fill='%23e8d9b9'/%3E%3C/svg%3E");
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--flax) var(--linen);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;overflow-x:hidden}
+button{font-family:var(--f-body);cursor:pointer;color:inherit}
+.wrap{position:relative;max-width:1440px;margin:0 auto;padding-block:0 18px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));display:flex;flex-direction:column}
+.trim{height:12px;background:var(--trim) 0 0/18px 12px repeat-x}
+.trim.i{background-image:var(--trim-i)}
+
+/* stitched frames: a hairline running stitch inside the edge of every woven panel */
+.stitch{position:relative}
+.stitch::after{content:"";position:absolute;inset:4px;border:1.5px dashed rgba(178,138,69,.75);pointer-events:none;z-index:1}
+.stitch.r::after{border-color:rgba(146,63,53,.55)}
+
+/* Masthead */
+.mast{display:flex;align-items:center;gap:14px 22px;padding:10px 6px 8px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px;margin:0;text-decoration:none}
+.logo .knot{width:40px;height:40px;flex:none;color:var(--madder)}
+.logo b{font-family:var(--f-display);font-weight:900;font-size:clamp(24px,3vw,32px);letter-spacing:.08em;line-height:1;color:var(--ink)}
+.logo span{font-family:var(--f-latin);font-size:12px;letter-spacing:.3em;color:var(--ink2);font-weight:500}
+.vine{flex:1;min-width:60px;height:26px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='26'%3E%3Cpath d='M0 13c15-9 25-9 30 0s15 9 30 0 25-9 30 0 20 9 30 0' fill='none' stroke='%2369745c' stroke-width='1.4'/%3E%3Cg fill='%2369745c'%3E%3Cpath d='M14 7c3-4 7-4 8-2-3 2-5 3-8 2zM44 19c3 4 7 4 8 2-3-2-5-3-8-2zM74 7c3-4 7-4 8-2-3 2-5 3-8 2zM104 19c3 4 7 4 8 2-3-2-5-3-8-2z'/%3E%3C/g%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='30' cy='13' r='3'/%3E%3Ccircle cx='90' cy='13' r='3'/%3E%3C/g%3E%3Cg fill='%23f6efe0'%3E%3Ccircle cx='60' cy='13' r='2.6'/%3E%3Ccircle cx='0' cy='13' r='2.6'/%3E%3Ccircle cx='120' cy='13' r='2.6'/%3E%3C/g%3E%3Cg fill='%23b28a45'%3E%3Ccircle cx='30' cy='13' r='1.1'/%3E%3Ccircle cx='90' cy='13' r='1.1'/%3E%3C/g%3E%3C/svg%3E") center/120px 26px repeat-x;opacity:.9}
+.meta{display:flex;align-items:center;font-family:var(--f-display);font-size:16px;font-weight:700;color:var(--ink)}
+.meta>*{padding:2px 16px;border-left:1.5px solid var(--flax4)}
+.meta>*:first-child{border-left:0}
+.meta b{font-family:var(--f-display);font-variant-numeric:tabular-nums}
+.tbtn{display:inline-flex;align-items:center;gap:7px;background:none;border:0;font-family:var(--f-display);font-weight:700;font-size:16px;color:var(--ink);letter-spacing:.08em}
+.tbtn svg{width:20px;height:20px;color:var(--ink2);transition:transform .3s}
+.tbtn:hover svg,.tbtn:focus-visible svg{transform:rotate(60deg);color:var(--madder)}
+.tbtn:focus-visible{outline:1.5px dashed var(--madder);outline-offset:3px}
+
+/* Arena: one indigo story frieze, hero at left facing the foe at right */
+.arena{position:relative;display:grid;grid-template-columns:1fr 1fr;height:clamp(240px,27vw,350px);background:var(--indigo) var(--weave);overflow:hidden;border-block:3px solid var(--indigo)}
+.half{position:relative;overflow:hidden;min-width:0}
+.half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transform-origin:50% 90%}
+.half.hero .art{background-image:var(--hero,url(../img/classes/hero_warrior.jpg));background-position:30% 40%;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
+.half.foe .art{background-position:70% 40%;-webkit-mask-image:linear-gradient(270deg,#000 80%,transparent);mask-image:linear-gradient(270deg,#000 80%,transparent)}
+.half::after{content:"";position:absolute;inset:auto 0 0;height:34%;pointer-events:none;background:linear-gradient(0deg,rgba(32,45,58,.7),transparent)}
+.half.foe.rage .art{filter:saturate(1.25) sepia(.25) hue-rotate(-12deg)}
+.half.foe.rage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 60% 45%,rgba(146,63,53,.38),transparent 70%);animation:breathe 1.8s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.35}}
+.half .art.hitfx{animation:hitfx .32s}
+@keyframes hitfx{0%{filter:brightness(1.7) sepia(.6)}100%{filter:none}}
+.half .art.shake{animation:shake .35s,hitfx .32s}
+@keyframes shake{25%{translate:-8px 0}50%{translate:7px 0}75%{translate:-3px 0}}
+.roundel{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:clamp(110px,13vw,170px);aspect-ratio:1;z-index:4;pointer-events:none;color:var(--gold2)}
+.roundel svg{width:100%;height:100%;overflow:visible}
+.roundel .rays{transform-origin:50% 50%;animation:spin 90s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.plate{position:absolute;bottom:12px;z-index:3;display:flex;flex-direction:column;align-items:flex-start;gap:6px;max-width:calc(100% - 30px)}
+.half.hero .plate{left:clamp(14px,6%,70px)}
+.half.foe .plate{right:clamp(14px,6%,70px);align-items:flex-end}
+.status{display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-height:24px}
+.half.foe .status{justify-content:flex-end}
+/* life ribbon: a madder pennant with notched ends and a thread gauge sewn along its foot */
+.lr{position:relative;display:flex;align-items:baseline;gap:14px;padding:7px 34px 11px;min-width:min(330px,100%);color:var(--flax2);background:var(--madder) var(--linen);
+  clip-path:polygon(0 0,100% 0,calc(100% - 14px) 50%,100% 100%,0 100%,14px 50%);font-family:var(--f-display);white-space:nowrap}
+.lr::before{content:"";position:absolute;inset:3px 16px;border-block:1px dashed rgba(234,211,154,.55);pointer-events:none}
+.lr .nm{font-weight:900;font-size:18px;letter-spacing:.12em}
+.lr .hp{font-family:var(--f-display);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.lr .res{font-size:13px;color:var(--gold3);letter-spacing:.06em}
+.lr .gauge{position:absolute;left:22px;right:22px;bottom:4px;height:3px;background:rgba(32,45,58,.55)}
+.lr .gauge i{position:absolute;inset:0 auto 0 0}
+.lr .gauge .lag{background:var(--flax);opacity:.55;transition:width .7s .35s ease-in}
+.lr .gauge .cur{background:var(--gold3);transition:width .25s ease-out}
+.tag{display:inline-block;padding:1px 9px;font-size:12px;line-height:1.6;color:var(--ink);background:var(--flax2);border-left:3px solid var(--gold);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.tag.ok{border-color:var(--moss)} .tag.rg{border-color:var(--madder)} .tag.cb{border-color:var(--moss2)} .tag.mg{border-color:var(--indigo2)}
+.tag.sh{border-color:var(--ice)} .tag.mr{border-color:var(--t-frb)}
+.tag.p2{border-color:var(--madder);background:var(--madder);color:var(--flax2);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{filter:brightness(1.18)}}
+.mood{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold2);background:var(--indigo) center/cover;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.mood.judge{border-color:var(--gold3)} .mood.rage{border-color:var(--madder3);box-shadow:0 0 0 2px var(--madder)}
+.floats{position:absolute;inset:0;pointer-events:none;z-index:6}
+.flt{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-family:var(--f-display);font-weight:900;font-size:34px;white-space:nowrap;animation:rise 1.3s ease-out forwards;color:var(--flax2);-webkit-text-stroke:1px var(--indigo);paint-order:stroke fill;text-shadow:0 2px 0 var(--indigo)}
+.flt.dmg{color:var(--gold3)} .flt.big{font-size:54px;color:var(--gold3);text-shadow:0 3px 0 var(--madder2),0 0 0 var(--indigo)}
+.flt.hurt{color:#f0a493} .flt.info{font-size:19px;color:var(--flax2);letter-spacing:.12em;-webkit-text-stroke:0;text-shadow:0 1px 3px var(--indigo),0 0 8px var(--indigo)} .flt.heal{color:#b9c9a3}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,14px) scale(.6)}14%{opacity:1;transform:translate(-50%,0) scale(1.15)}28%{transform:translate(-50%,-6px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(1)}}
+.flash{position:absolute;inset:0;z-index:7;pointer-events:none;background:radial-gradient(circle,rgba(234,211,154,.55),transparent 65%);opacity:0}
+.flash.on{animation:flash .45s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+/* turn and event banners: a madder cloth tab let down over the frieze */
+.banner{position:absolute;left:50%;top:44%;z-index:8;pointer-events:none;text-align:center;opacity:0;padding:12px 64px 14px;transform:translate(-50%,-50%);color:var(--flax2);background:var(--madder) var(--linen);
+  clip-path:polygon(0 0,100% 0,calc(100% - 22px) 50%,100% 100%,0 100%,22px 50%)}
+.banner::before{content:"";position:absolute;inset:4px 24px;border-block:1.5px dashed rgba(234,211,154,.6)}
+.banner b{display:block;font-family:var(--f-display);font-weight:900;font-size:30px;letter-spacing:.3em;white-space:nowrap}
+.banner span{font-family:var(--f-latin);font-size:11px;letter-spacing:.4em;color:var(--gold3);white-space:nowrap}
+.banner.red{background-color:var(--indigo)}
+.banner.show{animation:banner 1.6s ease-out}
+@keyframes banner{0%{opacity:0;transform:translate(-50%,-80%) scaleY(.4)}14%{opacity:1;transform:translate(-50%,-50%) scaleY(1)}78%{opacity:1}100%{opacity:0}}
+
+/* Loom of fate: warp threads divide time into beats, cloth patches carry the actions, knots mark beats where they meet */
+.loom{display:grid;grid-template-columns:200px minmax(0,1fr);gap:0 14px;padding:14px 10px 14px 6px;background:var(--flax2) var(--linen)}
+.loom>*{min-width:0}
+.loomhead{display:flex;flex-direction:column;gap:10px;padding:6px 4px 0 10px;position:relative}
+.loomhead .ttl b{display:block;font-family:var(--f-display);font-weight:900;font-size:34px;letter-spacing:.06em;line-height:1.1;color:var(--ink)}
+.loomhead .ttl small{display:block;font-family:var(--f-latin);font-size:11px;letter-spacing:.28em;color:var(--ink2);margin-top:4px}
+.loomhead .sprigs{flex:1;min-height:60px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 110'%3E%3Cg fill='none' stroke='%2369745c' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M10 108C30 80 40 50 70 30M40 70c-10-6-22-4-28 4M52 52c4-12 14-18 26-18M70 30c10-10 24-12 34-6'/%3E%3Cpath d='M150 108c-6-30 0-60 20-80M158 70c8-6 16-6 20-2M156 50c-8-4-16-2-20 4'/%3E%3C/g%3E%3Cg fill='%2369745c'%3E%3Cpath d='M30 82c-8 0-12-6-12-6 6-2 12 0 12 6zM60 40c-2-8 2-13 2-13 4 5 3 10-2 13zM88 26c4-7 10-8 10-8 0 6-4 9-10 8zM164 62c6-4 12-2 12-2-3 5-8 6-12 2z'/%3E%3C/g%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='70' cy='30' r='5'/%3E%3Ccircle cx='12' cy='76' r='4'/%3E%3Ccircle cx='170' cy='28' r='5'/%3E%3C/g%3E%3Cg fill='%23f6efe0'%3E%3Ccircle cx='104' cy='24' r='4'/%3E%3Ccircle cx='136' cy='54' r='3.5'/%3E%3C/g%3E%3Cg fill='%23b28a45'%3E%3Ccircle cx='70' cy='30' r='1.8'/%3E%3Ccircle cx='170' cy='28' r='1.8'/%3E%3Ccircle cx='104' cy='24' r='1.4'/%3E%3C/g%3E%3C/svg%3E") left bottom/contain no-repeat}
+.hint{font-size:13px;line-height:1.55;color:var(--ink2);display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}
+.hint>svg{width:12px;height:12px;flex:none;margin-top:4px;color:var(--gold)}
+.hint.err{color:var(--madder);font-weight:700}
+.hint.pend{color:var(--indigo);font-weight:700}
+.cancel{background:var(--flax2);border:1px solid var(--indigo2);color:var(--indigo);padding:0 12px;font-size:12px}
+.cancel:hover,.cancel:focus-visible{background:var(--indigo);color:var(--flax2);outline:none}
+.tlscroll{position:relative;overflow-x:auto;border:2px solid var(--indigo);background:var(--flax);scrollbar-color:var(--flax4) transparent}
+.tlwrap{position:relative;min-width:max-content}
+.tl{display:flex}
+.lanes{flex:none;width:86px;display:grid;grid-template-rows:42px 74px 64px 74px;position:sticky;left:0;z-index:3;background:var(--flax2);border-right:2px solid var(--indigo)}
+.lanes div{display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.1em;color:var(--flax2)}
+.lanes div:first-child{background:var(--flax2)}
+.lanes .le{background:var(--madder) var(--linen)} .lanes .lc{background:var(--moss2) var(--linen)} .lanes .lh{background:var(--indigo) var(--weave)}
+.lanes div+div{border-top:2px solid var(--flax2)}
+.slot{flex:1 0 104px;display:grid;grid-template-rows:42px 74px 64px 74px;position:relative;background:#e0d1b0;transition:background-color .25s}
+/* warp threads: each beat is bounded by a pair of flax threads, studded with ochre where the lanes cross */
+.slot::before{content:"";position:absolute;inset:0;pointer-events:none;border-left:1px solid rgba(94,83,67,.35);box-shadow:inset 1px 0 0 rgba(255,250,236,.7)}
+.slot>div{position:relative;border-bottom:1px solid rgba(94,83,67,.28)}
+.slot>div:last-child{border-bottom:0}
+.slot.now{background:#f4e9cf}
+.slot.fut{background:#e3d5b6}
+.slot.far{opacity:.55}
+.bn{display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:20px;color:var(--ink);letter-spacing:.02em}
+.slot.fut .bn{color:var(--ink2)}
+.slot.hit{background:#f9efd2}
+.slot.hit::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 18px rgba(178,138,69,.35);z-index:2}
+.slot.tgt{cursor:pointer}
+.slot.tgt::after{content:"";position:absolute;inset:4px;border:1.5px dashed var(--indigo2);pointer-events:none;opacity:.55;z-index:2}
+.slot.tgt:hover{background:#fbf3df}
+.slot.smk{background-image:repeating-linear-gradient(135deg,rgba(105,116,92,.14) 0 6px,transparent 6px 12px)}
+.lane{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;padding:4px 6px}
+.mid{display:flex;align-items:center;justify-content:center;font-size:13px;text-align:center;padding:0 3px;line-height:1.3}
+/* the clash lane: two ochre threads cross the cell, a woven knot sits where they meet */
+.mid.res,.mid.ok{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64' preserveAspectRatio='none'%3E%3Cpath d='M0 0L100 64M100 0L0 64' stroke='%23b28a45' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.mid .mt{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:2px 6px;line-height:1.25;font-family:var(--f-display);font-weight:700;color:var(--ink)}
+.mid .mt:empty{display:none}
+.mid.res .mt,.mid.ok .mt{background:var(--flax2);box-shadow:0 0 0 1px var(--gold)}
+.mid.res .mt::before,.mid.ok .mt::before{content:"";width:20px;height:20px;margin-bottom:1px;background:var(--knot) center/contain no-repeat}
+.mid.bad .mt{color:var(--madder)} .mid.ok .mt{color:var(--moss2)} .mid.arm .mt{color:var(--ink2)}
+.mid em{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:12px}
+.mid em.tk{color:var(--madder)}.mid em.dl{color:var(--indigo)}.mid em.hl{color:var(--t-frb)}
+.mid .old{font-size:10px;color:var(--muted);text-decoration:line-through}
+:root{--knot:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23b28a45' stroke-width='3'%3E%3Cpath d='M20 4c6 0 9 5 6 10l-12 12c-3 5 0 10 6 10s9-5 6-10L14 14c-3-5 0-10 6-10z'/%3E%3Cpath d='M4 20c0-6 5-9 10-6l12 12c5 3 10 0 10-6s-5-9-10-6L14 26c-5 3-10 0-10-6z'/%3E%3C/svg%3E")}
+/* cloth patches: madder for the foe, indigo for the hero, notched like cut cloth, a running stitch inside */
+.chip{position:relative;z-index:1;display:flex;align-items:center;gap:6px;padding:6px 16px;min-width:84px;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:17px;letter-spacing:.04em;white-space:nowrap;
+  color:var(--flax2);background:var(--indigo) var(--weave);clip-path:polygon(0 0,100% 0,calc(100% - 6px) 50%,100% 100%,0 100%,6px 50%);transition:filter .12s}
+.chip::before{content:"";position:absolute;inset:3px 8px;border-block:1px dashed rgba(234,211,154,.5);pointer-events:none}
+.chip>svg{width:18px;height:18px;flex:none}
+.chip b{font-weight:900;font-variant-numeric:tabular-nums}
+.chip.e{background-color:var(--madder);background-image:var(--linen)}
+.chip.e.j{background-color:var(--madder2);box-shadow:inset 0 0 0 2px var(--gold2)}
+.chip.e.j.warn{animation:pulse 1.1s infinite}
+.chip.e.na{background:var(--flax2);color:var(--madder);box-shadow:inset 0 0 0 1.5px var(--madder);font-size:14px}
+.chip.e.na::before{border-color:rgba(146,63,53,.4)}
+.chip.e.sh{background:var(--stone) var(--linen);color:var(--flax2);font-size:14px}
+.chip.e.mir{background:var(--flax2);color:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--indigo2);font-size:14px}
+.chip.e.fin{background:#3a1512;animation:pulse 1.1s infinite;box-shadow:inset 0 0 0 2px var(--madder3)}
+.chip .lock{font-size:11px;opacity:.9;border-left:1px solid currentColor;padding-left:5px}
+.chip.h.ch{box-shadow:inset 0 0 0 2px var(--gold2)}
+.chip.h.fx{background-color:#152029;box-shadow:inset 0 0 0 2px var(--gold2);color:var(--gold3)}
+.chip.h.rev{background:var(--t-frb);color:var(--flax2)}
+.chip.g{background:var(--flax2);color:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--indigo2);font-size:14px}
+.chip.g::before,.chip.w::before,.chip.d::before{border-color:rgba(32,45,58,.35)}
+.chip.w{background:var(--gold3) var(--linen);color:var(--ink);font-size:14px}
+.chip.d{background:var(--flax2);color:var(--moss2);box-shadow:inset 0 0 0 1.5px var(--moss2);font-size:14px}
+.chip.k{background:var(--moss2) var(--linen);font-size:13px;min-width:0;padding:2px 12px}
+.chip.sp{--ec:var(--fire);background:var(--ec) var(--linen);font-size:14px;padding:5px 12px}
+.chip.sp[data-el="冰"]{--ec:var(--ice)} .chip.sp[data-el="雷"]{--ec:var(--bolt)}
+.chip.spw{--ec:var(--fire);background:none;color:var(--ec);font-size:12px;min-width:0;padding:1px 10px;font-weight:700;clip-path:none;border:1.5px dotted var(--ec)}
+.chip.spw::before{display:none}
+.chip.spw[data-el="冰"]{--ec:var(--ice)} .chip.spw[data-el="雷"]{--ec:var(--bolt)}
+.chip.pick{cursor:pointer;filter:drop-shadow(0 0 0 var(--gold));animation:bob 1s ease-in-out infinite}
+.chip.pick::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 2px var(--gold3)}
+.chip.pick:hover{filter:brightness(1.15)}
+@keyframes bob{50%{translate:0 -2px}}
+.slot.fut .chip{opacity:.78}
+.slot.fut .bn,.slot.fut .mid{opacity:.85}
+/* past beats are woven in: flattened to undyed flax, threads tied off */
+.slot.past{flex:0 0 76px;background:#d6c7a6}
+.slot.past .bn{color:var(--muted);font-size:16px}
+.slot.past .chip{background:var(--flax3);color:var(--ink2);min-width:0;padding:2px 10px;font-size:13px;box-shadow:none;animation:none}
+.slot.past .chip::before{border-color:rgba(94,83,67,.3)}
+.slot.past .chip>svg{display:none}
+.slot.past .mid .mt{background:none;box-shadow:none;color:var(--ink2);font-size:12px}
+.slot.past .mid .mt::before{width:14px;height:14px;opacity:.6}
+.slot.past.fresh{animation:woven .9s ease-out}
+@keyframes woven{0%{background-color:#f9efd2}100%{background-color:#d6c7a6}}
+/* the shuttle that crosses the beats as a turn resolves */
+#needle{position:absolute;top:0;bottom:0;left:0;width:3px;margin-left:-1.5px;z-index:5;pointer-events:none;opacity:0;transition:left .45s cubic-bezier(.5,0,.3,1),opacity .3s;background:var(--gold)}
+#needle.on{opacity:1}
+#needle::before{content:"";position:absolute;top:8px;left:50%;width:34px;height:12px;transform:translateX(-50%);border-radius:50%;background:var(--madder);box-shadow:inset 0 0 0 2px var(--gold3)}
+#threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:visible}
+
+/* Dock: the sand arch, the hand of embroidered card patches, the cloth tab that advances time */
+.dock{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 6px 12px}
+.sand{position:relative;width:150px;height:226px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:18px;flex:none;color:var(--gold3);
+  background:var(--indigo) var(--weave);border-radius:75px 75px 4px 4px;box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+.sand::after{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(178,138,69,.55);border-radius:66px 66px 2px 2px;pointer-events:none}
+.sand>span{position:absolute;top:22px;left:50%;width:84px;height:110px;transform:translateX(-50%)}
+.sand>span svg,.logo .knot svg,.roundel svg{display:block;width:100%;height:100%}
+.logo .knot{display:block}
+.sandnum{position:relative;font-family:var(--f-display);font-weight:900;font-size:58px;line-height:1;color:var(--gold3);font-variant-numeric:tabular-nums}
+.sandnum.bump{animation:bump .4s}
+@keyframes bump{40%{transform:scale(1.3)}}
+.sandlbl{position:relative;font-family:var(--f-display);font-weight:700;font-size:16px;color:var(--flax2);letter-spacing:.2em;margin-top:2px}
+.debt{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:12px;color:var(--madder);font-weight:700}
+.hand{display:flex;gap:12px;overflow-x:auto;padding:18px 10px 8px;min-width:0}
+.hand>.card:first-child{margin-left:auto}.hand>.card:last-child{margin-right:auto}
+.hand.empty::before{content:"手牌已放回牌库，时间正在流动……";color:var(--ink2);font-size:14px;align-self:center;padding:96px 0}
+.card{--tc:var(--t-move);flex:0 0 150px;height:236px;padding:0;border:none;background:none;position:relative;text-align:center;color:var(--ink);transition:transform .18s ease-out,filter .18s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.card .fr{position:absolute;inset:0;display:flex;flex-direction:column;padding:7px;background:var(--indigo) var(--weave);box-shadow:0 6px 14px rgba(32,45,58,.35)}
+.card .fr::after{content:"";position:absolute;inset:3px;border:1.5px dashed rgba(178,138,69,.7);pointer-events:none}
+.card .art{height:118px;flex:none;position:relative;overflow:hidden;background:color-mix(in srgb,var(--tc) 85%,#000) var(--weave);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.card .art i{position:absolute;inset:0;background-size:cover;background-position:center}
+.card .txt{flex:1;display:flex;flex-direction:column;align-items:center;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold);padding:0 6px 6px;min-height:0}
+.card .cn{font-family:var(--f-display);font-weight:900;font-size:18px;letter-spacing:.14em;line-height:1.2;padding:5px 0 3px;width:100%;border-bottom:1px solid rgba(178,138,69,.6)}
+.card .ct{font-size:10px;letter-spacing:.3em;color:var(--ink2);padding-top:2px}
+.card .cd{font-size:11.5px;line-height:1.45;padding:4px 2px 0;color:var(--ink);text-align:center;overflow:hidden}
+.card .cx{font-size:10.5px;color:var(--madder);letter-spacing:.04em;margin-top:auto;font-weight:700}
+.card .ks{font-size:10.5px;color:var(--gold);letter-spacing:.4em;margin-top:auto;font-weight:900}
+.card[data-t="挪移"]{--tc:var(--t-move)} .card[data-t="共鸣"]{--tc:var(--t-res)} .card[data-t="节奏"]{--tc:var(--t-rhy)} .card[data-t="守御"]{--tc:var(--t-grd)} .card[data-t="禁术"]{--tc:var(--t-frb)}
+.card[data-t="战士"]{--tc:var(--t-war)} .card[data-t="刺客"]{--tc:var(--t-rog)} .card[data-t="法师"]{--tc:var(--t-mag)}
+.card.ks .fr{background-color:#5a4521;box-shadow:0 0 0 2px var(--gold2),0 6px 14px rgba(32,45,58,.35)}
+.card.ks .fr::after{border-color:var(--gold3)}
+.card .cost{position:absolute;top:-8px;left:-8px;width:36px;height:36px;z-index:3;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--flax2);box-shadow:0 0 0 2px var(--gold),0 0 0 3.5px var(--indigo),0 2px 4px rgba(0,0,0,.4)}
+.card .cost::before{content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed rgba(94,83,67,.5)}
+.card .cost span{position:relative;font-family:var(--f-display);font-weight:900;font-size:20px;color:var(--ink);line-height:1}
+.card.rg .cost{background:var(--madder);width:auto;min-width:36px;padding:0 10px 0 11px;border-radius:18px;gap:4px}
+.card.rg .cost span{color:var(--flax2)}
+.card.rg .cost small{position:relative;font-size:11px;color:var(--gold3);letter-spacing:.06em;font-weight:700}
+.card:hover:not(:disabled),.card:focus-visible{transform:translateY(-14px) rotate(-1deg);outline:none;z-index:3}
+.card:hover:not(:disabled) .fr,.card:focus-visible .fr{box-shadow:0 0 0 2.5px var(--gold2),0 16px 26px rgba(32,45,58,.4)}
+.card.sel{transform:translateY(-20px);z-index:3}
+.card.sel .fr{box-shadow:0 0 0 3px var(--madder),0 0 0 5px var(--gold3),0 18px 28px rgba(32,45,58,.45)}
+.card:disabled{filter:grayscale(.7) brightness(.82) opacity(.75);cursor:not-allowed}
+.card.flying{pointer-events:none}
+.endwrap{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:250px}
+.endbtn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:168px;padding:16px 22px;color:var(--flax2);border:0;background:var(--madder) var(--linen);box-shadow:inset 0 0 0 4px var(--madder),inset 0 0 0 5.5px var(--gold),0 6px 14px rgba(32,45,58,.35);transition:filter .2s,transform .1s}
+.endbtn::after{content:"";position:absolute;inset:10px;border:1.5px dashed rgba(234,211,154,.6);pointer-events:none}
+.endbtn svg{width:120px;height:58px;flex:none}
+.endbtn b{display:block;font-family:var(--f-display);font-weight:900;font-size:34px;letter-spacing:.16em;line-height:1.2}
+.endbtn:hover:not(:disabled),.endbtn:focus-visible{filter:brightness(1.12);outline:none}
+.endbtn:active:not(:disabled){transform:translateY(1px)}
+.endbtn:disabled{opacity:.6;cursor:wait}
+.busy .endbtn .shuttle{animation:weave .6s ease-in-out infinite alternate}
+@keyframes weave{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+.pilecount{text-align:center;padding:9px 6px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--ink);background:var(--flax2);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+
+/* Chronicle: the battle log rolls up from an indigo band at the foot */
+.chron{background:var(--indigo) var(--weave);color:var(--flax2)}
+.chron summary{cursor:pointer;list-style:none;padding:10px 18px;display:flex;align-items:center;gap:16px}
+.chron summary::-webkit-details-marker{display:none}
+.chron summary:focus-visible{outline:1.5px dashed var(--gold2);outline-offset:-4px}
+.chron .lbl{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:900;font-size:17px;letter-spacing:.16em;padding-right:16px;border-right:1.5px solid var(--gold);flex:none}
+.chron .lbl svg{width:20px;height:20px;color:var(--gold2)}
+.chron .latest{font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.06em}
+.chron .tog{color:var(--gold2);font-size:20px;flex:none;transition:transform .25s}
+.chron[open] .tog{transform:rotate(90deg)}
+.chron[open] .latest{visibility:hidden}
+.log{padding:0 18px 12px;font-size:13px;color:#c7cdd2;display:flex;flex-direction:column;gap:3px;max-height:200px;overflow:auto}
+.log p{margin:0} .log p:first-child{color:var(--flax2)}
+.t{display:inline-block;min-width:34px;font-family:var(--f-display);font-weight:700;color:var(--gold2);margin-right:6px}
+
+/* ---------- Full-page screens: briefing, victory, defeat, summit ---------- */
+.scr[hidden],.pickscr[hidden]{display:none}
+.scr{position:fixed;inset:0;z-index:24;overflow:auto;background:var(--flax) var(--linen);color:var(--ink)}
+.scr-in{position:relative;min-height:100%;display:flex;flex-direction:column;max-width:1500px;margin:0 auto;padding:0 max(14px,env(safe-area-inset-right,0px)) 16px max(14px,env(safe-area-inset-left,0px))}
+.scr .mast .page{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.2em;display:flex;align-items:center;gap:10px}
+.scr .mast .page svg{width:18px;height:18px;color:var(--indigo)}
+.body{flex:1;display:grid;gap:14px;padding-top:10px}
+.pp{position:relative;padding:18px 22px 20px;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2),0 4px 10px rgba(32,45,58,.12)}
+.pp::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(146,63,53,.35);pointer-events:none}
+.ip{position:relative;background:var(--indigo) var(--weave);color:var(--flax2);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+.ip::after{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(178,138,69,.5);pointer-events:none}
+.sh{margin:0 0 12px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:var(--f-display);font-weight:900;font-size:26px;letter-spacing:.14em;color:var(--ink)}
+.sh::before,.sh::after{content:"";width:64px;height:22px;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 22'%3E%3Cpath d='M2 11c14 0 20-8 30-8M10 11c10 0 16 6 26 6' fill='none' stroke='%2369745c' stroke-width='1.4'/%3E%3Cpath d='M20 5c3-4 7-3 7-3-2 3-4 4-7 3zM22 16c4 3 7 2 7 2-2-3-5-3-7-2z' fill='%2369745c'/%3E%3Cg fill='%23923f35'%3E%3Ccircle cx='54' cy='11' r='4'/%3E%3Ccircle cx='40' cy='5' r='2.4'/%3E%3C/g%3E%3Ccircle cx='54' cy='11' r='1.4' fill='%23b28a45'/%3E%3C/svg%3E") center/contain no-repeat}
+.sh::after{transform:scaleX(-1)}
+.sh.sm{font-size:20px}.sh.sm::before,.sh.sm::after{width:46px}
+.sh small{display:none}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.rules li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:center;padding:9px 0;border-top:1px solid rgba(94,83,67,.3);font-size:15px;line-height:1.6}
+.rules li:first-child{border-top:0}
+.rules li>i{width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
+.rules li:nth-child(3n+2)>i{background-color:var(--indigo)} .rules li:nth-child(3n)>i{background-color:var(--moss2)}
+.rules li>i svg{width:30px;height:30px}
+.scr b{color:var(--madder)}
+.scr .chip b{color:inherit}
+.ip b{color:var(--gold3)}
+/* buttons: madder cloth tabs for the main action, flax tabs for the way back */
+.acts{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+.btn{position:relative;flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 26px;font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.2em;color:var(--ink);border:0;
+  background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 2px var(--ink2),0 4px 10px rgba(32,45,58,.15);transition:filter .15s,transform .1s}
+.btn::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(178,138,69,.75);pointer-events:none}
+.btn svg{width:26px;height:26px;flex:none;color:var(--gold)}
+.btn.go,.btn.red{color:var(--flax2);background-color:var(--madder);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3);font-size:28px;flex:1.4}
+.btn.go svg,.btn.red svg{color:var(--gold3);width:64px;height:30px}
+.btn:hover,.btn:focus-visible{filter:brightness(1.08);outline:none}
+.btn:active{transform:translateY(1px)}
+
+/* briefing: hunt tapestry at left, the foe's pattern and your class in the middle, the tower at right */
+.scr.brief .body{grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr) 110px}
+.hunt{position:relative;min-height:min(78vh,820px);overflow:hidden}
+.hunt .pic{position:absolute;inset:10px;background:center 30%/cover no-repeat}
+.hunt .flag{position:absolute;top:10px;left:34px;width:64px;height:120px;z-index:2;color:var(--gold3)}
+.cart{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:2;width:min(86%,520px);text-align:center;color:var(--flax2)}
+.cart .fl{display:inline-block;padding:2px 22px;font-family:var(--f-display);font-weight:900;font-size:20px;letter-spacing:.2em;background:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.cart .nm{position:relative;margin-top:-2px;padding:10px 60px 12px;background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 2px var(--gold);clip-path:polygon(28px 0,calc(100% - 28px) 0,100% 50%,calc(100% - 28px) 100%,28px 100%,0 50%)}
+.cart .nm::before,.cart .nm::after{content:"";position:absolute;top:50%;width:38px;height:38px;margin-top:-19px;background:var(--knot-g) center/contain no-repeat}
+.cart .nm::before{left:16px}.cart .nm::after{right:16px}
+.cart h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(40px,4.4vw,60px);letter-spacing:.12em;line-height:1.1}
+.cart .en{font-family:var(--f-latin);font-size:13px;letter-spacing:.32em;margin-top:6px;text-shadow:0 1px 3px var(--indigo)}
+:root{--knot-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23cfa95f' stroke-width='2.4'%3E%3Cpath d='M20 4c6 0 9 5 6 10l-12 12c-3 5 0 10 6 10s9-5 6-10L14 14c-3-5 0-10 6-10z'/%3E%3Cpath d='M4 20c0-6 5-9 10-6l12 12c5 3 10 0 10-6s-5-9-10-6L14 26c-5 3-10 0-10-6z'/%3E%3C/svg%3E")}
+.bmid{display:flex;flex-direction:column;gap:14px;min-width:0}
+.preview{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;border:1.5px solid var(--ink2);background:var(--flax)}
+.preview>div{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 6px 10px;border-left:1px solid rgba(94,83,67,.35)}
+.preview>div:first-child{border-left:0}
+.preview em{font-style:normal;font-family:var(--f-display);font-weight:900;font-size:17px}
+.preview .chip{min-width:0;width:100%;font-size:15px;padding:6px 8px}
+.preview .none{flex:1;width:100%;min-height:34px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:#e6dabf;box-shadow:inset 0 0 0 1px rgba(94,83,67,.3)}
+.cls{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:center}
+.crest{width:96px;height:110px;color:var(--cc,var(--madder))}
+.crest svg{width:100%;height:100%}
+.cls h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:34px;letter-spacing:.2em;line-height:1.1}
+.cls .sub{display:flex;align-items:center;gap:8px;margin:6px 0 4px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--ink)}
+.cls .sub svg{width:20px;height:20px;color:var(--indigo)}
+.cls p{grid-column:1/-1;margin:2px 0 0;font-size:13px;line-height:1.7;color:var(--ink2)}
+/* the clock tower: seven stacked stone storeys, the current one in madder */
+.tower{position:relative;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;padding:62px 10px 14px;margin:0;list-style:none;background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+.tower::before{content:"";position:absolute;top:18px;left:50%;width:0;height:0;transform:translateX(-50%);border:0 solid transparent;border-width:0 16px 32px;border-bottom-color:#c9c3b5}
+.tw{position:relative;width:70px;flex:1;min-height:56px;max-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:var(--f-display);font-weight:900;font-size:22px;color:var(--ink);
+  background:#c9c3b5 repeating-linear-gradient(0deg,transparent 0 13px,rgba(32,45,58,.18) 13px 14px);border-top:3px solid #a9a397}
+.tw::after{content:"";width:12px;height:16px;border-radius:6px 6px 0 0;background:var(--indigo);opacity:.65}
+.tw:first-child{width:84px}
+.tw.done{background-color:#d8c99f;color:var(--ink2)}
+.tw.done::after{background:var(--gold);opacity:1}
+.tw.cur{background:var(--madder) var(--linen);color:var(--gold3);box-shadow:0 0 0 2px var(--gold2);z-index:1}
+.tw.cur::after{background:var(--gold3);opacity:1}
+.dbg{font-size:13px;color:var(--ink2)}
+.dbg summary{cursor:pointer;letter-spacing:.1em;width:max-content;max-width:100%}
+.floors{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.floors .fl{display:flex;gap:6px;align-items:baseline}
+.floors .fl em{font-style:normal;font-size:12px;width:4.5em;flex:none}
+.floors .fl div{display:flex;flex-wrap:wrap;gap:6px}
+.floors button{padding:3px 10px;font:700 13px var(--f-body);background:var(--flax2);color:var(--ink);border:1px solid var(--ink2)}
+.floors button.cur,.floors button:hover{background:var(--madder);color:var(--flax2);border-color:var(--madder)}
+
+/* victory and summit headings */
+.vban{align-self:center;position:relative;margin:-6px auto 0;padding:10px 70px 12px;text-align:center;color:var(--gold3);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 86%,0 100%)}
+.vban b{display:block;font-family:var(--f-display);font-weight:900;font-size:40px;letter-spacing:.3em;line-height:1.1;color:var(--gold3)}
+.vban span{font-family:var(--f-latin);font-size:13px;letter-spacing:.4em;color:var(--flax2)}
+.scr.win .body{grid-template-columns:minmax(300px,.62fr) minmax(0,1.38fr)}
+.hero-col{display:flex;flex-direction:column;gap:12px}
+.hero-col>.fig{flex:1;display:flex;padding:10px;min-height:340px}
+.hero-col .pic{flex:1;background:center 18%/cover no-repeat}
+.vmain .lead{margin:-10px 0 0;text-align:center;font-size:14px;color:var(--ink2);letter-spacing:.1em}
+.seam{height:0;margin:-4px auto 0;width:min(520px,80%);border-top:2px dashed var(--madder)}
+.seven{display:block;width:100%;height:70px}
+.acts.end{justify-content:center}.acts.end .btn{max-width:440px}
+.stat small+small,.stat b+small{font-size:11px;letter-spacing:.04em;color:var(--muted);font-weight:500}
+.foecrest{display:flex;align-items:center;justify-content:center;padding:14px;background:var(--madder) var(--linen);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold)}
+.foecrest i{width:min(220px,70%);aspect-ratio:2/1;background:center/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:inset 0 0 0 3px var(--gold)}
+.best{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:16px 20px}
+.best .v{text-align:center;padding:0 6px}
+.best .v small{display:block;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.14em}
+.best .v b{display:block;font-family:var(--f-display);font-weight:900;font-size:56px;line-height:1.05;color:var(--gold3)}
+.best .v em{font-style:normal;font-family:var(--f-display);font-size:15px}
+.best .cards{font-size:13px;line-height:1.7;color:#d3d7da;border-left:1.5px solid rgba(178,138,69,.6);padding-left:14px}
+.vmain{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ttl{margin:4px 0 0;text-align:center;font-family:var(--f-display);font-weight:900;font-size:clamp(38px,4.6vw,62px);letter-spacing:.1em;line-height:1.15;color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 12px;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.stat>i{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
+.stat>i svg{width:26px;height:26px}
+.stat>i.ind{background-color:var(--indigo)} .stat>i.mo{background-color:var(--moss2)}
+.stat small{display:block;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.1em;color:var(--ink2)}
+.stat b{display:block;font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1.15;color:var(--indigo);white-space:nowrap}
+.stat b em{font-style:normal;color:var(--madder)}
+.stat b.zh{font-size:21px;letter-spacing:.06em}
+.rewards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin:0;padding:14px 4px 4px}
+.rewards .card{flex-basis:170px;height:262px}
+.rewards .card .art{height:136px}
+.rewards .card .cd{font-size:12.5px}
+.skipcard{flex:0 0 170px;height:262px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:16px 14px 18px;text-align:center;font:inherit;cursor:pointer;border:0;color:var(--ink);
+  background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2),0 6px 14px rgba(32,45,58,.2);transition:transform .18s,box-shadow .18s;position:relative}
+.skipcard::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(178,138,69,.7);pointer-events:none}
+.skipcard .sk-ic{flex:1;width:100%;color:var(--indigo);display:flex;align-items:center;justify-content:center}
+.skipcard .sk-ic svg{width:96px;height:120px}
+.skipcard b{font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.16em;color:var(--ink)!important;border-bottom:1px solid rgba(178,138,69,.7);padding-bottom:4px;width:100%}
+.skipcard i{font-style:normal;font-size:13px;color:var(--ink2)}
+.skipcard:hover,.skipcard:focus-visible{transform:translateY(-14px) rotate(1deg);box-shadow:inset 0 0 0 1.5px var(--ink2),0 0 0 2.5px var(--gold2),0 16px 26px rgba(32,45,58,.3);outline:none}
+.rwnote{display:inline-block;margin:0 auto;padding:6px 26px;font-family:var(--f-display);font-weight:700;letter-spacing:.14em;font-size:15px;color:var(--flax2);background:var(--indigo);box-shadow:inset 0 0 0 1.5px var(--gold)}
+/* the journey frieze: the red thread runs past every floor, a knot at each one cleared */
+.journey{position:relative;display:flex;justify-content:space-between;align-items:center;padding:30px 40px 34px;overflow:hidden}
+.journey::before{content:"";position:absolute;left:30px;right:30px;top:50%;border-top:2px dashed var(--madder3)}
+.journey .jn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--f-display);font-size:12px;color:#cfd3d6;letter-spacing:.06em}
+.journey .jn i{width:18px;height:18px;border-radius:50%;background:var(--indigo);box-shadow:0 0 0 2px var(--stone)}
+.journey .jn.done i{background:var(--gold2);box-shadow:0 0 0 2px var(--gold3)}
+.journey .jn.next i{width:26px;height:26px;background:var(--madder);box-shadow:0 0 0 2px var(--gold3),0 0 0 6px rgba(146,63,53,.35)}
+.journey .jn b{font-weight:900;font-size:14px;color:var(--flax2)!important}
+.journey .jn span{position:absolute;top:100%;margin-top:4px;white-space:nowrap}
+.journey .jn em{position:absolute;bottom:100%;margin-bottom:4px;font-style:normal;font-family:var(--f-latin);font-size:11px;letter-spacing:.14em;color:var(--gold2)}
+
+/* the road: the red thread forks, each strand ends in a cloth patch; the weavery lays its wares out on flax */
+.scr.road .body,.scr.shop .body{grid-template-columns:minmax(0,1fr);align-content:start}
+.scr.road .lead,.scr.shop .lead{margin:-6px 0 0;text-align:center;font-size:15px;color:var(--ink2);letter-spacing:.1em}
+.fork{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;padding:30px 0 10px}
+.thr{position:relative;flex:0 1 320px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 22px 26px;border:0;font:inherit;cursor:pointer;text-align:center;color:var(--flax2);
+  background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold),0 8px 18px rgba(32,45,58,.3);transition:transform .18s,box-shadow .18s}
+.thr::after{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(178,138,69,.5);pointer-events:none}
+.thr::before{content:"";position:absolute;bottom:100%;left:50%;height:30px;border-left:3px solid var(--madder)}
+.thr .ic{width:96px;height:96px;display:flex;align-items:center;justify-content:center;color:var(--gold3);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
+.thr .ic svg{width:58px;height:58px}
+.thr b{font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.2em;color:var(--gold3)!important}
+.thr small{font-family:var(--f-latin);font-size:11px;letter-spacing:.3em;color:var(--gold2)}
+.thr .d{font-size:15px;line-height:1.6;color:#d3d7da}
+.thr:hover:not(:disabled),.thr:focus-visible{transform:translateY(-8px);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 6px var(--gold3),0 0 0 3px var(--gold2),0 16px 28px rgba(32,45,58,.4);outline:none}
+.thr:disabled{opacity:.5;cursor:default}
+.note{max-width:640px;margin:40px auto 0;text-align:center;font-size:20px;font-family:var(--f-display)}
+.ware{display:flex;flex-direction:column;align-items:center;gap:10px}
+.ware .card{flex:none;width:170px;height:262px}.ware .card .art{height:136px}
+.price{font-family:var(--f-display);font-weight:900;font-size:16px;letter-spacing:.1em;padding:3px 18px;background:var(--indigo);color:var(--gold3);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.ware.sold .price{background:var(--stone);color:var(--flax2)}
+.crafts,.stitches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.craft{display:flex;align-items:center;gap:14px;padding:14px 16px;border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink);background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2);transition:box-shadow .15s,transform .1s}
+.craft>i{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--gold3);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
+.craft>i svg{width:26px;height:26px}
+.craft span{flex:1;min-width:0}
+.craft b{display:block;font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.14em;color:var(--ink)!important}
+.craft small{display:block;font-size:13px;line-height:1.5;color:var(--ink2)}
+.craft em{font-style:normal;font-family:var(--f-display);font-weight:900;font-size:18px;color:var(--gold);white-space:nowrap}
+.craft em::after{content:" 金线";font-size:12px}
+.craft:hover:not(:disabled),.craft:focus-visible{box-shadow:inset 0 0 0 1.5px var(--ink2),0 0 0 2.5px var(--gold2);outline:none}
+.craft:disabled{opacity:.45;cursor:default}
+.sewing{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}
+.sewing .stitches{grid-template-columns:minmax(0,1fr)}
+.deckpick .card{flex-basis:150px;height:236px}.deckpick .card .art{height:110px}
+.rwnote em{font-style:normal;color:var(--gold3)}
+/* a stitched card wears a gold thread under its text */
+.card .stl{position:absolute;left:0;right:0;bottom:0;padding:2px 4px;font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;
+  background:var(--gold3);box-shadow:0 -1.5px 0 var(--gold),inset 0 -1px 0 var(--gold)}
+.card.st .fr{box-shadow:0 0 0 2px var(--gold2),0 6px 14px rgba(32,45,58,.35)}
+@media (max-width:820px){.crafts,.stitches{grid-template-columns:minmax(0,1fr)}.sewing{grid-template-columns:minmax(0,1fr)}.fork{gap:40px}}
+
+/* knots: gold knot emblems in the header, a list in the briefing, cloth patches when you pick one */
+.knots{display:inline-flex;gap:4px;align-items:center}
+.knots i{width:22px;height:22px;color:var(--gold);display:inline-flex}.knots i svg{width:100%;height:100%}
+.knotlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.knotlist li{display:grid;grid-template-columns:28px auto minmax(0,1fr);gap:10px;align-items:center;font-size:14px;line-height:1.5}
+.knotlist i{width:28px;height:28px;color:var(--gold)}.knotlist i svg{width:100%;height:100%}
+.knotlist b{font-family:var(--f-display);font-weight:900;white-space:nowrap}
+.thr .kn-ic,.kware .kn-ic{width:84px;height:84px;color:var(--gold3);display:flex}
+.thr .kn-ic svg,.kware .kn-ic svg{width:100%;height:100%}
+.kware{position:relative;width:170px;height:262px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 12px;border:0;font:inherit;cursor:pointer;text-align:center;color:var(--flax2);
+  background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3)}
+.kware b{font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.14em;color:var(--gold3)!important}
+.kware small{font-size:11px;letter-spacing:.2em;color:var(--gold2)}
+.kware .d{font-size:12.5px;line-height:1.5;color:#d3d7da}
+.kware:disabled{opacity:.45;cursor:default}
+.tale{max-width:760px;width:100%;margin:20px auto 0;padding:34px 40px;text-align:center}
+.tale .kick{font-family:var(--f-latin);font-size:13px;letter-spacing:.4em;color:var(--gold2)}
+.tale h2{margin:6px 0 14px;font-family:var(--f-display);font-weight:900;font-size:clamp(32px,4vw,48px);letter-spacing:.14em;color:var(--gold3)}
+.tale p{margin:0;font-size:17px;line-height:1.8;color:#e1e4e6}
+.taleopts{max-width:760px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.taleopts .craft b{font-size:17px;letter-spacing:.06em}
+.card .art i.gl{display:flex;align-items:center;justify-content:center;color:var(--madder3);background:var(--ink)}
+.card .art i.gl svg{width:62%;height:62%}
+
+/* woven foes: damask motifs in the loom's ground cloth, faint on beats still to come, woven firm on beats past, lit gold when their trait fires */
+.slot .wv{position:absolute;left:50%;top:50%;width:100px;height:100px;transform:translate(-50%,-50%);pointer-events:none;background:var(--wv) center/contain no-repeat;opacity:.11}
+.slot.now .wv{opacity:.17}
+.slot.past .wv{width:72px;height:72px;opacity:.32}
+/* lit: the indigo motif re-dyed in ochre-gold thread */
+.slot .wv.lit{opacity:.75;filter:brightness(0) invert(58%) sepia(62%) saturate(520%) hue-rotate(358deg) brightness(.92);animation:wvlit 1.4s ease-out}
+@keyframes wvlit{0%{transform:translate(-50%,-50%) scale(1.35)}100%{transform:translate(-50%,-50%) scale(1)}}
+.tag.fate{border-color:var(--gold);background:var(--indigo);color:var(--gold3)}
+.lead.fate{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;color:var(--indigo)}
+.fatebox p{margin:0 0 10px;font-size:15px;line-height:1.7;text-align:center}
+.fatebox .btn{width:100%;font-size:18px;padding:10px 16px}
+.skipcard.weave{background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3)}
+.skipcard.weave b{color:var(--gold3)!important}.skipcard.weave>i{color:#d3d7da;font-size:12px;line-height:1.5}
+.skipcard.weave .sk-ic i{display:block;width:120px;height:120px;background:var(--flax) center/86% no-repeat;box-shadow:inset 0 0 0 2px var(--gold)}
+.thr .wv-ic{width:110px;height:110px;background:var(--flax) center/86% no-repeat;box-shadow:inset 0 0 0 2px var(--gold)}
+.knotlist i.wvi{background:center/contain no-repeat}
+
+/* defeat: the story frays at its lower edge */
+.scr.lose .body{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}
+.fray{position:relative;min-height:min(80vh,840px);overflow:hidden}
+.fray .pic{position:absolute;inset:10px 10px 0;background:center 30%/cover no-repeat}
+.fray svg.threads{position:absolute;left:10px;right:10px;bottom:0;width:calc(100% - 20px);height:34%;overflow:visible;pointer-events:none}
+.lmain{display:flex;flex-direction:column;gap:14px;padding:22px 26px}
+.lmain .kick{text-align:center;font-family:var(--f-latin);font-size:22px;letter-spacing:.5em;color:var(--madder)}
+.lmain .ttl{color:var(--madder);font-size:clamp(52px,6vw,84px);margin:0}
+.where{position:relative;padding:12px;text-align:center;font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.14em;color:var(--flax2);background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold)}
+.where::before,.where::after{content:"⚜";position:absolute;top:50%;transform:translateY(-50%);color:var(--gold2);font-size:24px}
+.where::before{left:18px}.where::after{right:18px}
+.lmain .stat{flex-direction:row}
+.lmain .rules li{grid-template-columns:44px minmax(0,1fr)}
+.lmain .rules li>i{width:44px;height:44px}
+.lmain .rules li>i svg{width:24px;height:24px}
+.coda{text-align:center;font-family:var(--f-display);font-size:13px;letter-spacing:.3em;color:var(--ink2)}
+
+/* summit: the whole seven-floor journey unrolled */
+.scr.end .body{grid-template-columns:1fr}
+.pano{position:relative;height:clamp(300px,42vw,560px);overflow:hidden}
+.pano .pic{position:absolute;inset:10px;background:center 40%/cover no-repeat}
+.pano svg.path{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px);pointer-events:none}
+.pano .cap{position:absolute;left:34px;bottom:30px;text-align:center;padding:10px 40px;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2),0 6px 14px rgba(32,45,58,.35)}
+.pano .cap h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(40px,5vw,66px);letter-spacing:.16em;line-height:1.1;color:var(--madder)}
+.pano .cap span{font-family:var(--f-latin);font-size:13px;letter-spacing:.4em;color:var(--ink2)}
+.deck{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:4px 0 6px}
+.deck span{display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:6px 6px 6px;font-family:var(--f-display);font-weight:700;font-size:13px;color:var(--ink);background:var(--flax2);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.deck span i{width:100%;aspect-ratio:1;background:var(--indigo) center/cover;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.deck em{font-style:normal;color:var(--madder);margin-left:2px}
+
+/* ---------- Class pick: three heraldic banners ---------- */
+.pickscr{position:fixed;inset:0;z-index:25;overflow:auto;color:var(--ink);background:var(--flax) var(--linen)}
+.pk-in{max-width:1500px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 max(14px,env(safe-area-inset-right,0px)) 14px max(14px,env(safe-area-inset-left,0px))}
+.pk-in .mast h2{margin:0 auto;font-family:var(--f-display);font-weight:900;font-size:clamp(24px,3vw,34px);letter-spacing:.18em}
+.pk-field{flex:1;display:flex;gap:clamp(12px,3vw,46px);justify-content:center;align-items:flex-start;padding:20px clamp(10px,3vw,46px) 56px;background:var(--flax3) var(--sprig);box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.pk-row{--cc:var(--madder);position:relative;flex:1;max-width:400px;display:flex;flex-direction:column;align-items:stretch;padding:24px 18px 16px;border:0;font:inherit;text-align:center;color:var(--flax2);
+  background:var(--cc) var(--linen);box-shadow:inset 0 0 0 4px var(--cc),inset 0 0 0 5.5px var(--gold),0 10px 24px rgba(32,45,58,.3);transform-origin:50% 0;transition:transform .3s,box-shadow .3s}
+.pk-row::before{content:"";position:absolute;left:-12px;right:-12px;top:-10px;height:10px;background:var(--gold);border-radius:5px;box-shadow:0 2px 0 var(--madder2)}
+.pk-row::after{content:"";position:absolute;inset:10px;border:1.5px dashed rgba(207,169,95,.6);pointer-events:none}
+.pk-row .tas{position:absolute;left:8px;right:8px;top:100%;height:40px;background:repeating-linear-gradient(90deg,transparent 0 6px,var(--cc) 6px 14px,transparent 14px 20px);-webkit-mask-image:linear-gradient(180deg,#000 60%,transparent);mask-image:linear-gradient(180deg,#000 60%,transparent)}
+.pk-row .tas::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--gold)}
+.pk-row:hover{transform:rotate(-.6deg)}
+.pk-row:focus-visible{outline:none}
+.pk-row.on{box-shadow:inset 0 0 0 4px var(--cc),inset 0 0 0 6px var(--gold3),0 0 0 3px var(--gold2),0 16px 34px rgba(32,45,58,.4)}
+.pk-row .nm{display:block;position:relative;z-index:1;margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(34px,3.4vw,50px);letter-spacing:.2em;line-height:1.1}
+.pk-row .la{font-family:var(--f-latin);font-size:12px;letter-spacing:.3em}
+.pk-row .mt{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.12em;margin-top:6px}
+.pk-row .fig{position:relative;height:clamp(180px,calc(100vh - 630px),340px);margin:10px 0 0;background:center 15%/cover no-repeat;box-shadow:inset 0 0 0 1.5px rgba(207,169,95,.6)}
+.pk-badge{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:6px 28px;font-family:var(--f-display);font-weight:900;letter-spacing:.24em;font-size:17px;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold3);opacity:0;transition:opacity .2s;white-space:nowrap}
+.pk-row.on .pk-badge{opacity:1}
+.pk-st{position:relative;z-index:1;display:flex;justify-content:center;gap:4px 14px;flex-wrap:wrap;padding:8px 0 6px;font-size:13px;letter-spacing:.04em}
+.pk-st span{display:flex;align-items:center;gap:4px}
+.pk-st svg{width:14px;height:14px;color:var(--gold3)}
+.pk-cards{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pk-cards .fc{display:flex;flex-direction:column;background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold);padding:4px;color:var(--ink)}
+.pk-cards i{display:block;aspect-ratio:1/.8;background:var(--indigo) center/cover no-repeat;box-shadow:inset 0 0 0 1px var(--gold)}
+.pk-cards .fc b{font-family:var(--f-display);font-weight:900;font-size:15px;letter-spacing:.1em;padding-top:4px;color:var(--ink)}
+.pk-cards small{font-size:11px;color:var(--ink2);letter-spacing:.06em}
+.pk-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;margin-top:14px;padding:14px 20px}
+.pk-foot .crest{width:64px;height:74px}
+.pk-foot .who b{display:block;font-family:var(--f-display);font-weight:900;font-size:30px;letter-spacing:.16em;line-height:1.1;color:var(--ink)}
+.pk-foot .who span{font-family:var(--f-latin);font-size:11px;letter-spacing:.3em;color:var(--ink2)}
+.pk-foot .pitch{display:flex;align-items:center;gap:18px}
+.pk-foot .pitch p{margin:0;padding-left:18px;border-left:1.5px solid var(--gold);font-family:var(--f-display);font-size:16px;line-height:1.6}
+.pk-foot .btns{display:flex;gap:10px}
+.pk-foot .btn{min-width:0;flex:none;padding:14px 22px}
+.pk-foot .btn.go{min-width:220px}
+
+@media (max-width:1100px){
+  .loom{grid-template-columns:1fr}
+  .loomhead{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:6px 16px;padding:0 4px 8px}
+  .loomhead .ttl b{font-size:26px;display:inline}.loomhead .ttl small{display:inline;margin-left:10px}
+  .loomhead .sprigs{display:none}
+  .scr.brief .body{grid-template-columns:minmax(0,1fr) minmax(340px,1fr)}
+  .tower{grid-column:1/-1;flex-direction:row;padding:10px 14px;gap:4px}
+  .tower::before{display:none}
+  .tw{flex:1;max-height:none;min-height:46px;width:auto}.tw:first-child{width:auto}
+  .pk-foot{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .mast{padding:8px 2px 6px;gap:6px 12px}.vine{display:none}
+  .meta{font-size:14px;flex-wrap:wrap}.meta>*{padding:2px 10px}.tbtn{font-size:14px}
+  .arena{height:240px}
+  .roundel{width:84px;top:36%}
+  .lr{min-width:0;padding:5px 22px 9px;gap:8px}.lr .nm{font-size:14px;letter-spacing:.04em}.lr .hp{font-size:14px}.lr .res{display:none}
+  .plate{bottom:6px;max-width:calc(100% - 12px)}.half.hero .plate{left:6px}.half.foe .plate{right:6px}
+  .tag{font-size:11px;padding:0 6px}
+  .mood{width:26px;height:26px}
+  .lanes{width:52px}.lanes div{font-size:14px;letter-spacing:0}
+  .slot{flex-basis:86px}.slot.past{flex-basis:54px}
+  .chip{min-width:62px;padding:4px 10px;font-size:14px}.chip>svg{display:none}
+  .slot.past .chip{font-size:11px;padding:1px 4px}
+  .dock{grid-template-columns:auto 1fr;gap:10px}
+  .sand{width:110px;height:150px;padding-bottom:10px}.sand>span{width:50px;height:64px;top:16px}.sandnum{font-size:40px}.sandlbl{font-size:13px}
+  .endwrap{width:auto}
+  .endbtn{height:118px}.endbtn b{font-size:26px}.endbtn svg{width:90px;height:40px}
+  .hand{grid-column:1/-1;order:3;justify-content:flex-start}
+  .card{flex-basis:140px;height:226px}.card .art{height:104px}
+  .banner b{font-size:22px}
+  .scr.brief .body,.scr.win .body,.scr.lose .body{grid-template-columns:1fr}
+  .hunt{min-height:420px}.fray{min-height:380px}
+  .hero-col>.fig{min-height:300px}
+  .stats{grid-template-columns:1fr}
+  .journey{padding:26px 14px 30px}.journey .jn span{display:none}
+  .pk-field{flex-direction:column;align-items:stretch;padding:18px 14px 60px;gap:56px}
+  .pk-row{max-width:none}
+  .pk-foot{position:sticky;bottom:0;z-index:2}
+  .pk-foot .pitch{flex-direction:column;align-items:flex-start}.pk-foot .pitch p{padding-left:0;border-left:0}
+  .pk-foot .btns{flex-wrap:wrap}.pk-foot .btn,.pk-foot .btn.go{flex:1;min-width:0}
+  .cart .nm{padding:8px 46px}.cart .nm::before,.cart .nm::after{width:26px;height:26px;margin-top:-13px}
+}
+@media (max-width:460px){.logo span{display:none}.btn{font-size:17px;letter-spacing:.1em}.btn.go,.btn.red{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important;transition:none!important}}
