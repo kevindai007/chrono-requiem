@@ -36,20 +36,20 @@ const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parri
 // calls done() to walk on; it may push more steps onto run.road first (an event chain, a detour), and nothing knows where a step sits
 const ROAD=[['fork'],['fork'],['fork'],['fork'],['fork','fork'],['fork']];
 const FORK_N=2;
-// tg: the ribbon on the strand's picture; peek(run): what the strand promises, under its name on the fork
+// to: the strand's button; tg: the ribbon on its picture; peek(run): what the strand promises, under its name on the fork
 const THREADS={
-  shop:{n:'织坊',la:'THE WEAVERY',ic:'SHUTTLE',w:3,tg:['花钱',''],d:'花金线买牌、给牌加绣、拆掉不想要的牌。',ok:()=>true,go:(run,done)=>showShop(run,done),
+  shop:{n:'织坊',la:'THE WEAVERY',w:3,to:'进入织坊',tg:['花钱',''],d:'花金线买牌、给牌加绣、拆掉不想要的牌。',ok:()=>true,go:(run,done)=>showShop(run,done),
     peek:run=>['货架上四张牌，有时还挂着一枚线结',`加绣 ${sewPrice(run)} · 拆线 ${cutPrice(run)} · 缝补 ${PRICE.mend}`]},
-  wheel:{n:'纺车',la:'THE SPINNING WHEEL',ic:'GLASS',w:2,tg:['休整','mo'],d:'歇一歇：回复 30% 生命，或者免费给一张牌加绣。',ok:()=>true,go:(run,done)=>showWheel(run,done),
+  wheel:{n:'纺车',la:'THE SPINNING WHEEL',w:2,to:'走向纺车',tg:['休整','mo'],d:'歇一歇：回复 30% 生命，或者免费给一张牌加绣。',ok:()=>true,go:(run,done)=>showWheel(run,done),
     peek:run=>[wheelHeal(run)?`歇息：回复 ${wheelHeal(run)} 点生命`:'生命是满的，歇息没有用','或者织补：免费给一张牌加绣']},
-  tale:{n:'线头',la:'A LOOSE THREAD',ic:'FLEUR',w:3,tg:['未知','ind'],d:'一根垂下来的线头，拉一拉看会发生什么。',ok:run=>Object.values(TALES).some(t=>!t.ok||t.ok(run)),go:(run,done)=>showTale(run,done),
+  tale:{n:'线头',la:'A LOOSE THREAD',w:3,to:'拉一拉线头',tg:['未知','ind'],d:'一根垂下来的线头，拉一拉看会发生什么。',ok:run=>Object.values(TALES).some(t=>!t.ok||t.ok(run)),go:(run,done)=>showTale(run,done),
     peek:()=>['一件说不准的事：有得也有失','不想要的话，可以走开']},
-  elite:{n:'乱线',la:'A TANGLED FOE',ic:'CLAW',w:2,tg:['危险','red'],d:'下一层的另一只怪织错了，生命 +25%。打赢它挑一枚线结。',ok:run=>run.stage>=1&&TOWER[run.stage].length>1&&knotPool(run).length>0,
+  elite:{n:'乱线',la:'A TANGLED FOE',w:2,to:'迎战乱线',tg:['危险','red'],d:'下一层的另一只怪织错了，生命 +25%。打赢它挑一枚线结。',ok:run=>run.stage>=1&&TOWER[run.stage].length>1&&knotPool(run).length>0,
     go:run=>{startFight(run,shuffle(TOWER[run.stage].filter(k=>k!==run.foes[run.stage]))[0]);render();showRules(true);banner('乱线',FL().name,true)},
     peek:run=>[`对手：${TOWER[run.stage].filter(k=>k!==run.foes[run.stage]).map(k=>FOE[k].name).join(' 或 ')}`,'打赢了：金线和一枚线结；不回血，不拿牌']},
-  cache:{n:'宝线',la:'A GOLDEN KNOT',ic:'KNOT',w:1,tg:['奖励','gd'],d:'一束打好的金色线结，挑一枚带走。',ok:run=>run.stage>=2&&knotPool(run).length>0,go:(run,done)=>showKnotPick(run,done),
+  cache:{n:'宝线',la:'A GOLDEN KNOT',w:1,to:'取走宝线',tg:['奖励','gd'],d:'一束打好的金色线结，挑一枚带走。',ok:run=>run.stage>=2&&knotPool(run).length>0,go:(run,done)=>showKnotPick(run,done),
     peek:run=>['三枚线结里挑一枚，整局都在',`还有 ${knotPool(run).length} 枚你没拿过`]},
-  spool:{n:'金线轴',la:'A SPOOL OF GOLD',ic:'KNOT',w:1,tg:['奖励','gd'],d:'路边一卷没人要的金线。',ok:()=>true,
+  spool:{n:'金线轴',la:'A SPOOL OF GOLD',w:1,to:'捡起金线轴',tg:['奖励','gd'],d:'路边一卷没人要的金线。',ok:()=>true,
     go:(run,done)=>{const g=spoolGold(run);run.gold+=g;showNote(run,'金线轴',`你收起了 <b>${g}</b> 根金线。`,done,'spool')},
     peek:run=>[`金线 +${spoolGold(run)}`,'捡起来就上路']}
 };
