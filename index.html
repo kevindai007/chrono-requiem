@@ -1916,7 +1916,8 @@ function showRules(intro){
     </div>
     ${towerCol()}</div>`,'startBtn');
   wireFloors();$('pickBtn').onclick=()=>showClassPick();
-  if($('fateBtn'))$('fateBtn').onclick=()=>{S.fate.on=!S.fate.on;showRules(intro)};
+  // toggle in place: rebuilding the briefing would replay its entrance and jump back to the top
+  const fb=$('fateBtn');if(fb)fb.onclick=()=>{S.fate.on=!S.fate.on;fb.classList.toggle('go',S.fate.on);fb.textContent=S.fate.on?'已接下（再点放弃）':'接下';renderTop()};
   $('startBtn').onclick=()=>{closePanel();if(fresh)banner(F.floor,F.name)};
 }
 
