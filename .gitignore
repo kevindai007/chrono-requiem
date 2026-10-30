@@ -1,0 +1,5 @@
+# 截图、临时图片不要放在仓库根目录
+/*.png
+/*.jpg
+node_modules/
+.DS_Store
