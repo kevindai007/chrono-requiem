@@ -493,11 +493,10 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .card .art i.gl svg{width:62%;height:62%}
 
 /* woven foes: damask motifs in the loom's ground cloth, faint on beats still to come, woven firm on beats past, lit gold when their trait fires */
-.slot .wv{position:absolute;left:50%;top:50%;width:92px;height:92px;transform:translate(-50%,-50%);pointer-events:none;background:var(--wv) center 30%/cover;
-  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.7) contrast(1.5) brightness(1.05);mix-blend-mode:multiply;opacity:.14}
+.slot .wv{position:absolute;left:50%;top:50%;width:100px;height:100px;transform:translate(-50%,-50%);pointer-events:none;background:var(--wv) center/contain no-repeat;mix-blend-mode:multiply;opacity:.13}
 .slot.now .wv{opacity:.2}
-.slot.past .wv{width:66px;height:66px;opacity:.3;filter:grayscale(1) sepia(1) contrast(1.6) brightness(.9)}
-.slot .wv.lit{opacity:.4;filter:sepia(1) saturate(2.6) brightness(1.1);box-shadow:inset 0 0 0 3px var(--gold);animation:wvlit 1.4s ease-out}
+.slot.past .wv{width:72px;height:72px;opacity:.34}
+.slot .wv.lit{opacity:.75;filter:sepia(1) saturate(3) brightness(1.7);animation:wvlit 1.4s ease-out}
 @keyframes wvlit{0%{transform:translate(-50%,-50%) scale(1.35);opacity:1}100%{transform:translate(-50%,-50%) scale(1)}}
 .tag.fate{border-color:var(--gold);background:var(--indigo);color:var(--gold3)}
 .lead.fate{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;color:var(--indigo)}
@@ -505,9 +504,9 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .fatebox .btn{width:100%;font-size:18px;padding:10px 16px}
 .skipcard.weave{background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3)}
 .skipcard.weave b{color:var(--gold3)!important}.skipcard.weave>i{color:#d3d7da;font-size:12px;line-height:1.5}
-.skipcard.weave .sk-ic i{display:block;width:110px;height:110px;background:center 30%/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.8) contrast(1.3)}
-.thr .wv-ic{width:96px;height:96px;background:center 30%/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.8) contrast(1.3)}
-.knotlist i.wvi{background:center 30%/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.8)}
+.skipcard.weave .sk-ic i{display:block;width:120px;height:120px;background:var(--flax) center/contain no-repeat;box-shadow:inset 0 0 0 2px var(--gold)}
+.thr .wv-ic{width:110px;height:110px;background:var(--flax) center/contain no-repeat;box-shadow:inset 0 0 0 2px var(--gold)}
+.knotlist i.wvi{background:center/contain no-repeat;mix-blend-mode:multiply}
 
 /* defeat: the story frays at its lower edge */
 .scr.lose .body{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}
@@ -893,7 +892,7 @@ const hasW=k=>!!S.run.woven?.includes(k);
 function wvFx(k,b){const at=b??S.resolving??S.beat-1;(S.wfx??={})[at]=k;flt('hero',WEAVES[k].n,'info')}
 // which woven motif shows in the cloth under beat b: one every third beat, cycling through the woven foes
 function wvAt(b){const ws=S.run.woven||[];const lit=S.wfx?.[b];if(lit)return {k:lit,lit:true};if(!ws.length||b%3!==2)return null;return {k:ws[Math.floor(b/3)%ws.length]}}
-const wvHtml=b=>{const w=wvAt(b);return w?`<i class="wv ${w.lit?'lit':''}" style="--wv:url(img/foe_${w.k}_p.jpg)" aria-hidden="true"></i>`:''};
+const wvHtml=b=>{const w=wvAt(b);return w?`<i class="wv ${w.lit?'lit':''}" style="--wv:url(img/wv_${w.k}.jpg)" aria-hidden="true"></i>`:''};
 
 /* ---------- Threads of fate: a wager offered before a fight; taken and kept, the fight's gold doubles, broken, −5 life ---------- */
 const FATES={
@@ -1906,7 +1905,7 @@ function showRules(intro){
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
       ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：做到了，这场的金线翻倍；没做到，生命 −5。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
-      ${S.run.woven.length?`<section class="pp"><h4 class="sh sm">织入的怪物</h4><ul class="knotlist">${S.run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/foe_${k}_p.jpg)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul></section>`:''}
+      ${S.run.woven.length?`<section class="pp"><h4 class="sh sm">织入的怪物</h4><ul class="knotlist">${S.run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/wv_${k}.jpg)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${S.run.knots.length?`<section class="pp"><h4 class="sh sm">线结</h4><ul class="knotlist">${S.run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
         '<b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。',
@@ -1960,7 +1959,7 @@ function showEnd(){
         <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} → <em>${healTo()}</em>`,{sm:`上限 ${S.maxhp+5}`})}${stat(SVG.STAIRS,'ind','下一层',N.name,{zh:1})}</div>
         <h4 class="sh">战利品</h4><p class="lead">挑一张牌加入牌组</p>
         <div class="rewards">${pool.map(k=>cardHtml(k,{cls:'rw',attr:`data-k="${k}"`})).join('')}
-          ${WEAVES[F.key]&&!S.run.woven.includes(F.key)?`<button class="skipcard weave" id="weaveBtn"><span class="sk-ic"><i style="background-image:url(${F.portrait})"></i></span><b>织入${F.lane}</b><i>不拿牌 · ${WEAVES[F.key].n}：${WEAVES[F.key].d}</i></button>`:''}
+          ${WEAVES[F.key]&&!S.run.woven.includes(F.key)?`<button class="skipcard weave" id="weaveBtn"><span class="sk-ic"><i style="background-image:url(img/wv_${F.key}.jpg)"></i></span><b>织入${F.lane}</b><i>不拿牌 · ${WEAVES[F.key].n}：${WEAVES[F.key].d}</i></button>`:''}
           <button class="skipcard" id="skipBtn"><span class="sk-ic">${SVG.SKIP}</span><b>直接上楼</b><i>不拿牌</i></button></div>
         <div class="journey ip">${S.run.foes.map((k,i)=>`<span class="jn ${i<=S.stage?'done':i===S.stage+1?'next':''}"><em>${ROMAN[i]}</em><i></i><span>${i<=S.stage+1?FOE[k].name:''}</span></span>`).join('')}</div>
         ${S.fate?.on?`<p class="lead fate">${fateRes()?`命运之线 · 完成：金线再 <b>+${loot()}</b>`:'命运之线 · 没有完成：生命 <b>−5</b>'}</p>`:''}
@@ -2068,7 +2067,7 @@ function showKnotPick(run,done){
 // the loom holds WEAVE_MAX foes: weaving a new one unravels one you pick
 function showUnweave(run,key,done,back){
   openScr('road',pageHd('织入',run),`<div class="body"><h2 class="ttl">织机满了</h2><p class="lead">拆掉一只，才能把<b>${FOE[key].name}</b>织进去</p>
-    <div class="fork">${run.woven.map(k=>`<button class="thr wvn" data-k="${k}"><span class="wv-ic" style="background-image:url(img/foe_${k}_p.jpg)"></span><b>${WEAVES[k].n}</b><small>${FOE[k].name}</small><span class="d">${WEAVES[k].d}</span></button>`).join('')}</div>
+    <div class="fork">${run.woven.map(k=>`<button class="thr wvn" data-k="${k}"><span class="wv-ic" style="background-image:url(img/wv_${k}.jpg)"></span><b>${WEAVES[k].n}</b><small>${FOE[k].name}</small><span class="d">${WEAVES[k].d}</span></button>`).join('')}</div>
     <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`);
   document.querySelectorAll('.thr.wvn').forEach(b=>b.onclick=()=>{run.woven[run.woven.indexOf(b.dataset.k)]=key;done()});
   $('backBtn').onclick=()=>{delete $('scr').dataset.end;back()};
