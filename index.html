@@ -468,6 +468,30 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .card.st .fr{box-shadow:0 0 0 2px var(--gold2),0 6px 14px rgba(32,45,58,.35)}
 @media (max-width:820px){.crafts,.stitches{grid-template-columns:minmax(0,1fr)}.sewing{grid-template-columns:minmax(0,1fr)}.fork{gap:40px}}
 
+/* knots: gold knot emblems in the header, a list in the briefing, cloth patches when you pick one */
+.knots{display:inline-flex;gap:4px;align-items:center}
+.knots i{width:22px;height:22px;color:var(--gold);display:inline-flex}.knots i svg{width:100%;height:100%}
+.knotlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.knotlist li{display:grid;grid-template-columns:28px auto minmax(0,1fr);gap:10px;align-items:center;font-size:14px;line-height:1.5}
+.knotlist i{width:28px;height:28px;color:var(--gold)}.knotlist i svg{width:100%;height:100%}
+.knotlist b{font-family:var(--f-display);font-weight:900;white-space:nowrap}
+.thr .kn-ic,.kware .kn-ic{width:84px;height:84px;color:var(--gold3);display:flex}
+.thr .kn-ic svg,.kware .kn-ic svg{width:100%;height:100%}
+.kware{position:relative;width:170px;height:262px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 12px;border:0;font:inherit;cursor:pointer;text-align:center;color:var(--flax2);
+  background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3)}
+.kware b{font-family:var(--f-display);font-weight:900;font-size:21px;letter-spacing:.14em;color:var(--gold3)!important}
+.kware small{font-size:11px;letter-spacing:.2em;color:var(--gold2)}
+.kware .d{font-size:12.5px;line-height:1.5;color:#d3d7da}
+.kware:disabled{opacity:.45;cursor:default}
+.tale{max-width:760px;width:100%;margin:20px auto 0;padding:34px 40px;text-align:center}
+.tale .kick{font-family:var(--f-latin);font-size:13px;letter-spacing:.4em;color:var(--gold2)}
+.tale h2{margin:6px 0 14px;font-family:var(--f-display);font-weight:900;font-size:clamp(32px,4vw,48px);letter-spacing:.14em;color:var(--gold3)}
+.tale p{margin:0;font-size:17px;line-height:1.8;color:#e1e4e6}
+.taleopts{max-width:760px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.taleopts .craft b{font-size:17px;letter-spacing:.06em}
+.card .art i.gl{display:flex;align-items:center;justify-content:center;color:var(--madder3);background:var(--ink)}
+.card .art i.gl svg{width:62%;height:62%}
+
 /* defeat: the story frays at its lower edge */
 .scr.lose .body{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}
 .fray{position:relative;min-height:min(80vh,840px);overflow:hidden}
@@ -591,6 +615,7 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
       <span><b id="floorNo">第 1 层</b></span>
       <span>第 <b id="turnNo">1</b> 回合</span>
       <span>金线 <b id="goldNo">0</b></span>
+      <span id="knotsNo" hidden></span>
       <button class="tbtn" id="rulesBtn"><span data-svg="GEAR"></span>规则</button>
       <button class="tbtn" id="resetBtn"><span data-svg="REDO"></span>重开</button>
     </div>
@@ -683,6 +708,8 @@ const CARDS={
   stop:{n:'时停',c:3,t:'禁术',d:'敌人的时间轴整体冻结 2 拍，锁定的行动也不例外。',x:1},
   unity:{n:'万象归一',c:3,t:'禁术',d:'视野内你的全部攻击立刻一起结算，每多一次伤害再 +50%。',x:1},
   paradox:{n:'悖论',c:0,t:'禁术',d:'本回合 +2 时之砂，下回合 −3。'},
+  // a curse from the road: it only clogs the hand, and paying 1 sand clears it for the rest of the fight
+  tangle:{n:'乱线',c:1,t:'诅咒',d:'没有效果。打出后本场战斗不再出现。',x:1,glyph:'KNOT'},
   // warrior: rage (r) is spent instead of, or as well as, sand
   // a: the archetype (CLASSES[cls].arch) a class card belongs to; rewards lean toward the one you have taken most
   shield:{n:'举盾',c:1,t:'战士',a:'wall',d:'在一拍举盾。该拍敌人的每次攻击 −6，每挡下 1 点得 1 怒气。',tg:'any'},
@@ -802,7 +829,31 @@ function card(k){
   if(st==='light'){if(B.c>0)C.c=B.c-1;else C.r=B.r-1}
   return CARDS[k]=C;
 }
-const stitchesFor=k=>CARDS[k].st?[]:Object.keys(STITCH).filter(s=>STITCH[s].ok(CARDS[k],k));
+const stitchesFor=k=>CARDS[k].st||CARDS[k].t==='诅咒'?[]:Object.keys(STITCH).filter(s=>STITCH[s].ok(CARDS[k],k));
+/* ---------- Knots: passives that last the whole run, each bending one small rule ---------- */
+// cls: only offered to that class. The hooks read hasK(key) where the rule lives
+const KNOTS={
+  hourglass:{n:'沙漏坠',d:'每场战斗第一回合 +1 时之砂。'},
+  shuttle:{n:'金梭',d:'每回合第一张挪移牌不花时之砂。'},
+  shears:{n:'断线剪',d:'每场战斗第一次弹反，额外造成 12 点伤害。'},
+  spyglass:{n:'望远线',d:'时间轴视野永久 +2 拍。'},
+  rope:{n:'打结绳',d:'每场战斗中，生命低于 30% 后受到的第一次伤害减半。'},
+  spindle:{n:'纺锤',d:'每场战斗开局多抽 1 张牌。'},
+  abacus:{n:'算盘线',d:'胜利拿到的金线 +30%。'},
+  black:{n:'黑线',d:'每场战斗敌人开局少 10% 生命；但层与层之间不再回复生命。'},
+  jar:{n:'沙罐',d:'回合结束时没用完的时之砂，留 1 粒到下回合。'},
+  rustnail:{n:'锈盾钉',cls:'warrior',d:'每场战斗开局有 3 点怒气。'},
+  whetstone:{n:'磨石',cls:'warrior',d:'每回合你放下的第一次重击伤害 +6。'},
+  venomsac:{n:'毒囊',cls:'rogue',d:'每场战斗开局敌人带 5 层毒。'},
+  silk:{n:'蛛丝',cls:'rogue',d:'每回合第一次连击中断，最多只掉 2 层。'},
+  starthread:{n:'星辰线',cls:'mage',d:'每场战斗第一次元素反应伤害翻倍。'},
+  mute:{n:'静音织物',cls:'mage',d:'每场战斗第一次吟唱被打中时不会中断。'}
+};
+const hasK=k=>!!S.run.knots?.includes(k);
+const knotPool=run=>Object.keys(KNOTS).filter(k=>!run.knots.includes(k)&&(!KNOTS[k].cls||KNOTS[k].cls===run.cls));
+const knotRow=run=>run.knots.length?`<span class="knots">${run.knots.map(k=>`<i title="${KNOTS[k].n}：${KNOTS[k].d}">${SVG.KNOT}</i>`).join('')}</span>`:'';
+// the sand a card costs right now: the golden shuttle makes the turn's first move card free
+const costOf=C=>C.t==='挪移'&&S.shuttle?0:C.c;
 const castLen=C=>Math.max(1,C.cast-(S.quick?2:0)+(S.surge?2:0));
 const CL=()=>CLASSES[S.run.cls];
 const HINTS={h:'点选时间轴上你的一次攻击（金框），或点选它要挪到的那一拍',e:'点选时间轴上敌人的一个行动（红框），或点选它要挪到的那一拍',pair:'点选一拍，它会与下一拍互换',b4:'点选本回合起 4 拍内的一拍',any:'点选时间轴上的一拍',cast:'点选法术释放的那一拍（前面要留出吟唱的拍数）'};
@@ -1096,7 +1147,7 @@ const FOE=Object.fromEntries(FOES.map(f=>[f.key,f]));
 FOES.forEach(f=>{f.img=`img/foe_${f.key}.jpg`;f.portrait=`img/foe_${f.key}_p.jpg`});
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];
 const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
-const FL=()=>FOE[S.run.foes[S.stage]];
+const FL=()=>FOE[S.foeKey||S.run.foes[S.stage]];
 // between floors: max HP +5, and only part of the lost HP comes back
 const FLOOR_HEAL=.2;
 
@@ -1104,15 +1155,20 @@ const FLOOR_HEAL=.2;
 let S;
 function newRun(stage,cls,key){
   const C=CLASSES[cls];
-  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0};run.hp=run.maxhp;
+  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[]};run.hp=run.maxhp;
   if(key)run.foes[stage]=key;
   startFight(run);
 }
-function startFight(run){
-  const F=FOE[run.foes[run.stage]];
+// key: an elite from the road (乱线) fought in place of the floor's foe, with 25% more life
+function startFight(run,key){
+  const F=FOE[key||run.foes[run.stage]];
   S={run,stage:run.stage,beat:1,turn:1,hp:run.hp??run.maxhp,maxhp:run.maxhp,ehp:F.hp,emax:F.hp,sand:CLASSES[run.cls].sand||3,debt:0,shield:0,barrier:0,quick:false,med:false,iceArmor:false,lastSpell:null,
      best:null,turnCards:[],parried:false,parriedPrev:false,foresight:false,rage:0,rageMax:10,combo:0,comboMax:8,poison:0,chain:0,frost:0,refund:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
      deck:shuffle(run.deck.slice()),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
+  if(key){S.foeKey=key;S.emax=S.ehp=Math.round(F.hp*1.25)}
+  if(hasK('black'))S.ehp=Math.round(S.emax*.9);
+  if(hasK('hourglass'))S.sand++;if(hasK('spindle'))S.drawN=6;if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
+  S.shuttle=hasK('shuttle');S.mute=hasK('mute');S.star=hasK('starthread');
   gen(S.beat+11);
   F.turnStart?.call(F,true);
   draw(S.drawN);S.drawN=5;
@@ -1120,10 +1176,10 @@ function startFight(run){
 }
 // climb to the next floor with the HP this fight left you, taking card k (or none) and the gold thread the fight earned;
 // with ui, the steps of ROAD for this gap are walked before the next fight (the balance AI calls it without, straight to the fight)
-function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.maxhp+=5;run.hp=Math.min(run.maxhp,S.hp+5+Math.round(run.maxhp*FLOOR_HEAL));
+function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=hasK('black')?S.hp:Math.min(run.maxhp,S.hp+5+Math.round(run.maxhp*FLOOR_HEAL));
   run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
 // gold thread for a win: a base that grows with the floor, one per 10 of the fight's best beat, two per parry
-const loot=()=>18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0);
+const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1));
 
 /* ---------- The road between floors: a queue of steps, so a longer journey is only a longer queue ---------- */
 // run.road holds the steps still to walk before the next fight. A step is a THREADS key, or 'fork': FORK_N different threads
@@ -1134,6 +1190,10 @@ const FORK_N=2;
 const THREADS={
   shop:{n:'织坊',la:'THE WEAVERY',ic:'SHUTTLE',w:3,d:'花金线买牌、给牌加绣、拆掉不想要的牌。',ok:()=>true,go:(run,done)=>showShop(run,done)},
   wheel:{n:'纺车',la:'THE SPINNING WHEEL',ic:'GLASS',w:2,d:'歇一歇：回复 30% 生命，或者免费给一张牌加绣。',ok:()=>true,go:(run,done)=>showWheel(run,done)},
+  tale:{n:'线头',la:'A LOOSE THREAD',ic:'FLEUR',w:3,d:'一根垂下来的线头，拉一拉看会发生什么。',ok:run=>Object.values(TALES).some(t=>!t.ok||t.ok(run)),go:(run,done)=>showTale(run,done)},
+  elite:{n:'乱线',la:'A TANGLED FOE',ic:'CLAW',w:2,d:'下一层的另一只怪织错了，生命 +25%。打赢它挑一枚线结。',ok:run=>run.stage>=1&&TOWER[run.stage].length>1&&knotPool(run).length>0,
+    go:run=>{startFight(run,shuffle(TOWER[run.stage].filter(k=>k!==run.foes[run.stage]))[0]);render();showRules(true);banner('乱线',FL().name,true)}},
+  cache:{n:'宝线',la:'A GOLDEN KNOT',ic:'KNOT',w:1,d:'一束打好的金色线结，挑一枚带走。',ok:run=>run.stage>=2&&knotPool(run).length>0,go:(run,done)=>showKnotPick(run,done)},
   spool:{n:'金线轴',la:'A SPOOL OF GOLD',ic:'KNOT',w:1,d:'路边一卷没人要的金线。',ok:()=>true,go:(run,done)=>{const g=30+5*run.stage;run.gold+=g;showNote(run,'金线轴',`你收起了 <b>${g}</b> 根金线。`,done)}}
 };
 function walk(run){
@@ -1159,10 +1219,10 @@ function rewardPool(run,F){
   for(const k of shuffle(pool.slice())){if(cls.length>=2)break;if(cls.includes(k)||(CARDS[k].ks&&cls.some(c=>CARDS[c].ks)))continue;cls.push(k)}
   return cls.concat(shuffle(F.reward.slice()).slice(0,1));
 }
-const healTo=()=>Math.min(S.maxhp+5,S.hp+5+Math.round((S.maxhp+5)*FLOOR_HEAL));
+const healTo=()=>hasK('black')?S.hp:Math.min(S.maxhp+5,S.hp+5+Math.round((S.maxhp+5)*FLOOR_HEAL));
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function draw(n){for(let i=0;i<n;i++){if(!S.deck.length){if(!S.discard.length)return;S.deck=shuffle(S.discard);S.discard=[]}S.hand.push(S.deck.pop())}}
-function ev(o){if(S.edge&&o.dmg&&(o.side==='h'||o.side==='c'))o.dmg+=S.edge;o.id=S.uid++;S.events.push(o);return o}
+function ev(o){if(S.edge&&o.dmg&&(o.side==='h'||o.side==='c'))o.dmg+=S.edge;if(o.fx&&hasK('whetstone')&&!S.whet){S.whet=true;o.dmg+=6}o.id=S.uid++;S.events.push(o);return o}
 function gen(h){
   const F=FL();
   for(let b=S.genUpTo+1;b<=h;b++){
@@ -1172,7 +1232,7 @@ function gen(h){
   S.genUpTo=h;F.fill?.call(F,h);
 }
 const baseView=()=>FL().view?FL().view():8;
-const W=()=>baseView()+(S.foresight?4:0);
+const W=()=>baseView()+(S.foresight?4:0)+(hasK('spyglass')?2:0);
 const at=(b,side)=>S.events.filter(e=>e.beat===b&&(!side||e.side===side));
 // backstab: the assassin hits a beat where no enemy attack lands on them
 const openBeat=b=>!atkE(b).length||at(b,'d').length>0;
@@ -1212,12 +1272,13 @@ function healEnemy(x,label){
   const h=Math.min(x,S.emax-S.ehp);S.ehp+=h;flt('enemy','+'+h,'heal');log(`${label}：${FL().lane}回复了 ${h} 点生命。`);
 }
 function dealHero(x,es,opt={}){
+  if(x>0&&hasK('rope')&&!S.roped&&S.hp*10<S.maxhp*3){S.roped=true;x=Math.ceil(x/2);flt('hero','打结绳','info');log(`打结绳：这一下减半到 ${x}。`)}
   if(S.iceArmor){x=Math.max(0,x-3);if(!x){flt('hero','冰甲','info');return}}
   S.hp=Math.max(0,S.hp-x);S.dmgThis+=x;flt('hero','-'+x,'hurt');if(!opt.thorn)gainRage(2);
   if(S.hp<=0&&S.undying){S.undying=false;S.hp=Math.min(S.maxhp,16);flt('hero','不屈','heal');log('不屈：你在倒下前站稳了，回复到 16 点生命。');banner('不屈','UNDYING')}
   // a hit inside a spell's window breaks the cast (thorns don't count)
   if(S.run.cls==='mage'&&!opt.thorn&&S.resolving){const r=S.resolving,sp=S.events.filter(e=>e.side==='c'&&e.from<=r&&e.beat>=r);
-    if(sp.length){if(S.barrier){S.barrier=0;log('法力屏障护住了吟唱。');flt('hero','屏障','info')}else{S.events=S.events.filter(e=>!sp.includes(e));log(`吟唱被打断：${sp.map(e=>e.n).join('、')}作废。`);flt('hero','打断！','info');
+    if(sp.length){if(S.barrier){S.barrier=0;log('法力屏障护住了吟唱。');flt('hero','屏障','info')}else if(S.mute){S.mute=false;log('静音织物护住了吟唱。');flt('hero','静音织物','info')}else{S.events=S.events.filter(e=>!sp.includes(e));log(`吟唱被打断：${sp.map(e=>e.n).join('、')}作废。`);flt('hero','打断！','info');
       if(S.flow){const back=sp.reduce((a,e)=>a+(e.c||0),0);if(back){S.refund+=back;log(`法力回流：下回合返还 ${back} 粒时之砂。`)}}}}}
   FL().onHeroHit?.call(FL(),es,x);
   if(S.hp<=0)S.over='lose';
@@ -1340,15 +1401,15 @@ function flyCard(i){
 }
 // everything a card does to the state, with no screen effects; the real play and the preview both go through here
 function commit(i,target){
-  const key=S.hand[i],C=CARDS[key];
-  if(C.c>S.sand)return '时之砂不足';
+  const key=S.hand[i],C=CARDS[key],cost=costOf(C);
+  if(cost>S.sand)return '时之砂不足';
   if(C.r&&S.rage<C.r)return '怒气不足';
   const was=new Map(S.events.map(e=>[e.id,e.beat])),e0=S.ehp;
   S.edge=C.st==='edge'?4:0;const err=apply(C.base||key,target);S.edge=0;if(err)return err;
   for(const e of S.events)if(was.get(e.id)!==e.beat)(e.by??=[]).push(C.n);
   if(!C.tg&&!C.ks)S.turnCards.push(C.n);
   if(e0-S.ehp>(S.best?.d||0))S.best={d:e0-S.ehp,cards:[C.n]};
-  S.sand-=C.c;if(C.r&&!C.ra)S.rage-=C.r;S.hand.splice(i,1);
+  S.sand-=cost;if(cost<C.c)S.shuttle=false;if(C.r&&!C.ra)S.rage-=C.r;S.hand.splice(i,1);
   if(!C.x)(C.st==='loop'?S.deck:S.discard).push(key);
   if(!S.played||C.c>=S.played.c)S.played={t:C.t,c:C.c};
   return null;
@@ -1444,7 +1505,7 @@ function resolveBeat(b){
       dealEnemy(6,'残影反击',{src:'ghost',beat:b});if(hs.length&&!S.over)hit();
     }else if(hs.length||sp){
       if(ct>et){
-        flt('hero','弹反！','info');S.parried=true;S.parries=(S.parries||0)+1;gainRage(2);log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，弹反成功！${rev?'逆针被弹反净化。':''}`);
+        flt('hero','弹反！','info');S.parried=true;S.parries=(S.parries||0)+1;gainRage(2);if(hasK('shears')&&!S.sheared){S.sheared=true;dealEnemy(12,'断线剪',{src:'true'})}log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，弹反成功！${rev?'逆针被弹反净化。':''}`);
         if(S.bloodwar){const h=Math.min(3,S.maxhp-S.hp);if(h>0){S.hp+=h;flt('hero','+'+h,'heal')}}
         if(hs.length){struck=true;const e0=S.ehp;dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length});
           const h=S.drain?Math.min(Math.floor((e0-S.ehp)/2),S.maxhp-S.hp):0;if(h>0){S.hp+=h;flt('hero','+'+h,'heal');log(`饮血：回复 ${h} 点生命。`)}}
@@ -1465,7 +1526,7 @@ function resolveBeat(b){
   for(const c of at(b,'c')){if(S.over)break;castFire(c,b)}
   if(S.run.cls==='rogue'&&!S.over){
     if(clean)addCombo(1)
-    else if(S.combo){const k=S.keep?Math.floor(S.combo/2):0;log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层${k?`，余势留下 ${k} 层`:''}）。`);S.combo=k}
+    else if(S.combo){let k=S.keep?Math.floor(S.combo/2):0;if(hasK('silk')&&!S.silked){S.silked=true;k=Math.max(k,S.combo-2)}log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层${k?`，余势留下 ${k} 层`:''}）。`);S.combo=k}
   }
   if(S.poison>0&&!S.over){const d=S.poison;if(!S.plague)S.poison--;dealEnemy(d,`毒（${d} 层）`,{src:'poison',beat:b})}
   if(!S.over)F.afterBeat?.call(F,b);
@@ -1493,7 +1554,7 @@ function react(el,b){
   const p=S.lastSpell,R=p&&p.el!==el&&b-p.beat<=(S.prism?2:1)?REACT[p.el+el]:null;
   S.lastSpell={beat:b,el};
   if(!R){S.chain=0;return}
-  const link=S.chain++,d=R.dmg+link*(CHAIN+(S.prism?4:0));
+  const link=S.chain++,d=(R.dmg+link*(CHAIN+(S.prism?4:0)))*(S.star?2:1);if(S.star){S.star=false;log('星辰线：这次反应伤害翻倍。')}
   if(S.tide&&(S.tideN||0)<3){S.tideN=(S.tideN||0)+1;S.refund++;flt('hero','潮汐 +1','info')}
   banner(R.n,`${p.el} + ${el}${link?` · 连锁 ${link+1}`:''}`);dealEnemy(d,`元素反应·${R.n}${link?`（连锁 ${link+1}）`:''}`,{src:'spell',beat:b});S.resThis=true;if(R.frz&&!S.over)freeze(R.n)
 }
@@ -1513,7 +1574,8 @@ function nextTurn(){
   S.lastPlayed=S.played;S.played=null;S.turnCards=[];S.resThis=false;S.cry=false;S.smoke=[];
   S.ripo=S.drain=S.venom=S.prism=S.flow=S.toxin=false;S.tideN=0;
   if(S.plague&&S.poison){S.poison=Math.floor(S.poison/2);log(`瘟疫：毒减半到 ${S.poison} 层。`)}
-  S.sand=(CL().sand||3)-S.debt+(S.med?2:0)+S.refund;S.debt=0;S.med=false;S.refund=0;S.barrier=0;S.iceArmor=false;
+  const kept=hasK('jar')?Math.min(1,S.sand):0;S.shuttle=hasK('shuttle');S.whet=S.silked=false;
+  S.sand=(CL().sand||3)-S.debt+(S.med?2:0)+S.refund+kept;S.debt=0;S.med=false;S.refund=0;S.barrier=0;S.iceArmor=false;
   F.turnStart?.call(F,false);
   S.sand=Math.max(0,S.sand);
   draw(S.drawN);S.drawN=5;
@@ -1549,7 +1611,7 @@ let lastSand=null;
 function render(){renderTop();renderBoard();renderHand()}
 function renderTop(){
   const F=FL();
-  $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;$('goldNo').textContent=S.run.gold||0;
+  $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;$('goldNo').textContent=S.run.gold||0;$('knotsNo').innerHTML=knotRow(S.run);$('knotsNo').hidden=!S.run.knots?.length;
   $('foeName').textContent=F.name;
   $('enemyArt').style.backgroundImage=`url(${F.img})`;
   document.querySelector('.half.hero').style.setProperty('--hero',`url(img/hero_${S.run.cls}.jpg)`);
@@ -1578,10 +1640,10 @@ function renderTop(){
 const archName=a=>Object.values(CLASSES).map(K=>K.arch[a]).find(Boolean);
 // one card face, shared by the hand and the reward screen; opt.i is its hand index, opt.off disables it
 function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:var(--indigo)">吟唱 ${castLen(C)} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''} ${C.ks?'ks':''} ${C.st?'st':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
-    <span class="fr"><span class="art"><i style="background-image:url(img/ic_${C.base||k}.jpg)"></i>${C.st?`<span class="stl">${STITCH[C.st].n} · ${STITCH[C.st].sd}</span>`:''}</span><span class="txt"><span class="cn">${C.n}</span><span class="ct">${C.a?archName(C.a):'通用'}</span><span class="cd">${C.d}</span>${ex}${C.ks?'<span class="ks">基石</span>':C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}</span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
+    <span class="fr"><span class="art">${C.glyph?`<i class="gl">${SVG[C.glyph]}</i>`:`<i style="background-image:url(img/ic_${C.base||k}.jpg)"></i>`}${C.st?`<span class="stl">${STITCH[C.st].n} · ${STITCH[C.st].sd}</span>`:''}</span><span class="txt"><span class="cn">${C.n}</span><span class="ct">${C.a?archName(C.a):C.t==='诅咒'?'诅咒':'通用'}</span><span class="cd">${C.d}</span>${ex}${C.ks?'<span class="ks">基石</span>':C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}</span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):opt.cost??C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
 function renderHand(){
   $('hand').classList.toggle('empty',!S.hand.length);
-  $('hand').innerHTML=S.hand.map((k,i)=>{const C=CARDS[k];return cardHtml(k,{cls:S.pending===i?'sel':'',attr:`data-i="${i}"`,off:C.c>S.sand||(C.r&&S.rage<C.r)||S.busy||S.over})}).join('');
+  $('hand').innerHTML=S.hand.map((k,i)=>{const C=CARDS[k];return cardHtml(k,{cost:costOf(C),cls:S.pending===i?'sel':'',attr:`data-i="${i}"`,off:costOf(C)>S.sand||(C.r&&S.rage<C.r)||S.busy||S.over})}).join('');
 }
 
 /* what a resolved (or simulated) beat came to, in a word or two */
@@ -1698,7 +1760,7 @@ $('hint').addEventListener('click',e=>{if(e.target.id==='cancelBtn'){S.pending=n
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.pending=null;render()}});
 $('endBtn').addEventListener('click',endTurn);
 $('rulesBtn').addEventListener('click',()=>showRules(false));
-$('resetBtn').addEventListener('click',()=>{startFight(S.run);render();banner('第 1 回合','HORA I')});
+$('resetBtn').addEventListener('click',()=>{startFight(S.run,S.foeKey);render();banner('第 1 回合','HORA I')});
 addEventListener('resize',()=>{if(S)renderBoard()});
 
 /* ---------- Full-page screens: briefing, victory, defeat, summit ---------- */
@@ -1771,6 +1833,7 @@ function showRules(intro){
     <div class="bmid">
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
+      ${S.run.knots.length?`<section class="pp"><h4 class="sh sm">线结</h4><ul class="knotlist">${S.run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
         '<b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。',
         '高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，回复 20% 最大生命，挑一张新牌，再从岔路里选一股走：织坊、纺车……打得越漂亮，拿到的金线越多。'])}</section>`}
@@ -1794,7 +1857,7 @@ function showEnd(){
         <h4 class="sh sm">它的节奏</h4>${rulesList(F.rules)}
         <div class="acts"><button class="btn" id="runBtn">${SVG.REDO}重新选职业</button><button class="btn red" id="retryBtn">${SVG.SHUTTLE}重试本层</button></div>
         <p class="coda">钟针仍在前行</p></div></div>`,'retryBtn');
-    $('retryBtn').onclick=()=>{closePanel();startFight(S.run);render();banner(FL().floor,FL().name)};
+    $('retryBtn').onclick=()=>{closePanel();startFight(S.run,S.foeKey);render();banner(FL().floor,FL().name)};
     $('runBtn').onclick=()=>showClassPick();
   }else if(last){
     const ks=[...new Set(S.run.deck)];
@@ -1805,8 +1868,15 @@ function showEnd(){
       <section class="pp"><h4 class="sh sm">登顶的牌组</h4><div class="deck">${ks.map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span><i style="background-image:url(img/ic_${baseOf(k)}.jpg)"></i>${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
       <div class="acts end"><button class="btn go" id="runBtn">${SVG.SHUTTLE}再登钟楼</button></div></div>`,'runBtn');
     $('runBtn').onclick=()=>showClassPick();
+  }else if(S.foeKey){
+    // an elite from the road: no heal and no card, its gold and a knot, then back onto the road
+    const run=S.run,g=loot();
+    openScr('road',pageHd('乱线解开了',run),`<div class="body"><h2 class="ttl">${F.name}倒下了</h2>
+      <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} / ${S.maxhp}`)}${stat(SVG.KNOT,'ind','金线',`+${g}`)}</div>
+      <div class="acts end"><button class="btn go" id="goOn">${SVG.KNOT}挑一枚线结</button></div></div>`,'goOn');
+    $('goOn').onclick=()=>{run.hp=S.hp;run.gold+=g;showKnotPick(run,()=>walk(run))};
   }else{
-    const N=FOE[S.run.foes[S.stage+1]],pool=rewardPool(S.run,F);
+    const N=FOE[S.run.foes[S.stage+1]],pool=rewardPool(S.run,F);if(S.run.rift){const x=shuffle(CLASSES[S.run.cls].pool.filter(k=>!pool.includes(k)&&!CARDS[k].ks))[0];if(x)pool.unshift(x)}
     openScr('win',MAST(metaHtml()),`<div class="vban"><b>胜利</b><span>VICTORY</span></div><div class="body">
       <div class="hero-col"><div class="ip fig"><div class="pic" style="background-image:url(img/body_${cls}.jpg)" role="img" aria-label="${CL().n}"></div></div>
         <div class="foecrest"><i style="background-image:url(${F.img})"></i></div>
@@ -1826,7 +1896,7 @@ function showEnd(){
 }
 
 /* ---------- The road: a fork in the red thread, the weavery, the spinning wheel ---------- */
-const roadMeta=run=>`<div class="meta"><span>金线 <b>${run.gold}</b></span><span>生命 <b>${run.hp} / ${run.maxhp}</b></span><span>牌组 <b>${run.deck.length}</b></span></div>`;
+const roadMeta=run=>`<div class="meta">${run.knots.length?`<span>${knotRow(run)}</span>`:''}<span>金线 <b>${run.gold}</b></span><span>生命 <b>${run.hp} / ${run.maxhp}</b></span><span>牌组 <b>${run.deck.length}</b></span></div>`;
 const pageHd=(t,run)=>MAST(`<span class="page">${SVG.FLEUR}${t}${SVG.FLEUR}</span>${roadMeta(run)}`);
 // the journey frieze with the coming floor lit
 const journey=run=>`<div class="journey ip">${run.foes.map((k,i)=>`<span class="jn ${i<run.stage?'done':i===run.stage?'next':''}"><em>${ROMAN[i]}</em><i></i><span>${i<=run.stage?FOE[k].name:''}</span></span>`).join('')}</div>`;
@@ -1848,15 +1918,18 @@ const sewPrice=run=>40+15*run.sewn,cutPrice=run=>50+25*run.cut;
 function stockFor(run){
   const K=CLASSES[run.cls],cls=rewardPool(run,{reward:[]});
   const more=shuffle(K.pool.filter(k=>!cls.includes(k)&&!CARDS[k].ks))[0];
-  const time=shuffle(Object.keys(CARDS).filter(k=>!CARDS[k].a&&!k.includes('+')))[0];
+  const time=shuffle(Object.keys(CARDS).filter(k=>!CARDS[k].a&&!k.includes('+')&&CARDS[k].t!=='诅咒'))[0];
   return cls.concat(more,time).map(k=>({k,p:CARDS[k].ks?PRICE.ks:CARDS[k].a?PRICE.card:PRICE.time}));
 }
+function knotWare(run){const k=shuffle(knotPool(run))[0];return k?{k,p:100+10*run.stage}:null
+}
 function showShop(run,done){
-  const st=run.stall??={stock:stockFor(run),mended:false};
+  const st=run.stall??={stock:stockFor(run),knot:knotWare(run),mended:false};
   const leave=()=>{delete run.stall;done()},back=()=>showShop(run,done);
   const pay=p=>{if(run.gold<p)return false;run.gold-=p;return true};
   openScr('shop',pageHd('织坊',run),`<div class="body">
-    <section class="pp"><h4 class="sh">货架</h4><div class="rewards stock">${st.stock.map((w,i)=>`<div class="ware ${w.sold?'sold':''}">${cardHtml(w.k,{attr:`data-i="${i}"`,off:w.sold||run.gold<w.p})}<span class="price">${w.sold?'已售':w.p+' 金线'}</span></div>`).join('')}</div></section>
+    <section class="pp"><h4 class="sh">货架</h4><div class="rewards stock">${st.stock.map((w,i)=>`<div class="ware ${w.sold?'sold':''}">${cardHtml(w.k,{attr:`data-i="${i}"`,off:w.sold||run.gold<w.p})}<span class="price">${w.sold?'已售':w.p+' 金线'}</span></div>`).join('')}
+      ${st.knot?`<div class="ware ${st.knot.sold?'sold':''}"><button class="kware" id="knotBuy" ${st.knot.sold||run.gold<st.knot.p?'disabled':''}>${knotFace(st.knot.k)}</button><span class="price">${st.knot.sold?'已售':st.knot.p+' 金线'}</span></div>`:''}</div></section>
     <section class="pp"><h4 class="sh sm">手艺</h4><div class="crafts">
       <button class="craft" id="sewBtn" ${run.gold<sewPrice(run)?'disabled':''}><i>${SVG.SHUTTLE}</i><span><b>加绣</b><small>给一张牌绣上轻线、锋线或回线</small></span><em>${sewPrice(run)}</em></button>
       <button class="craft" id="cutBtn" ${run.gold<cutPrice(run)||run.deck.length<=5?'disabled':''}><i>${SVG.SKIP}</i><span><b>拆线</b><small>把一张牌从牌组里拆掉</small></span><em>${cutPrice(run)}</em></button>
@@ -1865,6 +1938,7 @@ function showShop(run,done){
     <div class="acts end"><button class="btn go" id="goOn">${SVG.SHUTTLE}离开织坊</button></div></div>`,'goOn');
   document.querySelectorAll('.stock .card').forEach(b=>b.onclick=()=>{const w=st.stock[+b.dataset.i];if(w.sold||!pay(w.p))return;
     w.sold=true;run.deck.push(w.k);if(CARDS[w.k].a)(run.picks??=[]).push(w.k);back()});
+  if($('knotBuy'))$('knotBuy').onclick=()=>{if(st.knot.sold||!pay(st.knot.p))return;st.knot.sold=true;run.knots.push(st.knot.k);back()};
   $('sewBtn').onclick=()=>showSew(run,sewPrice(run),back);
   $('cutBtn').onclick=()=>showCut(run,back);
   $('mendBtn').onclick=()=>{if(!pay(PRICE.mend))return;st.mended=true;run.hp=Math.min(run.maxhp,run.hp+15);back()};
@@ -1891,13 +1965,66 @@ function showSew(run,cost,done,cancel=done,sel=null){
     const id=run.deck[sel]+'+'+b.dataset.s;card(id);run.deck[sel]=id;done()});
   $('backBtn').onclick=sel==null?cancel:()=>showSew(run,cost,done,cancel);
 }
-function showCut(run,done){
-  openScr('shop',pageHd('拆线',run),`<div class="body"><section class="pp"><h4 class="sh">拆掉哪一张？</h4>
+// pick one card of the deck; onPick gets its index
+function pickCard(run,title,head,onPick,back){
+  openScr('shop',pageHd(title,run),`<div class="body"><section class="pp"><h4 class="sh">${head}</h4>
     <div class="rewards deckpick">${run.deck.map((k,i)=>cardHtml(k,{attr:`data-i="${i}"`})).join('')}</div></section>
     <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`);
-  document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>{const p=cutPrice(run);if(run.gold<p)return;run.gold-=p;run.cut++;
-    const [k]=run.deck.splice(+b.dataset.i,1);if(run.picks){const j=run.picks.lastIndexOf(k);if(j>=0)run.picks.splice(j,1)}done()});
-  $('backBtn').onclick=done;
+  document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>onPick(+b.dataset.i));
+  $('backBtn').onclick=back;
+}
+function unpick(run,i){const [k]=run.deck.splice(i,1);if(run.picks){const j=run.picks.lastIndexOf(k);if(j>=0)run.picks.splice(j,1)}return k}
+function showCut(run,done){
+  pickCard(run,'拆线','拆掉哪一张？',i=>{const p=cutPrice(run);if(run.gold<p)return;run.gold-=p;run.cut++;unpick(run,i);done()},done);
+}
+const knotFace=k=>`<span class="kn-ic">${SVG.KNOT}</span><b>${KNOTS[k].n}</b>${KNOTS[k].cls?`<small>${CLASSES[KNOTS[k].cls].n}</small>`:'<small>线结</small>'}<span class="d">${KNOTS[k].d}</span>`;
+function showKnotPick(run,done){
+  const ks=shuffle(knotPool(run)).slice(0,3);
+  openScr('road',pageHd('线结',run),`<div class="body"><h2 class="ttl">挑一枚线结</h2><p class="lead">线结整局都在，每枚改写一条小规则</p>
+    <div class="fork">${ks.map(k=>`<button class="thr kn" data-k="${k}">${knotFace(k)}</button>`).join('')}</div>
+    <div class="acts end"><button class="btn" id="skipBtn">${SVG.SKIP}都不要</button></div></div>`);
+  document.querySelectorAll('.thr.kn').forEach(b=>b.onclick=()=>{run.knots.push(b.dataset.k);done()});
+  $('skipBtn').onclick=done;
+}
+
+/* ---------- Loose threads: road events, each a choice with a price ---------- */
+// ok(run): can it show up now; each option's ok(run) greys it out, go(run,done) runs it and walks on
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const TALES={
+  weaver:{n:'迷途的织女',la:'THE LOST WEAVER',d:'一位织女坐在台阶上，线团散了一地。她说，只要分她一点你的命，她就把命运里的一个结让给你。',
+    opts:[{t:'献出 8 点最大生命，挑一枚线结',ok:r=>r.maxhp>30&&knotPool(r).length>0,go:(r,done)=>{r.maxhp-=8;r.hp=Math.min(r.hp,r.maxhp);showKnotPick(r,done)}},
+      {t:'帮她把线理好，收下 30 根金线',go:(r,done)=>{r.gold+=30;showNote(r,'迷途的织女','她把一束金线塞进你手里。金线 <b>+30</b>。',done)}}]},
+  torn:{n:'破损的挂毯',la:'THE TORN TAPESTRY',d:'墙上的挂毯破了一个洞，洞里能看见别的时间。',
+    opts:[{t:'花 40 金线补好它：随机一张牌加绣',ok:r=>r.gold>=40&&r.deck.some(k=>stitchesFor(k).length),go:(r,done)=>{r.gold-=40;
+        const i=rnd(r.deck.map((k,i)=>i).filter(i=>stitchesFor(r.deck[i]).length)),x=rnd(stitchesFor(r.deck[i])),id=r.deck[i]+'+'+x;card(id);r.deck[i]=id;
+        showNote(r,'破损的挂毯',`补好的地方多了一道绣纹：<b>${CARDS[id].n}</b> 绣上了<b>${STITCH[x].n}</b>（${STITCH[x].d}）。`,done)}},
+      {t:'撕下一块：随机拆掉一张牌，拿 25 金线',ok:r=>r.deck.length>5,go:(r,done)=>{const k=unpick(r,Math.floor(Math.random()*r.deck.length));r.gold+=25;
+        showNote(r,'破损的挂毯',`撕下来的那块布上织着<b>${CARDS[k].n}</b>，它离开了你的牌组。金线 <b>+25</b>。`,done)}}]},
+  well:{n:'回响之井',la:'THE ECHOING WELL',d:'往井里喊一声，回来的是两声。只是第二声有点走调。',
+    opts:[{t:'复制一张牌，但牌组里多一张乱线',go:(r,done)=>pickCard(r,'回响之井','复制哪一张？',i=>{r.deck.push(r.deck[i],'tangle');
+        showNote(r,'回响之井',`<b>${CARDS[r.deck[i]].n}</b> 多了一张，也多了一张<b>乱线</b>（花 1 粒沙打出，本场就不再出现）。`,done)},done)},
+      {t:'不出声，走开',go:(r,done)=>done()}]},
+  rift:{n:'时间裂缝',la:'A RIFT IN TIME',d:'墙上裂开一道缝，缝那头传来更高处的脚步声。',ok:r=>r.stage<=3,
+    opts:[{t:'踏进去：下一层换成更高一层的怪，赢了金线翻倍、多一张牌可选',go:(r,done)=>{r.foes[r.stage]=rnd(TOWER[r.stage+1]);r.rift=true;
+        showNote(r,'时间裂缝',`裂缝那头等着你的是<b>${FOE[r.foes[r.stage]].name}</b>。`,done)}},
+      {t:'绕开它',go:(r,done)=>done()}]},
+  wheel:{n:'命运纺锤',la:'THE SPINDLE OF FATE',d:'一只纺锤悬在半空，还在自己转。',
+    opts:[{t:'拨它一下',go:(r,done)=>{const n=Math.floor(Math.random()*3);
+        if(n===0&&knotPool(r).length)return showKnotPick(r,done);
+        if(n===1){r.hp=r.maxhp;return showNote(r,'命运纺锤','纺锤停下时，你身上的伤口都被缝好了。生命回满。',done)}
+        r.deck.push('tangle');showNote(r,'命运纺锤','纺锤缠住了你的手，一张<b>乱线</b>织进了牌组。',done)}},
+      {t:'别碰它',go:(r,done)=>done()}]},
+  thief:{n:'窃贼的赃物',la:'THE THIEF\'S HAUL',d:'时之窃贼摊开一块布：「拿你最贵的一张，换我这里一张你没见过的。」布下面的牌背朝上。',
+    opts:[{t:'换',ok:r=>r.deck.some(k=>CARDS[k].a),go:(r,done)=>{const own=r.deck.map((k,i)=>i).filter(i=>CARDS[r.deck[i]].a),top=Math.max(...own.map(i=>CARDS[r.deck[i]].c+(CARDS[r.deck[i]].r||0)/3)),
+        i=rnd(own.filter(i=>CARDS[r.deck[i]].c+(CARDS[r.deck[i]].r||0)/3===top)),K=CLASSES[r.cls],nw=rnd(K.pool.filter(k=>!r.deck.includes(k))),old=unpick(r,i);r.deck.push(nw);
+        showNote(r,'窃贼的赃物',`他拿走了<b>${CARDS[old].n}</b>，你翻开的是<b>${CARDS[nw].n}</b>：${CARDS[nw].d}`,done)}},
+      {t:'不换',go:(r,done)=>done()}]}
+};
+function showTale(run,done){
+  const T=rnd(Object.values(TALES).filter(t=>!t.ok||t.ok(run)));
+  openScr('road',pageHd('线头',run),`<div class="body"><div class="tale ip"><span class="kick">${T.la}</span><h2>${T.n}</h2><p>${T.d}</p></div>
+    <div class="taleopts">${T.opts.map((o,i)=>`<button class="craft" data-i="${i}" ${o.ok&&!o.ok(run)?'disabled':''}><i>${SVG.FLEUR}</i><span><b>${o.t}</b></span></button>`).join('')}</div></div>`);
+  document.querySelectorAll('.taleopts .craft').forEach(b=>b.onclick=()=>T.opts[+b.dataset.i].go(run,done));
 }
 
 /* ---------- Motion (GSAP): a move pulls a thread, a resonance ties a knot, a parry cuts the foe's patch and folds it back;
@@ -1995,7 +2122,7 @@ function enter(mode){
 }
 
 function start(data){
-  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.run.gold??=0;S.run.road??=[];[S.run.deck,S.deck,S.hand,S.discard].flat().forEach(k=>k.includes('+')&&card(k));S.rageMax??=10;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.run.stage!==S.stage)walk(S.run);else if(S.over)showEnd()}
+  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.run.gold??=0;S.run.road??=[];S.run.knots??=[];[S.run.deck,S.deck,S.hand,S.discard].flat().forEach(k=>k.includes('+')&&card(k));S.rageMax??=10;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.run.stage!==S.stage)walk(S.run);else if(S.over)showEnd()}
   else{newRun(0,'warrior');render();showClassPick(true)}
 }
 window.claude?.hot?.snapshot?.(()=>({state:JSON.parse(JSON.stringify(S))}));
