@@ -492,6 +492,23 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .card .art i.gl{display:flex;align-items:center;justify-content:center;color:var(--madder3);background:var(--ink)}
 .card .art i.gl svg{width:62%;height:62%}
 
+/* woven foes: damask motifs in the loom's ground cloth, faint on beats still to come, woven firm on beats past, lit gold when their trait fires */
+.slot .wv{position:absolute;left:50%;top:50%;width:92px;height:92px;transform:translate(-50%,-50%);pointer-events:none;background:var(--wv) center 30%/cover;
+  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.7) contrast(1.5) brightness(1.05);mix-blend-mode:multiply;opacity:.14}
+.slot.now .wv{opacity:.2}
+.slot.past .wv{width:66px;height:66px;opacity:.3;filter:grayscale(1) sepia(1) contrast(1.6) brightness(.9)}
+.slot .wv.lit{opacity:.4;filter:sepia(1) saturate(2.6) brightness(1.1);box-shadow:inset 0 0 0 3px var(--gold);animation:wvlit 1.4s ease-out}
+@keyframes wvlit{0%{transform:translate(-50%,-50%) scale(1.35);opacity:1}100%{transform:translate(-50%,-50%) scale(1)}}
+.tag.fate{border-color:var(--gold);background:var(--indigo);color:var(--gold3)}
+.lead.fate{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;color:var(--indigo)}
+.fatebox p{margin:0 0 10px;font-size:15px;line-height:1.7;text-align:center}
+.fatebox .btn{width:100%;font-size:18px;padding:10px 16px}
+.skipcard.weave{background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3)}
+.skipcard.weave b{color:var(--gold3)!important}.skipcard.weave>i{color:#d3d7da;font-size:12px;line-height:1.5}
+.skipcard.weave .sk-ic i{display:block;width:110px;height:110px;background:center 30%/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.8) contrast(1.3)}
+.thr .wv-ic{width:96px;height:96px;background:center 30%/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.8) contrast(1.3)}
+.knotlist i.wvi{background:center 30%/cover;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:grayscale(1) sepia(.8)}
+
 /* defeat: the story frays at its lower edge */
 .scr.lose .body{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}
 .fray{position:relative;min-height:min(80vh,840px);overflow:hidden}
@@ -850,6 +867,44 @@ const KNOTS={
   mute:{n:'静音织物',cls:'mage',d:'每场战斗第一次吟唱被打中时不会中断。'}
 };
 const hasK=k=>!!S.run.knots?.includes(k);
+
+/* ---------- Woven foes: beat a foe and, instead of a card, weave one of its traits into the loom (three at most) ---------- */
+// each becomes a damask motif in the loom's ground cloth; wvFx lights the motif on the beat where its trait just fired
+const WEAVES={
+  wolf:{n:'狂性',d:'生命不到 30% 时，你的每次攻击 +3。'},
+  bat:{n:'吸血',d:'每次弹反，回复 3 点生命。'},
+  skeleton:{n:'重组',d:'每场战斗第一次受到致命伤时，留 1 点生命并回复 10 点。'},
+  beetle:{n:'铁甲',d:'单次低于 4 点的伤害对你无效。'},
+  spider:{n:'蛛毒',d:'每回合你的攻击第一次命中，敌人 +2 层毒。'},
+  gargoyle:{n:'石肤',d:'你不出手的拍，受到的每次伤害 −2。'},
+  slime:{n:'分裂',d:'单次造成 15 点及以上伤害时抽 1 张牌（每回合一次）。'},
+  mirror:{n:'镜饲',d:'一回合没受到伤害，回合结束回复 4 点生命。'},
+  puppet:{n:'上弦',d:'本回合敌人的行动每被你延后一次，你的攻击 +1（最多 +5）。'},
+  treant:{n:'荆棘',d:'敌人每次打中你，反刺 2 点。'},
+  ogre:{n:'震荡',d:'每次弹反，敌人的下一次行动延后 1 拍。'},
+  banshee:{n:'虚体',d:'单次受到的伤害最多 15 点。'},
+  shaman:{n:'图腾',d:'每场战斗开局立起一面 10 点的图腾，替你挡伤害。'},
+  thief:{n:'窃时',d:'每回合第一次弹反，下回合 +1 时之砂。'},
+  golem:{n:'升温',d:'每回合结束热度 +1（最多 5），你的每次攻击 +热度；被打中热度清零。'},
+  knight:{n:'盾反',d:'你的反击（残影、残心、反击架势）伤害 +4。'}
+};
+const WEAVE_MAX=3;
+const hasW=k=>!!S.run.woven?.includes(k);
+function wvFx(k,b){const at=b??S.resolving??S.beat-1;(S.wfx??={})[at]=k;flt('hero',WEAVES[k].n,'info')}
+// which woven motif shows in the cloth under beat b: one every third beat, cycling through the woven foes
+function wvAt(b){const ws=S.run.woven||[];const lit=S.wfx?.[b];if(lit)return {k:lit,lit:true};if(!ws.length||b%3!==2)return null;return {k:ws[Math.floor(b/3)%ws.length]}}
+const wvHtml=b=>{const w=wvAt(b);return w?`<i class="wv ${w.lit?'lit':''}" style="--wv:url(img/foe_${w.k}_p.jpg)" aria-hidden="true"></i>`:''};
+
+/* ---------- Threads of fate: a wager offered before a fight; taken and kept, the fight's gold doubles, broken, −5 life ---------- */
+const FATES={
+  peak:{d:s=>`本场某一拍打出 ${30+5*s} 点以上`,ok:()=>(S.best?.d||0)>=30+5*S.stage},
+  parry:{d:s=>`本场弹反至少 ${s<3?2:3} 次`,ok:()=>(S.parries||0)>=(S.stage<3?2:3)},
+  quick:{d:s=>`${6+Math.floor(s/2)} 回合内获胜`,ok:()=>S.turn<=6+Math.floor(S.stage/2)},
+  hale:{d:s=>`本场生命最多少 ${15+3*s} 点`,ok:()=>S.hp0-S.hp<=15+3*S.stage}
+};
+// true kept, false broken, null when no wager was taken
+const fateRes=()=>S.fate?.on?FATES[S.fate.k].ok():null;
+function payFate(run){const r=fateRes();if(r===true)run.gold+=loot();else if(r===false)run.hp=Math.max(1,run.hp-5)}
 const knotPool=run=>Object.keys(KNOTS).filter(k=>!run.knots.includes(k)&&(!KNOTS[k].cls||KNOTS[k].cls===run.cls));
 const knotRow=run=>run.knots.length?`<span class="knots">${run.knots.map(k=>`<i title="${KNOTS[k].n}：${KNOTS[k].d}">${SVG.KNOT}</i>`).join('')}</span>`:'';
 // the sand a card costs right now: the golden shuttle makes the turn's first move card free
@@ -1155,7 +1210,7 @@ const FLOOR_HEAL=.2;
 let S;
 function newRun(stage,cls,key){
   const C=CLASSES[cls];
-  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[]};run.hp=run.maxhp;
+  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[],woven:[]};run.hp=run.maxhp;
   if(key)run.foes[stage]=key;
   startFight(run);
 }
@@ -1169,6 +1224,7 @@ function startFight(run,key){
   if(hasK('black'))S.ehp=Math.round(S.emax*.9);
   if(hasK('hourglass'))S.sand++;if(hasK('spindle'))S.drawN=6;if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
   S.shuttle=hasK('shuttle');S.mute=hasK('mute');S.star=hasK('starthread');
+  S.totem=hasW('shaman')?10:0;S.hp0=S.hp;S.wfx={};S.fate=run.stage<TOWER.length-1?{k:shuffle(Object.keys(FATES))[0],on:false}:null;
   gen(S.beat+11);
   F.turnStart?.call(F,true);
   draw(S.drawN);S.drawN=5;
@@ -1177,7 +1233,7 @@ function startFight(run,key){
 // climb to the next floor with the HP this fight left you, taking card k (or none) and the gold thread the fight earned;
 // with ui, the steps of ROAD for this gap are walked before the next fight (the balance AI calls it without, straight to the fight)
 function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=hasK('black')?S.hp:Math.min(run.maxhp,S.hp+5+Math.round(run.maxhp*FLOOR_HEAL));
-  run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
+  payFate(run);run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
 // gold thread for a win: a base that grows with the floor, one per 10 of the fight's best beat, two per parry
 const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1));
 
@@ -1240,6 +1296,7 @@ function heroTotal(hs){
   if(!hs.length)return 0;const b=hs[0].beat;
   let x=hs.reduce((a,e)=>a+e.dmg+(S.cry&&b<S.beat+3?4:0),0);
   if(S.blood&&S.hp*2<S.maxhp)x+=5*hs.length;
+  x+=((hasW('wolf')&&S.hp*10<S.maxhp*3?3:0)+(hasW('puppet')?S.windUp||0:0)+(hasW('golem')?S.heat||0:0))*hs.length;
   if(S.run.cls==='rogue'){x+=Math.floor(S.combo/2);if(openBeat(b))x+=1}
   const ks=at(b,'k');if(ks.length)x*=Math.max(...ks.map(k=>k.v||2));
   return Math.round(x*mult(hs.length));
@@ -1257,12 +1314,15 @@ function flt(who,text,cls){if(FX)FX.push({who,text,cls});if(SIM)return;const box
 function dealEnemy(raw,label,o={}){
   const F=FL();
   if(S.edge&&raw>0)raw+=S.edge;
+  if(hasW('knight')&&o.src==='ghost'&&raw>0)raw+=4;
+  if(hasW('spider')&&o.src==='atk'&&raw>0&&!S.webbed){S.webbed=true;addPoison(2);wvFx('spider',o.beat)}
   let x=F.mod&&o.src!=='true'?F.mod(raw,o):raw,note='';
   if(x<raw&&!(o.beat&&at(o.beat,'e').some(e=>e.sh))){flt('enemy',F.modNote,'info');note=`（${F.modNote}）`}
   if(F.take)x=F.take(x,o,raw);
   if(S.venom&&o.src==='atk'&&raw>0){const k=2*(o.n||1);addPoison(k);flt('enemy',`毒 +${k}`,'info')}
   if(S.shield>0&&x>0){const a=Math.min(S.shield,x);S.shield-=a;x-=a;flt('enemy',`帷幕 −${a}`,'info');note+=`（沙之帷幕吸收 ${a}）`}
   S.ehp=Math.max(0,S.ehp-x);
+  if(hasW('slime')&&x>=15&&!S.split&&S.ehp>0){S.split=true;draw(1);wvFx('slime',o.beat)}
   if(x>0)flt('enemy',String(x),x>=25?'big':'dmg');
   log(`${label||'攻击'}造成 ${x} 点伤害${note}。`);
   F.onDealt?.call(F,x,o);
@@ -1272,9 +1332,16 @@ function healEnemy(x,label){
   const h=Math.min(x,S.emax-S.ehp);S.ehp+=h;flt('enemy','+'+h,'heal');log(`${label}：${FL().lane}回复了 ${h} 点生命。`);
 }
 function dealHero(x,es,opt={}){
+  if(x>0&&hasW('banshee')&&x>15){x=15;wvFx('banshee')}
+  if(x>0&&hasW('beetle')&&x<4){wvFx('beetle');return}
+  if(x>0&&hasW('gargoyle')&&S.resolving&&!at(S.resolving,'h').length){x=Math.max(0,x-2);wvFx('gargoyle');if(!x)return}
+  if(x>0&&S.totem>0){const a=Math.min(S.totem,x);S.totem-=a;x-=a;wvFx('shaman');log(`图腾替你挡下 ${a} 点${S.totem?'':'，碎了'}。`);if(!x)return}
   if(x>0&&hasK('rope')&&!S.roped&&S.hp*10<S.maxhp*3){S.roped=true;x=Math.ceil(x/2);flt('hero','打结绳','info');log(`打结绳：这一下减半到 ${x}。`)}
   if(S.iceArmor){x=Math.max(0,x-3);if(!x){flt('hero','冰甲','info');return}}
   S.hp=Math.max(0,S.hp-x);S.dmgThis+=x;flt('hero','-'+x,'hurt');if(!opt.thorn)gainRage(2);
+  if(x>0&&hasW('golem'))S.heat=0;
+  if(x>0&&hasW('treant')&&!opt.thorn&&S.ehp>0){wvFx('treant');dealEnemy(2,'荆棘',{src:'true'})}
+  if(S.hp<=0&&hasW('skeleton')&&!S.rebuilt){S.rebuilt=true;S.hp=Math.min(S.maxhp,11);wvFx('skeleton');log('重组：骨头拼了回去，你带着 11 点生命站起来。')}
   if(S.hp<=0&&S.undying){S.undying=false;S.hp=Math.min(S.maxhp,16);flt('hero','不屈','heal');log('不屈：你在倒下前站稳了，回复到 16 点生命。');banner('不屈','UNDYING')}
   // a hit inside a spell's window breaks the cast (thorns don't count)
   if(S.run.cls==='mage'&&!opt.thorn&&S.resolving){const r=S.resolving,sp=S.events.filter(e=>e.side==='c'&&e.from<=r&&e.beat>=r);
@@ -1285,6 +1352,7 @@ function dealHero(x,es,opt={}){
 }
 function delayed(src){const F=FL();F.onDelay?.call(F,src);
   if(src==='stagger'||S.over)return;
+  if(hasW('puppet')&&(S.windUp||0)<5)S.windUp=(S.windUp||0)+1;
   if(S.rime){dealEnemy(4,'寒霜印记',{src:'spell',el:'冰'});if(S.over)return}
   if(S.run.cls==='mage')addFrost(1)}
 // at FROST stacks the next attack that is not time-locked freezes solid and never lands
@@ -1505,7 +1573,8 @@ function resolveBeat(b){
       dealEnemy(6,'残影反击',{src:'ghost',beat:b});if(hs.length&&!S.over)hit();
     }else if(hs.length||sp){
       if(ct>et){
-        flt('hero','弹反！','info');S.parried=true;S.parries=(S.parries||0)+1;gainRage(2);if(hasK('shears')&&!S.sheared){S.sheared=true;dealEnemy(12,'断线剪',{src:'true'})}log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，弹反成功！${rev?'逆针被弹反净化。':''}`);
+        flt('hero','弹反！','info');S.parried=true;S.parries=(S.parries||0)+1;gainRage(2);if(hasK('shears')&&!S.sheared){S.sheared=true;dealEnemy(12,'断线剪',{src:'true'})}
+        if(hasW('bat')){const h=Math.min(3,S.maxhp-S.hp);if(h){S.hp+=h;wvFx('bat',b)}}if(hasW('thief')&&!S.stole){S.stole=true;S.refund++;wvFx('thief',b)}if(hasW('ogre')&&!S.over){freeze('震荡');wvFx('ogre',b)}log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，弹反成功！${rev?'逆针被弹反净化。':''}`);
         if(S.bloodwar){const h=Math.min(3,S.maxhp-S.hp);if(h>0){S.hp+=h;flt('hero','+'+h,'heal')}}
         if(hs.length){struck=true;const e0=S.ehp;dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length});
           const h=S.drain?Math.min(Math.floor((e0-S.ehp)/2),S.maxhp-S.hp):0;if(h>0){S.hp+=h;flt('hero','+'+h,'heal');log(`饮血：回复 ${h} 点生命。`)}}
@@ -1570,6 +1639,9 @@ function nextTurn(){
   F.turnEnd?.call(F);
   S.beat+=3;S.turn++;gen(S.beat+11);
   S.parriedPrev=S.parried;S.parried=false;
+  if(hasW('mirror')&&!S.dmgThis&&S.hp<S.maxhp){S.hp=Math.min(S.maxhp,S.hp+4);wvFx('mirror',S.beat-1)}
+  if(hasW('golem'))S.heat=Math.min(5,(S.heat||0)+1);
+  S.webbed=S.split=S.stole=false;S.windUp=0;
   S.dmgLast=S.dmgThis;S.dmgThis=0;S.foresight=false;
   S.lastPlayed=S.played;S.played=null;S.turnCards=[];S.resThis=false;S.cry=false;S.smoke=[];
   S.ripo=S.drain=S.venom=S.prism=S.flow=S.toxin=false;S.tideN=0;
@@ -1622,7 +1694,7 @@ function renderTop(){
   const K=CL();$('heroName').textContent=K.n;
   $('heroRes').textContent=S.run.cls==='warrior'?`怒气 ${S.rage}/${S.rageMax}`:S.run.cls==='rogue'?`连击 ${S.combo}/${S.comboMax}`:`霜冻 ${S.frost}/${FROST}`;
   const T=(c,on,t)=>on?`<span class="tag ${c}">${t}</span>`:'';
-  $('heroStatus').innerHTML=(S.run.cls==='warrior'?T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,S.hp*2<S.maxhp?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')+T('rg',S.steady,'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
+  $('heroStatus').innerHTML=(S.fate?.on?`<span class="tag fate">命运 · ${FATES[S.fate.k].d(S.stage)}</span>`:'')+(S.totem?`<span class="tag">图腾 ${S.totem}</span>`:'')+(S.heat?`<span class="tag">热度 +${S.heat}</span>`:'')+(S.run.cls==='warrior'?T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,S.hp*2<S.maxhp?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')+T('rg',S.steady,'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
       :S.run.cls==='rogue'?T('cb',S.keep,'余势')+T('cb',S.venom,'毒刃')+T('cb',S.toxin,'毒发')+T('cb',S.zanshin,'残心')+T('cb',S.plague,'瘟疫')+T('cb',S.omen,'死兆')
       :T('mg',S.events.some(e=>e.side==='c'),`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.ff,`霜火 +${S.ff}`)+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
   let st='';
@@ -1671,7 +1743,7 @@ const EL={'火':SVG.FIRE,'冰':SVG.ICE,'雷':SVG.BOLT};
 const foeGlyph=e=>e.na?'':e.kind==='j'||e.fin?SVG.BURST:SVG.CLAW;
 function pastSlot(h){
   const m=midRec(h.rec);
-  return `<div class="slot past ${h.fresh?'fresh':''}" data-pb="${h.b}"><div class="bn"><span>${roman(h.b)}</span></div>
+  return `<div class="slot past ${h.fresh?'fresh':''}" data-pb="${h.b}">${wvHtml(h.b)}<div class="bn"><span>${roman(h.b)}</span></div>
     <div class="lane e">${h.e.map(x=>`<div class="chip st">${x.l}${x.na?'':` <b>${x.d}</b>`}</div>`).join('')}</div>
     <div class="mid ${m.c}"><span class="mt">${m.h}</span></div>
     <div class="lane h">${h.h.map(x=>`<div class="chip st">${x.l}${x.na?'':` <b>${x.d}</b>`}</div>`).join('')}</div></div>`;
@@ -1712,7 +1784,7 @@ function liveSlot(b,o){
     +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')
     +cs.map(e=>`<div class="chip sp" data-el="${e.el}" data-id="${e.id}">${EL[e.el]}${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
   const m=now?midRec(o.rec):guessMid(b,F);
-  return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} " data-b="${b}">
+  return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} " data-b="${b}">${wvHtml(b)}
     <div class="bn"><span>${roman(b)}</span></div><div class="lane e">${ech}</div><div class="mid ${m.c}"><span class="mt">${m.h}</span></div><div class="lane h">${hch}</div></div>`;
 }
 let scrollKey='';
@@ -1833,6 +1905,8 @@ function showRules(intro){
     <div class="bmid">
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
+      ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：做到了，这场的金线翻倍；没做到，生命 −5。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
+      ${S.run.woven.length?`<section class="pp"><h4 class="sh sm">织入的怪物</h4><ul class="knotlist">${S.run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/foe_${k}_p.jpg)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${S.run.knots.length?`<section class="pp"><h4 class="sh sm">线结</h4><ul class="knotlist">${S.run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
         '<b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。',
@@ -1842,6 +1916,7 @@ function showRules(intro){
     </div>
     ${towerCol()}</div>`,'startBtn');
   wireFloors();$('pickBtn').onclick=()=>showClassPick();
+  if($('fateBtn'))$('fateBtn').onclick=()=>{S.fate.on=!S.fate.on;showRules(intro)};
   $('startBtn').onclick=()=>{closePanel();if(fresh)banner(F.floor,F.name)};
 }
 
@@ -1874,7 +1949,7 @@ function showEnd(){
     openScr('road',pageHd('乱线解开了',run),`<div class="body"><h2 class="ttl">${F.name}倒下了</h2>
       <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} / ${S.maxhp}`)}${stat(SVG.KNOT,'ind','金线',`+${g}`)}</div>
       <div class="acts end"><button class="btn go" id="goOn">${SVG.KNOT}挑一枚线结</button></div></div>`,'goOn');
-    $('goOn').onclick=()=>{run.hp=S.hp;run.gold+=g;showKnotPick(run,()=>walk(run))};
+    $('goOn').onclick=()=>{run.hp=S.hp;run.gold+=g;payFate(run);showKnotPick(run,()=>walk(run))};
   }else{
     const N=FOE[S.run.foes[S.stage+1]],pool=rewardPool(S.run,F);if(S.run.rift){const x=shuffle(CLASSES[S.run.cls].pool.filter(k=>!pool.includes(k)&&!CARDS[k].ks))[0];if(x)pool.unshift(x)}
     openScr('win',MAST(metaHtml()),`<div class="vban"><b>胜利</b><span>VICTORY</span></div><div class="body">
@@ -1885,12 +1960,15 @@ function showEnd(){
         <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} → <em>${healTo()}</em>`,{sm:`上限 ${S.maxhp+5}`})}${stat(SVG.STAIRS,'ind','下一层',N.name,{zh:1})}</div>
         <h4 class="sh">战利品</h4><p class="lead">挑一张牌加入牌组</p>
         <div class="rewards">${pool.map(k=>cardHtml(k,{cls:'rw',attr:`data-k="${k}"`})).join('')}
+          ${WEAVES[F.key]&&!S.run.woven.includes(F.key)?`<button class="skipcard weave" id="weaveBtn"><span class="sk-ic"><i style="background-image:url(${F.portrait})"></i></span><b>织入${F.lane}</b><i>不拿牌 · ${WEAVES[F.key].n}：${WEAVES[F.key].d}</i></button>`:''}
           <button class="skipcard" id="skipBtn"><span class="sk-ic">${SVG.SKIP}</span><b>直接上楼</b><i>不拿牌</i></button></div>
         <div class="journey ip">${S.run.foes.map((k,i)=>`<span class="jn ${i<=S.stage?'done':i===S.stage+1?'next':''}"><em>${ROMAN[i]}</em><i></i><span>${i<=S.stage+1?FOE[k].name:''}</span></span>`).join('')}</div>
+        ${S.fate?.on?`<p class="lead fate">${fateRes()?`命运之线 · 完成：金线再 <b>+${loot()}</b>`:'命运之线 · 没有完成：生命 <b>−5</b>'}</p>`:''}
         <p class="lead"><span class="rwnote">当前牌组 ${S.run.deck.length} 张 · 金线 ${S.run.gold||0} <em>+${loot()}</em></span></p></div></div>`);
     const next=k=>nextFloor(k,true);
     document.querySelectorAll('.rewards .card').forEach(b=>b.onclick=()=>next(b.dataset.k));
     $('skipBtn').onclick=()=>next(null);
+    if($('weaveBtn'))$('weaveBtn').onclick=()=>{const run=S.run;if(run.woven.length<WEAVE_MAX){run.woven.push(F.key);next(null)}else showUnweave(run,F.key,()=>next(null),showEnd)};
   }
   $('scr').dataset.end=String(S.uid);
 }
@@ -1985,6 +2063,15 @@ function showKnotPick(run,done){
     <div class="acts end"><button class="btn" id="skipBtn">${SVG.SKIP}都不要</button></div></div>`);
   document.querySelectorAll('.thr.kn').forEach(b=>b.onclick=()=>{run.knots.push(b.dataset.k);done()});
   $('skipBtn').onclick=done;
+}
+
+// the loom holds WEAVE_MAX foes: weaving a new one unravels one you pick
+function showUnweave(run,key,done,back){
+  openScr('road',pageHd('织入',run),`<div class="body"><h2 class="ttl">织机满了</h2><p class="lead">拆掉一只，才能把<b>${FOE[key].name}</b>织进去</p>
+    <div class="fork">${run.woven.map(k=>`<button class="thr wvn" data-k="${k}"><span class="wv-ic" style="background-image:url(img/foe_${k}_p.jpg)"></span><b>${WEAVES[k].n}</b><small>${FOE[k].name}</small><span class="d">${WEAVES[k].d}</span></button>`).join('')}</div>
+    <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`);
+  document.querySelectorAll('.thr.wvn').forEach(b=>b.onclick=()=>{run.woven[run.woven.indexOf(b.dataset.k)]=key;done()});
+  $('backBtn').onclick=()=>{delete $('scr').dataset.end;back()};
 }
 
 /* ---------- Loose threads: road events, each a choice with a price ---------- */
@@ -2122,7 +2209,7 @@ function enter(mode){
 }
 
 function start(data){
-  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.run.gold??=0;S.run.road??=[];S.run.knots??=[];[S.run.deck,S.deck,S.hand,S.discard].flat().forEach(k=>k.includes('+')&&card(k));S.rageMax??=10;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.run.stage!==S.stage)walk(S.run);else if(S.over)showEnd()}
+  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.run.gold??=0;S.run.road??=[];S.run.knots??=[];S.run.woven??=[];[S.run.deck,S.deck,S.hand,S.discard].flat().forEach(k=>k.includes('+')&&card(k));S.rageMax??=10;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.run.stage!==S.stage)walk(S.run);else if(S.over)showEnd()}
   else{newRun(0,'warrior');render();showClassPick(true)}
 }
 window.claude?.hot?.snapshot?.(()=>({state:JSON.parse(JSON.stringify(S))}));
