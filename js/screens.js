@@ -13,11 +13,12 @@ const stat=(ic,c,lb,v,o={})=>`<div class="stat"><i class="${c}">${ic}</i><span><
 // the clock tower: storeys from I at the foot to VII, cleared ones gilded, the current one in madder
 const towerCol=()=>`<ol class="tower" aria-label="钟楼">${S.run.foes.map((k,i)=>`<li class="tw ${i<S.stage?'done':i===S.stage?'cur':''}" title="${i<=S.stage?FOE[k].name:FOE[k].floor}">${ROM[i+1]}</li>`).join('')}</ol>`;
 const patch=e=>`<div class="chip e ${e.na?'na':''} ${e.kind==='j'?'j':''}">${foeGlyph(e)}${e.label}${e.na?'':` <b>${e.dmg}</b>`}</div>`;
-function openScr(mode,mast,main,focus){
-  const s=$('scr');calmDown();s.className='scr '+mode;
+// quiet: redraw the same page in place (a purchase in the weavery), keeping the scroll and skipping the entrance
+function openScr(mode,mast,main,focus,quiet){
+  const s=$('scr'),y=s.scrollTop;calmDown();s.className='scr '+mode;
   $('scrIn').innerHTML=mast+main;
-  s.hidden=false;s.scrollTop=0;delete s.dataset.end;
-  enter(mode);
+  s.hidden=false;s.scrollTop=quiet?y:0;delete s.dataset.end;
+  if(!quiet)enter(mode);
   const f=$(focus);if(f)f.focus({preventScroll:true});
 }
 function closePanel(){calmDown();$('scr').hidden=true}
@@ -141,16 +142,45 @@ const roadMeta=run=>`<div class="meta">${run.knots.length?`<span>${knotRow(run)}
 const pageHd=(t,run)=>MAST(`<span class="page">${SVG.FLEUR}${t}${SVG.FLEUR}</span>${roadMeta(run)}`);
 // the journey frieze with the coming floor lit
 const journey=run=>`<div class="journey ip">${run.foes.map((k,i)=>`<span class="jn ${i<run.stage?'done':i===run.stage?'next':''}"><em>${ROM[i+1]}</em><i></i><span>${i<=run.stage?FOE[k].name:''}</span></span>`).join('')}</div>`;
-function showFork(run,done){
-  const opts=forkOptions(run);
-  openScr('road',pageHd('岔路',run),`<div class="body">
-    <h2 class="ttl">红线在这里分岔</h2><p class="lead">选一股走下去，下一层是 <b>${FOE[run.foes[run.stage]].name}</b></p>
-    <div class="fork">${opts.map(k=>{const T=THREADS[k];return `<button class="thr" data-k="${k}"><span class="ic">${SVG[T.ic]}</span><b>${T.n}</b><small>${T.la}</small><span class="d">${T.d}</span></button>`}).join('')}</div>
-    ${journey(run)}</div>`);
-  document.querySelectorAll('.thr').forEach(b=>b.onclick=()=>THREADS[b.dataset.k].go(run,done));
+// the coming foe, hung beside the road as a small hunting tapestry
+function nextFoe(run){
+  const F=FOE[run.foes[run.stage]];
+  return `<aside class="nfoe ip"><div class="pic" style="background-image:url(${F.portrait})" role="img" aria-label="${F.name}"></div>
+    <div class="cap"><span class="fl">下一层 · 第 ${ROM[run.stage+1]} 层</span><h3>${F.name}</h3><small>${EN[F.key]}</small>
+      <span class="hp">${SVG.HEART}生命 <b>${F.hp}</b></span><p>${F.rules[0]}</p></div></aside>`;
 }
-function showNote(run,title,html,done){
-  openScr('road',pageHd(title,run),`<div class="body"><div class="pp note"><p>${html}</p><div class="acts"><button class="btn go" id="goOn">${SVG.SHUTTLE}继续上路</button></div></div></div>`,'goOn');
+// what you carry: life, gold, the deck in short, knots and woven foes
+function pack(run){
+  const st=run.deck.filter(k=>CARDS[k].st).length,tg=run.deck.filter(k=>CARDS[k].t==='诅咒').length;
+  return `<aside class="pack pp"><h4 class="sh sm">行囊</h4>
+    <div class="hpbar" title="生命"><span style="width:${Math.round(100*run.hp/run.maxhp)}%"></span><b>${SVG.HEART}${run.hp} / ${run.maxhp}</b></div>
+    <div class="purse"><i>${SVG.KNOT}</i><b>${run.gold}</b><small>金线</small></div>
+    <p class="dk">牌组 <b>${run.deck.length}</b> 张${st?` · 绣过 <b>${st}</b>`:''}${tg?` · 乱线 <b>${tg}</b>`:''}</p>
+    ${run.knots.length?`<ul class="knotlist">${run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul>`:'<p class="none">还没有线结</p>'}
+    ${run.woven.length?`<ul class="knotlist">${run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/weaves/${k}.png)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul>`:''}</aside>`;
+}
+// the red thread drops from a knot and splits into one strand per choice; each strand ends in a woven picture
+function showFork(run,done){
+  const opts=forkOptions(run),n=opts.length,more=run.road.includes('fork');
+  openScr('road',pageHd('岔路',run),`<div class="body forkpg">
+    ${nextFoe(run)}
+    <div class="fmain"><h2 class="ttl">红线在这里分岔</h2>
+      <p class="lead">选一股走下去，尽头是第 ${ROM[run.stage+1]} 层的 <b>${FOE[run.foes[run.stage]].name}</b>${more?'；走完这一股，红线还会再分一次':''}</p>
+      <div class="strands" style="--n:${n}"><span class="spool">${SVG.KNOT}</span>
+        <svg class="split" viewBox="0 0 ${n*100} 60" preserveAspectRatio="none" aria-hidden="true">${opts.map((k,i)=>`<path data-i="${i}" d="M${n*50} 0C${n*50} 34 ${i*100+50} 26 ${i*100+50} 60"/>`).join('')}</svg>
+        ${opts.map((k,i)=>{const T=THREADS[k];return `<button class="strand" data-k="${k}" data-i="${i}"><span class="pic" style="background-image:url(img/road/${k}.jpg)"><em class="tg ${T.tg[1]}">${T.tg[0]}</em></span>
+          <span class="tx"><b>${T.n}</b><small>${T.la}</small><span class="d">${T.d}</span><ul class="peek">${T.peek(run).map(x=>`<li>${x}</li>`).join('')}</ul></span>
+          <span class="pick">${SVG.SHUTTLE}走这一股</span></button>`}).join('')}</div></div>
+    ${pack(run)}
+    ${journey(run)}</div>`);
+  const paths=document.querySelectorAll('.split path');
+  document.querySelectorAll('.strand').forEach(b=>{const p=paths[+b.dataset.i];
+    b.onmouseenter=b.onfocus=()=>p.classList.add('hot');b.onmouseleave=b.onblur=()=>p.classList.remove('hot');
+    b.onclick=()=>THREADS[b.dataset.k].go(run,done)});
+}
+// a short page on the road; pic names one of the road pictures img/rd_<pic>.jpg
+function showNote(run,title,html,done,pic){
+  openScr('road',pageHd(title,run),`<div class="body"><div class="pp note ${pic?'pic':''}">${pic?`<span class="np" style="background-image:url(img/road/${pic}.jpg)"></span>`:''}<p>${html}</p><div class="acts"><button class="btn go" id="goOn">${SVG.SHUTTLE}继续上路</button></div></div></div>`,'goOn');
   $('goOn').onclick=done;
 }
 // the weavery's prices: stitching and unpicking cost more each time you do them in a run
@@ -164,64 +194,115 @@ function stockFor(run){
 }
 function knotWare(run){const k=shuffle(knotPool(run))[0];return k?{k,p:100+10*run.stage}:null
 }
-function showShop(run,done){
-  const st=run.stall??={stock:stockFor(run),knot:knotWare(run),mended:false};
-  const leave=()=>{delete run.stall;done()},back=()=>showShop(run,done);
+// what the old weaver says: a greeting by how full your purse is, then a word on whatever you just did
+const WEAVER={rich:['金线不少嘛。好布配好牌，慢慢挑。','这么多金线，够把整面墙都绣一遍了。'],poor:['钱袋空了？看看也不收钱。','金线不够就去打怪，楼上多的是。'],
+  mid:['进来吧，外面的线都乱了。','牌是织出来的，不顺手就拆了重织。','往上走的人，都在我这儿换过一身线。'],
+  buy:k=>`「${CARDS[k].n}」织得紧，好好用。`,knot:k=>`「${KNOTS[k].n}」系牢了，整局都不会松。`,sew:k=>`绣好了，「${CARDS[k].n}」比原来顺手。`,
+  cut:k=>`「${CARDS[k].n}」拆下来了，线我留着。`,mend:'伤口缝上了。别再撕开。'};
+const weaverHi=run=>rnd(run.gold<PRICE.time?WEAVER.poor:run.gold>=150?WEAVER.rich:WEAVER.mid);
+// the deck, folded: each card once with its count, stitched ones gilded, curses in madder
+const deckFold=(run,cls='')=>{const n={};run.deck.forEach(k=>n[k]=(n[k]||0)+1);
+  return `<div class="deck ${cls}">${Object.keys(n).map(k=>`<span class="${CARDS[k].st?'st':''} ${CARDS[k].t==='诅咒'?'cu':''}" title="${CARDS[k].d}"><i style="background-image:url(img/cards/${baseOf(k)}.jpg)"></i>${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n[k]>1?`<em>×${n[k]}</em>`:''}</span>`).join('')}</div>`};
+function showShop(run,done,said){
+  const st=run.stall??={stock:stockFor(run),knot:knotWare(run),mended:false};st.hi??=weaverHi(run);
+  const leave=()=>{delete run.stall;done()},back=say=>showShop(run,done,say);
   const pay=p=>{if(run.gold<p)return false;run.gold-=p;return true};
-  openScr('shop',pageHd('织坊',run),`<div class="body">
-    <section class="pp"><h4 class="sh">货架</h4><div class="rewards stock">${st.stock.map((w,i)=>`<div class="ware ${w.sold?'sold':''}">${cardHtml(w.k,{attr:`data-i="${i}"`,off:w.sold||run.gold<w.p})}<span class="price">${w.sold?'已售':w.p+' 金线'}</span></div>`).join('')}
-      ${st.knot?`<div class="ware ${st.knot.sold?'sold':''}"><button class="kware" id="knotBuy" ${st.knot.sold||run.gold<st.knot.p?'disabled':''}>${knotFace(st.knot.k)}</button><span class="price">${st.knot.sold?'已售':st.knot.p+' 金线'}</span></div>`:''}</div></section>
-    <section class="pp"><h4 class="sh sm">手艺</h4><div class="crafts">
-      <button class="craft" id="sewBtn" ${run.gold<sewPrice(run)?'disabled':''}><i>${SVG.SHUTTLE}</i><span><b>加绣</b><small>给一张牌绣上轻线、锋线或回线</small></span><em>${sewPrice(run)}</em></button>
-      <button class="craft" id="cutBtn" ${run.gold<cutPrice(run)||run.deck.length<=5?'disabled':''}><i>${SVG.SKIP}</i><span><b>拆线</b><small>把一张牌从牌组里拆掉</small></span><em>${cutPrice(run)}</em></button>
-      <button class="craft" id="mendBtn" ${run.gold<PRICE.mend||st.mended||run.hp>=run.maxhp?'disabled':''}><i>${SVG.HEART}</i><span><b>缝补</b><small>${st.mended?'这次已经缝补过了':'回复 15 点生命'}</small></span><em>${PRICE.mend}</em></button>
-    </div></section>
-    <div class="acts end"><button class="btn go" id="goOn">${SVG.SHUTTLE}离开织坊</button></div></div>`,'goOn');
-  document.querySelectorAll('.stock .card').forEach(b=>b.onclick=()=>{const w=st.stock[+b.dataset.i];if(w.sold||!pay(w.p))return;
-    w.sold=true;run.deck.push(w.k);if(CARDS[w.k].a)(run.picks??=[]).push(w.k);back()});
-  if($('knotBuy'))$('knotBuy').onclick=()=>{if(st.knot.sold||!pay(st.knot.p))return;st.knot.sold=true;run.knots.push(st.knot.k);back()};
-  $('sewBtn').onclick=()=>showSew(run,sewPrice(run),back);
-  $('cutBtn').onclick=()=>showCut(run,back);
-  $('mendBtn').onclick=()=>{if(!pay(PRICE.mend))return;st.mended=true;run.hp=Math.min(run.maxhp,run.hp+15);back()};
+  const tag=(sold,p)=>`<span class="price ${sold?'':run.gold<p?'short':''}">${sold?'已售':`${p} 金线`}</span>`;
+  openScr('shop',pageHd('织坊',run),`<div class="body shoppg">
+    <aside class="weaver ip"><div class="pic" style="background-image:url(img/road/weaver.jpg)" role="img" aria-label="老织娘"></div>
+      <div class="cap"><h3>老织娘</h3><small>THE OLD WEAVER</small></div><p class="say">${said||st.hi}</p>
+      <div class="purse"><i>${SVG.KNOT}</i><b>${run.gold}</b><small>金线</small></div></aside>
+    <div class="smain">
+      <section class="pp"><h4 class="sh">货架</h4><p class="lead">职业牌 ${PRICE.card} · 基石 ${PRICE.ks} · 时间牌 ${PRICE.time} · 线结 ${st.knot?st.knot.p:'—'}</p>
+        <div class="shelf">${st.stock.map((w,i)=>`<div class="ware ${w.sold?'sold':''}">${cardHtml(w.k,{attr:`data-i="${i}"`,off:w.sold||run.gold<w.p})}${tag(w.sold,w.p)}</div>`).join('')}
+        ${st.knot?`<div class="ware ${st.knot.sold?'sold':''}"><button class="kware" id="knotBuy" ${st.knot.sold||run.gold<st.knot.p?'disabled':''}>${knotFace(st.knot.k)}</button>${tag(st.knot.sold,st.knot.p)}</div>`:''}</div></section>
+      <section class="pp"><h4 class="sh sm">手艺</h4><div class="crafts">
+        <button class="craft art" id="sewBtn" ${run.gold<sewPrice(run)?'disabled':''}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>加绣</b><small>给一张牌绣上轻线、锋线或回线</small><small class="nx">绣过 ${run.sewn} 次 · 下次 ${sewPrice(run)+15}</small></span><em>${sewPrice(run)}</em></button>
+        <button class="craft art" id="cutBtn" ${run.gold<cutPrice(run)||run.deck.length<=5?'disabled':''}><i style="background-image:url(img/crafts/cut.jpg)"></i><span><b>拆线</b><small>${run.deck.length<=5?'牌组只剩 5 张，拆不动了':'把一张牌从牌组里拆掉'}</small><small class="nx">拆过 ${run.cut} 次 · 下次 ${cutPrice(run)+25}</small></span><em>${cutPrice(run)}</em></button>
+        <button class="craft art" id="mendBtn" ${run.gold<PRICE.mend||st.mended||run.hp>=run.maxhp?'disabled':''}><i style="background-image:url(img/crafts/mend.jpg)"></i><span><b>缝补</b><small>${st.mended?'这次已经缝补过了':run.hp>=run.maxhp?'生命是满的':'回复 15 点生命'}</small><small class="nx">每次进织坊一次</small></span><em>${PRICE.mend}</em></button>
+      </div></section>
+      <section class="pp"><h4 class="sh sm">你的牌组 · ${run.deck.length} 张</h4>${deckFold(run)}</section>
+      <div class="acts end"><button class="btn go" id="goOn">${SVG.SHUTTLE}离开织坊</button></div></div></div>`,'goOn',said!=null);
+  document.querySelectorAll('.shelf .card').forEach(b=>b.onclick=()=>{const w=st.stock[+b.dataset.i];if(w.sold||!pay(w.p))return;
+    w.sold=true;run.deck.push(w.k);if(CARDS[w.k].a)(run.picks??=[]).push(w.k);back(WEAVER.buy(w.k))});
+  if($('knotBuy'))$('knotBuy').onclick=()=>{if(st.knot.sold||!pay(st.knot.p))return;st.knot.sold=true;run.knots.push(st.knot.k);back(WEAVER.knot(st.knot.k))};
+  $('sewBtn').onclick=()=>showSew(run,sewPrice(run),k=>back(WEAVER.sew(k)),()=>back(''));
+  $('cutBtn').onclick=()=>showCut(run,k=>back(k?WEAVER.cut(k):''));
+  $('mendBtn').onclick=()=>{if(!pay(PRICE.mend))return;st.mended=true;run.hp=Math.min(run.maxhp,run.hp+15);back(WEAVER.mend)};
   $('goOn').onclick=leave;
 }
 function showWheel(run,done){
-  const h=Math.min(run.maxhp-run.hp,Math.round(run.maxhp*.3));
-  openScr('road',pageHd('纺车',run),`<div class="body"><h2 class="ttl">在纺车边歇一歇</h2><p class="lead">两件事只来得及做一件</p>
-    <div class="fork"><button class="thr" id="restBtn" ${h?'':'disabled'}><span class="ic">${SVG.HEART}</span><b>歇息</b><small>REST</small><span class="d">回复 ${h} 点生命</span></button>
-      <button class="thr" id="sewBtn"><span class="ic">${SVG.SHUTTLE}</span><b>织补</b><small>MEND A CARD</small><span class="d">免费给一张牌加绣</span></button></div></div>`);
+  const h=wheelHeal(run);
+  openScr('road',pageHd('纺车',run),`<div class="body"><h2 class="ttl">在纺车边歇一歇</h2><p class="lead">炉火正旺，两件事只来得及做一件</p>
+    <div class="wheelpg"><span class="scene" style="background-image:url(img/road/wheel.jpg)"></span>
+      <div class="crafts two">
+        <button class="craft art big" id="restBtn" ${h?'':'disabled'}><i style="background-image:url(img/crafts/mend.jpg)"></i><span><b>歇息</b><small>${h?`回复 ${h} 点生命`:'生命是满的'}</small>
+          <span class="hpbar"><span style="width:${Math.round(100*run.hp/run.maxhp)}%"></span><span class="gain" style="left:${Math.round(100*run.hp/run.maxhp)}%;width:${Math.round(100*h/run.maxhp)}%"></span><b>${run.hp} → ${run.hp+h} / ${run.maxhp}</b></span></span></button>
+        <button class="craft art big" id="sewBtn" ${run.deck.some(k=>stitchesFor(k).length)?'':'disabled'}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>织补</b><small>免费给一张牌加绣（织坊里要 ${sewPrice(run)} 金线）</small>
+          <small class="nx">能绣的牌 ${run.deck.filter(k=>stitchesFor(k).length).length} 张</small></span></button></div></div>
+    ${journey(run)}</div>`);
   $('restBtn').onclick=()=>{run.hp+=h;done()};
   $('sewBtn').onclick=()=>showSew(run,0,done,()=>showWheel(run,done));
 }
-// pick a card from the deck, then one of the stitches it can take; cost 0 is the spinning wheel's free stitch
+// why a card or a stitch can't be sewn
+const noSew=k=>CARDS[k].st?`已绣${STITCH[CARDS[k].st].n}`:CARDS[k].t==='诅咒'?'乱线不能绣':'没有合适的绣纹';
+// stitching, two steps on one page. First pick a card: the three stitches hang above the deck, and pointing at one lights the
+// cards that can take it. Then the card sits in the embroidery hoop, each stitch shows the card it would make, and you confirm.
+// cost 0 is the spinning wheel's free stitch; done(id) gets the stitched card
 function showSew(run,cost,done,cancel=done,sel=null){
-  const ids=run.deck.map((k,i)=>i).filter(i=>stitchesFor(run.deck[i]).length);
-  openScr('shop',pageHd('加绣',run),`<div class="body">
-    <section class="pp"><h4 class="sh">${sel==null?'挑一张牌':'挑一种绣纹'}</h4>
-    ${sel==null?`<div class="rewards deckpick">${run.deck.map((k,i)=>cardHtml(k,{attr:`data-i="${i}"`,off:!ids.includes(i)})).join('')}</div>`
-      :`<div class="sewing"><div class="rewards">${cardHtml(run.deck[sel])}</div><div class="stitches">${stitchesFor(run.deck[sel]).map(x=>`<button class="craft" data-s="${x}"><i>${SVG.SHUTTLE}</i><span><b>${STITCH[x].n}</b><small>${STITCH[x].d}</small></span></button>`).join('')}</div></div>`}</section>
-    <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}${sel==null?'算了':'换一张'}</button></div></div>`);
-  document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>showSew(run,cost,done,cancel,+b.dataset.i));
-  document.querySelectorAll('.stitches .craft').forEach(b=>b.onclick=()=>{if(run.gold<cost)return;run.gold-=cost;if(cost)run.sewn++;
-    const id=run.deck[sel]+'+'+b.dataset.s;card(id);run.deck[sel]=id;done()});
-  $('backBtn').onclick=sel==null?cancel:()=>showSew(run,cost,done,cancel);
+  const can=run.deck.map(k=>stitchesFor(k));
+  const fee=cost?`这次加绣 <b>${cost}</b> 金线 · 你有 <b>${run.gold}</b>`:'纺车边的织补 · <b>免费</b>';
+  if(sel==null){
+    openScr('shop',pageHd('加绣',run),`<div class="body sewpg">
+      <h2 class="ttl">挑一张牌加绣</h2><p class="lead">${fee}</p>
+      <div class="stlegend">${Object.keys(STITCH).map(x=>`<button class="stx" data-s="${x}"><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${STITCH[x].d}</small><small class="nx">能绣 ${can.filter(c=>c.includes(x)).length} 张</small></span></button>`).join('')}</div>
+      <section class="pp"><h4 class="sh sm">牌组 · 能绣的 ${can.filter(c=>c.length).length} 张</h4>
+        <div class="rewards deckpick">${run.deck.map((k,i)=>`<span class="dp" data-s="${can[i].join(' ')}">${cardHtml(k,{attr:`data-i="${i}"`,off:!can[i].length})}${can[i].length?`<span class="sts">${can[i].map(x=>`<i style="background-image:url(img/stitches/${x}.jpg)" title="${STITCH[x].n}"></i>`).join('')}</span>`:`<span class="why">${noSew(k)}</span>`}</span>`).join('')}</div></section>
+      <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`,'backBtn');
+    // pointing at a stitch lights the cards that can take it; a click pins it
+    const dps=document.querySelectorAll('.dp');let lock=null;
+    const dim=s=>dps.forEach(d=>d.classList.toggle('dim',!!s&&!d.dataset.s.split(' ').includes(s)));
+    document.querySelectorAll('.stx').forEach(b=>{const s=b.dataset.s;
+      b.onmouseenter=b.onfocus=()=>dim(s);b.onmouseleave=b.onblur=()=>dim(lock);
+      b.onclick=()=>{lock=lock===s?null:s;document.querySelectorAll('.stx').forEach(x=>x.classList.toggle('on',x.dataset.s===lock));dim(lock)}});
+    document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>showSew(run,cost,done,cancel,+b.dataset.i));
+    $('backBtn').onclick=cancel;return;
+  }
+  const k=run.deck[sel],ok=can[sel];let pick=ok[0];
+  const after=x=>{const id=k+'+'+x;card(id);return id};
+  openScr('shop',pageHd('加绣',run),`<div class="body sewpg">
+    <h2 class="ttl">挑一种绣纹</h2><p class="lead">${fee}</p>
+    <div class="hoopwrap">
+      <div class="hoop"><span class="ring"></span>${cardHtml(k)}<small>绣之前</small></div>
+      <span class="arrow">${SVG.SHUTTLE}</span>
+      <div class="hoop aft"><span class="ring"></span><span id="aftCard">${cardHtml(after(pick))}</span><small>绣之后</small></div>
+      <div class="stitchlist">${Object.keys(STITCH).map(x=>`<button class="stx ${x===pick?'on':''}" data-s="${x}" ${ok.includes(x)?'':'disabled'}><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${ok.includes(x)?STITCH[x].d:STITCH[x].no}</small></span></button>`).join('')}</div></div>
+    <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}换一张</button><button class="btn go" id="sewGo" ${run.gold<cost?'disabled':''}>${SVG.SHUTTLE}<span id="sewLbl">绣上${STITCH[pick].n}</span></button></div></div>`,'sewGo');
+  document.querySelectorAll('.stitchlist .stx').forEach(b=>b.onclick=()=>{pick=b.dataset.s;
+    document.querySelectorAll('.stitchlist .stx').forEach(x=>x.classList.toggle('on',x===b));
+    $('aftCard').innerHTML=cardHtml(after(pick));$('sewLbl').textContent='绣上'+STITCH[pick].n;
+    if(!CALM)gsap.from('#aftCard .card',{scale:.9,opacity:.4,duration:.3,ease:'back.out(2)',clearProps:'transform,opacity'})});
+  $('sewGo').onclick=()=>{if(run.gold<cost)return;run.gold-=cost;if(cost)run.sewn++;const id=after(pick);run.deck[sel]=id;done(id)};
+  $('backBtn').onclick=()=>showSew(run,cost,done,cancel);
 }
-// pick one card of the deck; onPick gets its index
-function pickCard(run,title,head,onPick,back){
-  openScr('shop',pageHd(title,run),`<div class="body"><section class="pp"><h4 class="sh">${head}</h4>
-    <div class="rewards deckpick">${run.deck.map((k,i)=>cardHtml(k,{attr:`data-i="${i}"`})).join('')}</div></section>
+// pick one card of the deck; onPick gets its index. head is the page title, sub the line under it
+function pickCard(run,title,head,onPick,back,sub=''){
+  openScr('shop',pageHd(title,run),`<div class="body sewpg"><h2 class="ttl">${head}</h2>${sub?`<p class="lead">${sub}</p>`:''}
+    <section class="pp"><h4 class="sh sm">牌组 · ${run.deck.length} 张</h4><div class="rewards deckpick">${run.deck.map((k,i)=>`<span class="dp">${cardHtml(k,{attr:`data-i="${i}"`})}</span>`).join('')}</div></section>
     <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`);
   document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>onPick(+b.dataset.i));
   $('backBtn').onclick=back;
 }
 function unpick(run,i){const [k]=run.deck.splice(i,1);if(run.picks){const j=run.picks.lastIndexOf(k);if(j>=0)run.picks.splice(j,1)}return k}
+// done(k) gets the card that was cut, or nothing when you changed your mind
 function showCut(run,done){
-  pickCard(run,'拆线','拆掉哪一张？',i=>{const p=cutPrice(run);if(run.gold<p)return;run.gold-=p;run.cut++;unpick(run,i);done()},done);
+  const p=cutPrice(run);
+  pickCard(run,'拆线','拆掉哪一张？',i=>{if(run.gold<p)return;run.gold-=p;run.cut++;done(unpick(run,i))},()=>done(),`拆一张 <b>${p}</b> 金线 · 你有 <b>${run.gold}</b> · 牌组越薄，好牌来得越勤`);
 }
 const knotFace=k=>`<span class="kn-ic">${SVG.KNOT}</span><b>${KNOTS[k].n}</b>${KNOTS[k].cls?`<small>${CLASSES[KNOTS[k].cls].n}</small>`:'<small>线结</small>'}<span class="d">${KNOTS[k].d}</span>`;
 function showKnotPick(run,done){
   const ks=shuffle(knotPool(run)).slice(0,3);
-  openScr('road',pageHd('线结',run),`<div class="body"><h2 class="ttl">挑一枚线结</h2><p class="lead">线结整局都在，每枚改写一条小规则</p>
+  openScr('road',pageHd('线结',run),`<div class="body"><span class="kpbanner" style="background-image:url(img/road/cache.jpg)"></span><h2 class="ttl">挑一枚线结</h2><p class="lead">线结整局都在，每枚改写一条小规则</p>
     <div class="fork">${ks.map(k=>`<button class="thr kn" data-k="${k}">${knotFace(k)}</button>`).join('')}</div>
     <div class="acts end"><button class="btn" id="skipBtn">${SVG.SKIP}都不要</button></div></div>`);
   document.querySelectorAll('.thr.kn').forEach(b=>b.onclick=()=>{run.knots.push(b.dataset.k);done()});
@@ -272,7 +353,7 @@ const TALES={
 };
 function showTale(run,done){
   const T=rnd(Object.values(TALES).filter(t=>!t.ok||t.ok(run)));
-  openScr('road',pageHd('线头',run),`<div class="body"><div class="tale ip"><span class="kick">${T.la}</span><h2>${T.n}</h2><p>${T.d}</p></div>
+  openScr('road',pageHd('线头',run),`<div class="body"><div class="tale ip"><span class="np" style="background-image:url(img/road/tale.jpg)"></span><span class="kick">${T.la}</span><h2>${T.n}</h2><p>${T.d}</p></div>
     <div class="taleopts">${T.opts.map((o,i)=>`<button class="craft" data-i="${i}" ${o.ok&&!o.ok(run)?'disabled':''}><i>${SVG.FLEUR}</i><span><b>${o.t}</b></span></button>`).join('')}</div></div>`);
   document.querySelectorAll('.taleopts .craft').forEach(b=>b.onclick=()=>T.opts[+b.dataset.i].go(run,done));
 }

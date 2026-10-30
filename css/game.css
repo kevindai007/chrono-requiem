@@ -444,7 +444,7 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .ware .card{flex:none;width:170px;height:262px}.ware .card .art{height:136px}
 .price{font-family:var(--f-display);font-weight:900;font-size:16px;letter-spacing:.1em;padding:3px 18px;background:var(--indigo);color:var(--gold3);box-shadow:inset 0 0 0 1.5px var(--gold)}
 .ware.sold .price{background:var(--stone);color:var(--flax2)}
-.crafts,.stitches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.crafts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .craft{display:flex;align-items:center;gap:14px;padding:14px 16px;border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink);background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2);transition:box-shadow .15s,transform .1s}
 .craft>i{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--gold3);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 2px var(--gold)}
 .craft>i svg{width:26px;height:26px}
@@ -455,15 +455,117 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .craft em::after{content:" 金线";font-size:12px}
 .craft:hover:not(:disabled),.craft:focus-visible{box-shadow:inset 0 0 0 1.5px var(--ink2),0 0 0 2.5px var(--gold2);outline:none}
 .craft:disabled{opacity:.45;cursor:default}
-.sewing{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}
-.sewing .stitches{grid-template-columns:minmax(0,1fr)}
-.deckpick .card{flex-basis:150px;height:236px}.deckpick .card .art{height:110px}
 .rwnote em{font-style:normal;color:var(--gold3)}
 /* a stitched card wears a gold thread under its text */
 .card .stl{position:absolute;left:0;right:0;bottom:0;padding:2px 4px;font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;
   background:var(--gold3);box-shadow:0 -1.5px 0 var(--gold),inset 0 -1px 0 var(--gold)}
 .card.st .fr{box-shadow:0 0 0 2px var(--gold2),0 6px 14px rgba(32,45,58,.35)}
-@media (max-width:820px){.crafts,.stitches{grid-template-columns:minmax(0,1fr)}.sewing{grid-template-columns:minmax(0,1fr)}.fork{gap:40px}}
+.deckpick .card{flex:none;width:150px;height:236px}.deckpick .card .art{height:110px}
+/* the fork page: the coming foe on the left, the strands in the middle, your pack on the right */
+.scr.road .body.forkpg{grid-template-columns:270px minmax(0,1fr) 270px;align-items:start}
+.forkpg>.journey{grid-column:1/-1}
+.nfoe{display:flex;flex-direction:column;min-height:520px}
+.nfoe .pic{flex:1;min-height:300px;margin:10px 10px 0;background:center 30%/cover no-repeat}
+.nfoe .cap{position:relative;z-index:1;padding:12px 18px 20px;text-align:center}
+.nfoe .fl{font-family:var(--f-display);font-size:13px;letter-spacing:.2em;color:var(--gold2)}
+.nfoe h3{margin:2px 0 0;font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.14em;color:var(--gold3)}
+.nfoe small{display:block;font-family:var(--f-latin);font-size:10px;letter-spacing:.24em;color:var(--gold2)}
+.nfoe .hp{display:inline-flex;align-items:center;gap:6px;margin:10px 0 6px;font-size:14px;color:var(--flax2)}.nfoe .hp svg{width:16px;height:16px;color:var(--madder3)}
+.nfoe .hp b{color:var(--gold3)!important}
+.nfoe p{margin:0;font-size:13px;line-height:1.6;color:#d3d7da;text-align:left}.nfoe p b{color:var(--gold3)!important}
+.fmain{display:flex;flex-direction:column;gap:10px;min-width:0}
+.strands{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:22px;width:min(100%,calc(var(--n) * 330px));margin:0 auto;padding-top:88px}
+.strands .spool{position:absolute;top:0;left:50%;width:34px;height:34px;margin-left:-17px;color:var(--madder);z-index:1}.strands .spool svg{width:100%;height:100%}
+.split{position:absolute;top:30px;left:0;width:100%;height:60px;overflow:visible}
+.split path{fill:none;stroke:var(--madder);stroke-width:3;vector-effect:non-scaling-stroke;transition:stroke .2s,stroke-width .2s}
+.split path.hot{stroke:var(--gold);stroke-width:5}
+.strand{position:relative;display:flex;flex-direction:column;padding:0;border:0;font:inherit;text-align:center;cursor:pointer;color:var(--flax2);
+  background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold),0 8px 18px rgba(32,45,58,.3);transition:transform .18s,box-shadow .18s}
+.strand::after{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(178,138,69,.5);pointer-events:none}
+.strand .pic{position:relative;display:block;aspect-ratio:3/2;margin:10px 10px 0;background:center/cover no-repeat;box-shadow:inset 0 -1.5px 0 var(--gold)}
+.strand .tg{position:absolute;top:10px;left:-4px;padding:2px 12px 2px 10px;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:13px;letter-spacing:.2em;color:var(--flax2);background:var(--madder2);box-shadow:inset 0 0 0 1px var(--gold)}
+.strand .tg.mo{background:var(--moss2)}.strand .tg.ind{background:var(--indigo2)}.strand .tg.red{background:var(--madder)}.strand .tg.gd{background:var(--gold);color:var(--ink)}
+.strand .tx{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 22px 6px}
+.strand b{font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.2em;color:var(--gold3)!important}
+.strand small{font-family:var(--f-latin);font-size:11px;letter-spacing:.3em;color:var(--gold2)}
+.strand .d{font-size:14.5px;line-height:1.6;color:#d3d7da}
+.peek{list-style:none;margin:8px 0 0;padding:8px 0 0;width:100%;border-top:1px dashed rgba(178,138,69,.45);display:flex;flex-direction:column;gap:4px;text-align:left}
+.peek li{position:relative;padding-left:16px;font-size:13px;line-height:1.5;color:var(--gold3)}
+.peek li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;background:var(--madder3);transform:rotate(45deg)}
+.strand .pick{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 16px 18px;padding:8px;font-family:var(--f-display);font-weight:900;font-size:17px;letter-spacing:.2em;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.strand .pick svg{width:44px;height:20px;color:var(--gold3)}
+.strand:hover,.strand:focus-visible{transform:translateY(-8px);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 6px var(--gold3),0 0 0 3px var(--gold2),0 16px 28px rgba(32,45,58,.4);outline:none}
+/* your pack: life, purse, the deck in short, knots and woven foes */
+.pack{display:flex;flex-direction:column;gap:12px}
+.pack .sh{margin-bottom:0}
+.hpbar{position:relative;display:block;height:26px;background:var(--stone);box-shadow:inset 0 0 0 1.5px var(--ink2);overflow:hidden}
+.hpbar>span{position:absolute;top:0;bottom:0;left:0;background:var(--madder)}
+.hpbar>span.gain{left:auto;background:var(--moss);opacity:.9}
+.hpbar>b{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;height:100%;font-family:var(--f-display);font-weight:900;font-size:14px;letter-spacing:.06em;color:var(--flax2)!important}
+.hpbar svg{width:14px;height:14px;color:var(--gold3)}
+.purse{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.purse i{width:30px;height:30px;color:var(--gold2);display:flex}.purse i svg{width:100%;height:100%}
+.purse b{font-family:var(--f-latin);font-weight:900;font-size:30px;color:var(--gold3)!important;line-height:1}
+.purse small{font-family:var(--f-display);font-size:13px;letter-spacing:.2em;color:var(--gold2)}
+.pack .dk,.pack .none{margin:0;text-align:center;font-size:14px;color:var(--ink2)}.pack .none{font-size:13px;color:var(--muted)}
+.pack .knotlist li{grid-template-columns:24px minmax(0,1fr);font-size:12.5px;row-gap:0}
+.pack .knotlist li>span{grid-column:2}.pack .knotlist i{width:24px;height:24px}
+/* a short page on the road can carry one of the road pictures */
+.note.pic{padding-top:12px}.note .np{display:block;aspect-ratio:3/2;margin:0 0 16px;background:center/cover no-repeat;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.tale .np{display:block;position:relative;aspect-ratio:3/1.4;margin:-14px -20px 18px;background:center/cover no-repeat;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.kpbanner{display:block;width:min(100%,560px);aspect-ratio:3/1.2;margin:0 auto;background:center/cover no-repeat;box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold)}
+/* the weavery: the old weaver on the left, shelf, crafts and your deck on the right */
+.scr.shop .body.shoppg{grid-template-columns:300px minmax(0,1fr);align-items:start}
+.weaver{display:flex;flex-direction:column;gap:12px;padding-bottom:18px;position:sticky;top:10px}
+.weaver .pic{aspect-ratio:4/5;margin:10px 10px 0;background:center 20%/cover no-repeat}
+.weaver .cap{text-align:center}
+.weaver h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:26px;letter-spacing:.2em;color:var(--gold3)}
+.weaver .cap small{font-family:var(--f-latin);font-size:10px;letter-spacing:.26em;color:var(--gold2)}
+.say{position:relative;z-index:1;margin:0 18px;padding:12px 16px;font-size:15px;line-height:1.7;color:var(--ink);background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.say::before{content:"";position:absolute;top:-8px;left:50%;margin-left:-8px;border:8px solid transparent;border-top:0;border-bottom-color:var(--gold)}
+.weaver .purse{margin:0 18px;position:relative;z-index:1}
+.smain{display:flex;flex-direction:column;gap:14px;min-width:0}
+.shelf{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 20px;padding:10px 6px 0;position:relative}
+.shelf::after{content:"";position:absolute;left:-8px;right:-8px;bottom:22px;height:14px;z-index:0;background:linear-gradient(#7a5a32,#5b4024);box-shadow:0 4px 0 #3f2c18,0 8px 10px rgba(32,45,58,.25)}
+.shelf .ware{position:relative;z-index:1;gap:28px}
+.price.short{color:var(--madder3)}
+.crafts .craft.art>i,.wheelpg .craft.art>i{width:64px;height:64px;background:var(--madder) center/cover no-repeat}
+.craft .nx{margin-top:2px;font-size:12px;color:var(--muted)}
+.crafts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.craft.big{padding:18px 20px}.craft.big>i{width:84px!important;height:84px!important}
+.craft .hpbar{margin-top:8px;height:22px}
+.wheelpg{display:flex;flex-direction:column;gap:14px;width:min(100%,900px);margin:0 auto}
+.wheelpg .scene{display:block;aspect-ratio:3/1.25;background:center/cover no-repeat;box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 5.5px var(--gold),0 8px 18px rgba(32,45,58,.3)}
+/* stitching: a legend of the three stitches over the deck, then the card in the embroidery hoop */
+.scr.shop .body.sewpg{align-content:start}
+.stlegend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stx{display:flex;align-items:center;gap:14px;padding:12px 14px;border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink);background:var(--flax2) var(--linen);box-shadow:inset 0 0 0 1.5px var(--ink2);transition:box-shadow .15s}
+.stx>i{width:60px;height:60px;flex:none;background:var(--indigo) center/cover no-repeat;box-shadow:inset 0 0 0 2px var(--gold)}
+.stx b{display:block;font-family:var(--f-display);font-weight:900;font-size:20px;letter-spacing:.14em;color:var(--ink)!important}
+.stx small{display:block;font-size:13px;line-height:1.5;color:var(--ink2)}
+.stx:hover:not(:disabled),.stx:focus-visible,.stx.on{box-shadow:inset 0 0 0 2px var(--gold),0 0 0 2.5px var(--gold2);outline:none}
+.stx.on{background-color:var(--gold3)}
+.stx:disabled{opacity:.45;cursor:default}
+.deckpick .dp{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;transition:opacity .15s,filter .15s}
+.deckpick .dp.dim{opacity:.3;filter:grayscale(.8)}
+.dp .sts{display:flex;gap:4px}.dp .sts i{width:22px;height:22px;background:center/cover;box-shadow:inset 0 0 0 1px var(--gold)}
+.dp .why{font-size:12px;color:var(--muted);height:22px;line-height:22px}
+.hoopwrap{display:grid;grid-template-columns:auto auto auto minmax(260px,1fr);gap:18px;align-items:center;justify-content:center}
+.hoop{position:relative;width:300px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hoop .ring{position:absolute;inset:0;background:url(../img/road/hoop.png) center/contain no-repeat}
+.hoop .card{position:relative;flex:none;width:160px;height:250px}.hoop .card .art{height:122px}
+.hoop>span:not(.ring){position:relative}
+.hoop small{position:absolute;bottom:-4px;font-family:var(--f-display);font-weight:900;font-size:14px;letter-spacing:.3em;color:var(--ink2)}
+.hoop.aft small{color:var(--gold)}
+.hoopwrap .arrow{width:60px;height:28px;color:var(--madder)}.hoopwrap .arrow svg{width:100%;height:100%}
+.stitchlist{display:flex;flex-direction:column;gap:10px}
+.btn:disabled{opacity:.5;cursor:default;filter:none}
+@media (max-width:1180px){.scr.road .body.forkpg{grid-template-columns:240px minmax(0,1fr)}.forkpg>.pack{grid-column:1/-1}
+  .hoopwrap{grid-template-columns:auto auto auto}.stitchlist{grid-column:1/-1}}
+@media (max-width:820px){.crafts,.stlegend,.crafts.two{grid-template-columns:minmax(0,1fr)}.fork{gap:40px}
+  .scr.road .body.forkpg,.scr.shop .body.shoppg{grid-template-columns:minmax(0,1fr)}.nfoe{min-height:0}.nfoe .pic{min-height:220px}.weaver{position:relative;top:0}.weaver .pic{aspect-ratio:16/10}
+  .strands{grid-template-columns:minmax(0,1fr);padding-top:0}.strands .spool,.split{display:none}
+  .hoopwrap{grid-template-columns:minmax(0,1fr);justify-items:center}.hoop{width:min(100%,280px)}.hoopwrap .arrow{transform:rotate(90deg)}}
 
 /* knots: gold knot emblems in the header, a list in the briefing, cloth patches when you pick one */
 .knots{display:inline-flex;gap:4px;align-items:center}

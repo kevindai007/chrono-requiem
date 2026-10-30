@@ -80,6 +80,15 @@ function enter(mode){
     gsap.from('.rewards>*',{y:70,rotation:i=>(i-1.5)*7,opacity:0,stagger:.09,duration:.65,ease:'back.out(1.4)',delay:.55,clearProps:'transform,opacity'});
     gsap.from('.journey',{clipPath:'inset(0 100% 0 0)',duration:1.2,ease:'power2.inOut',delay:.7});
     gsap.from('.journey .jn.next i',{scale:0,duration:.5,ease:'back.out(3)',delay:1.7});
+  }else if(mode==='road'&&$('scrIn').querySelector('.strands')){
+    // the red thread drops from its knot and splits, then each strand's picture is hung at its end
+    gsap.from('.strands .spool',{y:-30,opacity:0,duration:.4,ease:'back.out(2)'});
+    gsap.fromTo('.split path',{drawSVG:'0%'},{drawSVG:'100%',duration:.7,ease:'power1.inOut',delay:.25});
+    gsap.from('.strand',{y:-40,opacity:0,stagger:.12,duration:.55,ease:'back.out(1.4)',delay:.6,clearProps:'transform,opacity'});
+    gsap.from('.nfoe,.pack',{opacity:0,duration:.5,delay:.3,clearProps:'opacity'});
+  }else if(mode==='shop'&&$('scrIn').querySelector('.shelf')){
+    gsap.from('.shelf .ware',{y:-26,opacity:0,stagger:.07,duration:.45,ease:'back.out(1.6)',delay:.15,clearProps:'transform,opacity'});
+    gsap.from('.say',{scale:.8,opacity:0,transformOrigin:'50% 0',duration:.4,ease:'back.out(2)',delay:.4,clearProps:'transform,opacity'});
   }else if(mode==='lose'){
     fray();
     gsap.from('.lmain>*',{y:18,opacity:0,stagger:.07,duration:.5,ease:'power2.out',delay:.2,clearProps:'transform,opacity'});

@@ -125,9 +125,9 @@ const CLASSES={
 // base: the card it was stitched from (its art and rules), st: its stitch. A card takes one stitch at most
 const EDGE=['echo','shadow','clone','boomerang','cleave','skybreaker','quake','bash','grudge','frenzy','finisher','detonate'];
 const STITCH={
-  light:{n:'轻线',d:'费用 −1（怒气牌 −1 怒气）',sd:'费用 −1',ok:C=>C.c>0||(C.r||0)>1},
-  edge:{n:'锋线',d:'这张牌打出的每次伤害 +4',sd:'每次伤害 +4',ok:(C,k)=>!!C.cast||EDGE.includes(k)},
-  loop:{n:'回线',d:'打出后放回牌库顶，而不是弃牌堆',sd:'打出后回到牌库顶',ok:C=>!C.x}
+  light:{n:'轻线',d:'费用 −1（怒气牌 −1 怒气）',sd:'费用 −1',no:'费用已经最低了',ok:C=>C.c>0||(C.r||0)>1},
+  edge:{n:'锋线',d:'这张牌打出的每次伤害 +4',sd:'每次伤害 +4',no:'只有造成伤害的牌能绣',ok:(C,k)=>!!C.cast||EDGE.includes(k)},
+  loop:{n:'回线',d:'打出后放回牌库顶，而不是弃牌堆',sd:'打出后回到牌库顶',no:'消耗牌不能绣',ok:C=>!C.x}
 };
 const baseOf=k=>k.split('+')[0];
 function card(k){
