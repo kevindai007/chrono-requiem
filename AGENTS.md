@@ -48,6 +48,7 @@ tools/art/          美术素材清单和 Codex 提示词
 - 音效和动画优先用 vendor/ 里现成的库（Tone.js、GSAP 插件、canvas-confetti），不要自己从头写合成器或补间。需要新库时用 npm 下载对应版本的浏览器构建（UMD）放进 vendor/。
 - 声音全部由 Tone.js 实时合成，不放音频文件（file:// 下 fetch 音频会被拦）。不要用 Tone 里依赖 AudioWorklet 的节点（PluckSynth、FeedbackCombFilter、BitCrusher 等），file:// 下加载不了。新音效加进 `sound.js` 的 `SFX_BOOK`，在事件发生处调 `SFX('名字')`；`SFX` 在预演（SIM）里自动静音。
 - 战斗画面的视觉反馈集中在 `motion.js`：`flt()` 飘字时会调 `floatFx()`，按飘字类型配出手、受击、格挡、闪身动画和音效；法术走 `spellFx(元素)`。尊重 `prefers-reduced-motion`（`CALM` 时不放动画，但音效照常）。
+- 生成或修改角色美术后，交付前检查手臂和手的数量、肩/肘/腕是否连得上、关节角度是否自然、武器和盾牌是否真的握在手里。风格化也要解剖合理。先确认角色没问题再复用到其他界面，免得把错误带过去。
 
 ## 平衡模拟
 
