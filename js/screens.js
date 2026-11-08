@@ -256,49 +256,40 @@ function showWheel(run,done){
 const offerOf=run=>run.offer??=rollStitches(run);
 const sewable=run=>run.deck.filter(k=>stitchesFor(k,offerOf(run)).length).length;
 // why a card or a stitch can't be sewn
-const noSew=k=>CARDS[k].st?`已绣${STITCH[CARDS[k].st].n}`:CARDS[k].t==='诅咒'?'乱线不能绣':'今天的绣线都不合适';
-// stitching, two steps on one page. First pick a card: the three stitches hang above the deck, and pointing at one lights the
-// cards that can take it. Then the card sits in the embroidery hoop, each stitch shows the card it would make, and you confirm.
-// cost 0 is the spinning wheel's free stitch; done(id) gets the stitched card
-function showSew(run,cost,done,cancel=done,sel=null){
+const noSew=k=>CARDS[k].st?`已绣${STITCH[CARDS[k].st].n}`:CARDS[k].t==='诅咒'?'乱线不能绣':'绣不了';
+// stitching, picked once: first the stitch (the visit's three hang above the deck, the first one that fits something is on),
+// and the deck shows which cards take it. A click on a card puts it in the embroidery hoop with that stitch, before and after
+// side by side, and the button sews it. cost 0 is the spinning wheel's free stitch; done(id) gets the stitched card
+function showSew(run,cost,done,cancel=done,st=null,sel=null,quiet=false){
   const offer=offerOf(run),can=run.deck.map(k=>stitchesFor(k,offer));
+  st??=offer.find(x=>can.some(c=>c.includes(x)))||offer[0];
   const fee=cost?`这次加绣 <b>${cost}</b> 金线 · 你有 <b>${run.gold}</b>`:'纺车边的织补 · <b>免费</b>';
+  const n=x=>can.filter(c=>c.includes(x)).length;
   if(sel==null){
+    const why=k=>CARDS[k].st||CARDS[k].t==='诅咒'?noSew(k):STITCH[st].no||noSew(k);
     openScr('shop',pageHd('加绣',run),`<div class="body sewpg">
-      <h2 class="ttl">挑一张牌加绣</h2><p class="lead">${fee}</p>
-      <div class="stlegend">${offer.map(x=>`<button class="stx" data-s="${x}"><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${STITCH[x].d}</small><small class="nx">能绣 ${can.filter(c=>c.includes(x)).length} 张</small></span></button>`).join('')}</div>
-      <section class="pp"><h4 class="sh sm">牌组 · 能绣的 ${can.filter(c=>c.length).length} 张</h4>
-        <div class="rewards deckpick">${run.deck.map((k,i)=>`<span class="dp" data-s="${can[i].join(' ')}">${cardHtml(k,{attr:`data-i="${i}"`,off:!can[i].length})}${can[i].length?`<span class="sts">${can[i].map(x=>`<i style="background-image:url(img/stitches/${x}.jpg)" title="${STITCH[x].n}"></i>`).join('')}</span>`:`<span class="why">${noSew(k)}</span>`}</span>`).join('')}</div></section>
-      <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`,'backBtn');
-    // pointing at a stitch lights the cards that can take it; a click pins it
-    const dps=document.querySelectorAll('.dp');let lock=null;
-    const dim=s=>dps.forEach(d=>d.classList.toggle('dim',!!s&&!d.dataset.s.split(' ').includes(s)));
-    document.querySelectorAll('.stx').forEach(b=>{const s=b.dataset.s;
-      b.onmouseenter=b.onfocus=()=>dim(s);b.onmouseleave=b.onblur=()=>dim(lock);
-      b.onclick=()=>{lock=lock===s?null:s;document.querySelectorAll('.stx').forEach(x=>x.classList.toggle('on',x.dataset.s===lock));dim(lock)}});
-    document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>showSew(run,cost,done,cancel,+b.dataset.i));
+      <h2 class="ttl">加绣</h2><p class="lead">${fee} · 先选绣线，再点一张牌</p>
+      <div class="stlegend">${offer.map(x=>`<button class="stx ${x===st?'on':''}" data-s="${x}" ${n(x)?'':'disabled'}><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${STITCH[x].d}</small><small class="nx">能绣 ${n(x)} 张</small></span></button>`).join('')}</div>
+      <section class="pp"><h4 class="sh sm">牌组 · 能绣${STITCH[st].n}的 ${n(st)} 张</h4>
+        <div class="rewards deckpick">${run.deck.map((k,i)=>{const ok=can[i].includes(st);return `<span class="dp ${ok?'':'dim'}">${cardHtml(k,{attr:`data-i="${i}"`,off:!ok})}${ok?'':`<span class="why">${why(k)}</span>`}</span>`}).join('')}</div></section>
+      <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`,'backBtn',quiet);
+    document.querySelectorAll('.stx').forEach(b=>b.onclick=()=>showSew(run,cost,done,cancel,b.dataset.s,null,true));
+    document.querySelectorAll('.deckpick .card').forEach(b=>b.onclick=()=>showSew(run,cost,done,cancel,st,+b.dataset.i));
     $('backBtn').onclick=cancel;return;
   }
-  const k=run.deck[sel],ok=can[sel];let pick=ok[0];
-  const after=x=>{const id=k+'+'+x;card(id);return id};
-  // the change a stitch makes, written under the stitched card
-  const diff=x=>{const A=card(after(x)),C=CARDS[k];return {light:()=>(C.c>0?`费用 ${C.c} → ${A.c}`:`怒气 ${C.r} → ${A.r}`)+' · 每场一次',edge:()=>'每次伤害 +4',loop:()=>'打出后 → 牌库顶',
-    lead:()=>`费用 ${C.c} → ${A.c} · 开局在手`,kin:()=>STITCH.kin.d}[x]()};
-  const lbl=x=>`绣上${STITCH[x].n}${cost?` · ${cost} 金线`:''}`;
+  const k=run.deck[sel],id=k+'+'+st,A=card(id),C=CARDS[k];
+  // the change the stitch makes, written under the stitched card
+  const diff={light:()=>(C.c>0?`费用 ${C.c} → ${A.c}`:`怒气 ${C.r} → ${A.r}`)+' · 每场一次',edge:()=>'每次伤害 +4',loop:()=>'打出后 → 牌库顶',
+    lead:()=>`费用 ${C.c} → ${A.c} · 开局在手`,kin:()=>STITCH.kin.d}[st]();
   openScr('shop',pageHd('加绣',run),`<div class="body sewpg">
-    <h2 class="ttl">挑一种绣纹</h2><p class="lead">${fee}</p>
+    <h2 class="ttl">绣上${STITCH[st].n}</h2><p class="lead">${fee}</p>
     <div class="hoopwrap">
       <div class="hoop"><span class="ring"></span>${cardHtml(k)}<small>绣之前</small></div>
       <span class="arrow"></span>
-      <div class="hoop aft"><span class="ring"></span><span id="aftCard">${cardHtml(after(pick))}</span><small id="aftDiff">${diff(pick)}</small></div>
-      <div class="stitchlist">${offer.map(x=>`<button class="stx ${x===pick?'on':''}" data-s="${x}" ${ok.includes(x)?'':'disabled'}><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${ok.includes(x)?STITCH[x].d:STITCH[x].no}</small></span></button>`).join('')}</div></div>
-    <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}换一张</button><button class="btn go" id="sewGo" ${run.gold<cost?'disabled':''}>${SVG.SHUTTLE}<span id="sewLbl">${lbl(pick)}</span></button></div></div>`,'sewGo');
-  document.querySelectorAll('.stitchlist .stx').forEach(b=>b.onclick=()=>{pick=b.dataset.s;
-    document.querySelectorAll('.stitchlist .stx').forEach(x=>x.classList.toggle('on',x===b));
-    $('aftCard').innerHTML=cardHtml(after(pick));$('sewLbl').textContent=lbl(pick);$('aftDiff').textContent=diff(pick);
-    if(!CALM)gsap.from('#aftCard .card',{scale:.9,opacity:.4,duration:.3,ease:'back.out(2)',clearProps:'transform,opacity'})});
-  $('sewGo').onclick=()=>{if(run.gold<cost)return;run.gold-=cost;if(cost)run.sewn++;const id=after(pick);run.deck[sel]=id;done(id)};
-  $('backBtn').onclick=()=>showSew(run,cost,done,cancel);
+      <div class="hoop aft"><span class="ring"></span>${cardHtml(id)}<small>${diff}</small></div></div>
+    <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}换一张</button><button class="btn go" id="sewGo" ${run.gold<cost?'disabled':''}>${SVG.SHUTTLE}绣上${STITCH[st].n}${cost?` · ${cost} 金线`:''}</button></div></div>`,'sewGo');
+  $('sewGo').onclick=()=>{if(run.gold<cost)return;run.gold-=cost;if(cost)run.sewn++;run.deck[sel]=id;done(id)};
+  $('backBtn').onclick=()=>showSew(run,cost,done,cancel,st);
 }
 // pick one card of the deck; onPick gets its index. head is the page title, sub the line under it
 function pickCard(run,title,head,onPick,back,sub=''){
