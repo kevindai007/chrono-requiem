@@ -113,10 +113,8 @@ function heroTotal(hs){
 function log(msg){S.log.unshift({t:S.beat,msg});S.log=S.log.slice(0,40)}
 
 function restart(el,cls,ms){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);if(ms)setTimeout(()=>el.classList.remove(cls),ms)}
-function lunge(side){const el=$(side==='hero'?'heroArt':'enemyArt');el.classList.add('lunge');setTimeout(()=>el.classList.remove('lunge'),180)}
-function banner(title,sub,red){if(FX)FX.push({who:'b',text:title});if(SIM)return;const b=$('banner');b.querySelector('b').textContent=title;b.querySelector('span').textContent=sub||'';b.classList.toggle('red',!!red);restart(b,'show',1650)}
-function flt(who,text,cls){if(FX)FX.push({who,text,cls});if(SIM)return;const box=$(who==='hero'?'heroFloats':'enemyFloats');const d=document.createElement('div');d.className='flt '+cls;d.textContent=text;d.style.left=(38+Math.random()*24)+'%';box.appendChild(d);setTimeout(()=>d.remove(),1400);
-  if(cls==='hurt'||cls==='big'||cls==='dmg'){restart($(who==='hero'?'heroArt':'enemyArt'),'shake',400);lunge(who==='hero'?'enemy':'hero');if(cls==='big')restart($('flash'),'on',500)}}
+function banner(title,sub,red){if(FX)FX.push({who:'b',text:title});if(SIM)return;const b=$('banner');b.querySelector('b').textContent=title;b.querySelector('span').textContent=sub||'';b.classList.toggle('red',!!red);restart(b,'show',1650);SFX(/^第 \d+ 回合$/.test(title)?'turn':'banner')}
+function flt(who,text,cls){if(FX)FX.push({who,text,cls});if(SIM)return;const box=$(who==='hero'?'heroFloats':'enemyFloats');const d=document.createElement('div');d.className='flt '+cls;d.textContent=text;d.style.left=(38+Math.random()*24)+'%';box.appendChild(d);setTimeout(()=>d.remove(),1400);floatFx(who,text,cls)}
 
 // o.src: 'atk' (a hero attack beat), 'ghost' (残影 counter), 'unity'; o.res: the hit was a resonance
 function dealEnemy(raw,label,o={}){
@@ -295,11 +293,11 @@ function playCard(i,target){
   const before=chipPos();
   const err=commit(i,target);
   if(err){setHint(err);return}
-  flyCard(i);
+  flyCard(i);SFX('play');
   S.pending=null;render();pullThreads(before);
-  if(S.over)setTimeout(showEnd,700);
+  if(S.over)setTimeout(showEnd,overFx());
 }
-let hintMsg='';function setHint(m){hintMsg=m;render();setTimeout(()=>{if(hintMsg===m){hintMsg='';render()}},2200)}
+let hintMsg='';function setHint(m){hintMsg=m;SFX('err');render();setTimeout(()=>{if(hintMsg===m){hintMsg='';render()}},2200)}
 
 /* ---------- Foresight: the preview runs the real rules on a copy of the state ---------- */
 // SIM silences the screen (floats, banners); FX collects the floats of the beat being stepped so the board can name what happened
@@ -421,7 +419,7 @@ function resolveBeat(b){
 function freeze(why,n=1){const xs=foeE(e=>!e.locked&&!e.na&&e.beat>cur()).sort((x,y)=>x.beat-y.beat).slice(0,n);
   for(const nx of xs){if(S.over)break;nx.beat++;log(`${why}：${FL().lane}的${nx.label}延后到第 ${roman(nx.beat)} 拍。`);delayed('card')}}
 function castFire(c,b){
-  flt('hero',c.n,'info');
+  flt('hero',c.n,'info');spellFx(c.el);
   for(let i=0;i<c.hits&&!S.over;i++)dealEnemy(c.dmg,c.n,{src:'spell',beat:b,el:c.el});
   if(S.over)return;
   if(c.frz)freeze(c.n,c.frz);
@@ -467,9 +465,9 @@ async function endTurn(){
   if(S.busy||S.over)return;
   const F=FL();
   S.busy=true;S.pending=null;
-  S.discard.push(...S.hand);S.hand=[];
+  discardHand();S.discard.push(...S.hand);S.hand=[];
   for(let k=0;k<3;k++){
-    const b=S.beat+k;S.resolving=b;render();
+    const b=S.beat+k;S.resolving=b;render();SFX('tick');
     await sleep(520);
     const snap=snapBeat(b);snap.rec=stepBeat(b);
     S.hist.forEach(h=>h.fresh=false);snap.fresh=true;S.hist.push(snap);
@@ -484,6 +482,6 @@ async function endTurn(){
     banner(`第 ${S.turn} 回合`,`HORA ${roman(S.beat)}`);
   }
   S.busy=false;render();
-  if(S.over)setTimeout(showEnd,700);
+  if(S.over)setTimeout(showEnd,overFx());else dealHand();
 }
 

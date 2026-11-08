@@ -6,7 +6,7 @@ let lastSand=null;
 function render(){renderTop();renderBoard();renderHand()}
 function renderTop(){
   const F=FL();
-  $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;$('goldNo').textContent=S.run.gold||0;$('knotsNo').innerHTML=knotRow(S.run);$('knotsNo').hidden=!S.run.knots?.length;
+  $('floorNo').textContent=F.floor;$('turnNo').textContent=S.turn;countTo($('goldNo'),S.run.gold||0);$('knotsNo').innerHTML=knotRow(S.run);$('knotsNo').hidden=!S.run.knots?.length;
   $('foeName').textContent=F.name;
   $('enemyArt').style.backgroundImage=`url(${F.img})`;
   document.querySelector('.half.hero').style.setProperty('--hero',`url(${art(`img/classes/hero_${S.run.cls}.jpg`)})`);
@@ -139,10 +139,10 @@ function renderHint(pend){
 $('hand').addEventListener('click',e=>{
   const c=e.target.closest('.card');if(!c||c.disabled)return;
   const i=+c.dataset.i,C=CARDS[S.hand[i]];
-  if(S.pending===i){S.pending=null;render();return}
+  if(S.pending===i){S.pending=null;SFX('cancel');render();return}
   if(C.c>S.sand)return setHint('时之砂不足');
   if(C.r&&S.rage<C.r)return setHint('怒气不足');
-  if(C.tg){S.pending=i;hintMsg='';render()}else playCard(i);
+  if(C.tg){S.pending=i;hintMsg='';SFX('pick');render()}else playCard(i);
 });
 $('timeline').addEventListener('click',e=>{
   if(S.pending==null||S.busy)return;
@@ -151,10 +151,10 @@ $('timeline').addEventListener('click',e=>{
   if(tgt.err)return setHint(tgt.err);
   playCard(S.pending,tgt.t);
 });
-$('hint').addEventListener('click',e=>{if(e.target.id==='cancelBtn'){S.pending=null;render()}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.pending=null;render()}});
+$('hint').addEventListener('click',e=>{if(e.target.id==='cancelBtn'){S.pending=null;SFX('cancel');render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.pending=null;SFX('cancel');render()}});
 $('endBtn').addEventListener('click',endTurn);
 $('rulesBtn').addEventListener('click',()=>showRules(false));
-$('resetBtn').addEventListener('click',()=>{startFight(S.run,S.foeKey);render();banner('第 1 回合','HORA I')});
+$('resetBtn').addEventListener('click',()=>{startFight(S.run,S.foeKey);render();fightIn();banner('第 1 回合','HORA I')});
 addEventListener('resize',()=>{if(S)renderBoard()});
 
