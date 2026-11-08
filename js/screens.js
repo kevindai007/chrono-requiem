@@ -55,7 +55,9 @@ function showClassPick(first){
   if(!CALM)gsap.from('.pk-row',{y:-70,rotation:i=>(i-1)*3,opacity:0,stagger:.12,duration:.8,ease:'back.out(1.3)',clearProps:'transform,opacity'});
   const f=document.querySelector('.pk-row.on');if(f)f.focus({preventScroll:true});
 }
-$('pkGo').onclick=()=>{$('pick').hidden=true;newRun(0,pickSel);render();showRules(true)};
+// a run sets out with one knot of three drawn at random, so no two climbs start the same; the first fight is laid out again with it
+$('pkGo').onclick=()=>{$('pick').hidden=true;newRun(0,pickSel);render();
+  showKnotPick(S.run,()=>{startFight(S.run);render();showRules(true)},'出发前，老织娘塞给你三枚线结：挑一枚带上')};
 $('pkBack').onclick=()=>{$('pick').hidden=true;if(S.over)showEnd()};
 
 /* Briefing: the hunt tapestry, the foe's pattern with its first three beats, your class, the tower */
@@ -67,6 +69,7 @@ function showRules(intro){
       <div class="cart"><span class="fl">${F.floor}</span><div class="nm"><h2>${F.name}</h2></div><div class="en">${EN[F.key]}</div></div></div>
     <div class="bmid">
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
+      ${S.tw?`<section class="pp twbox"><h4 class="sh sm">异纹 · ${TWISTS[S.tw].n}</h4><p>这一只织得和别的不一样：${TWISTS[S.tw].d}</p></section>`:''}
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
       ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：做到了，这场的金线翻倍；没做到，生命 −5。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
       ${S.run.woven.length?`<section class="pp"><h4 class="sh sm">织入的怪物</h4><ul class="knotlist">${S.run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/weaves/${k}.png)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul></section>`:''}
@@ -184,13 +187,14 @@ function showNote(run,title,html,done,pic){
   $('goOn').onclick=done;
 }
 // the weavery's prices: stitching and unpicking cost more each time you do them in a run
-const PRICE={card:45,ks:80,time:35,mend:25};
+// st: what a card that comes already stitched adds to its price
+const PRICE={card:45,ks:80,time:35,mend:25,st:15};
 const sewPrice=run=>40+15*run.sewn,cutPrice=run=>50+25*run.cut;
 function stockFor(run){
   const K=CLASSES[run.cls],cls=rewardPool(run,{reward:[]});
   const more=shuffle(K.pool.filter(k=>!cls.includes(k)&&!CARDS[k].ks))[0];
   const time=shuffle(Object.keys(CARDS).filter(k=>!CARDS[k].a&&!k.includes('+')&&CARDS[k].t!=='诅咒'))[0];
-  return cls.concat(more,time).map(k=>({k,p:CARDS[k].ks?PRICE.ks:CARDS[k].a?PRICE.card:PRICE.time}));
+  return cls.concat(more,time).map(k=>({k,p:(CARDS[k].ks?PRICE.ks:CARDS[k].a?PRICE.card:PRICE.time)+(CARDS[k].st?PRICE.st:0)}));
 }
 function knotWare(run){const k=shuffle(knotPool(run))[0];return k?{k,p:100+10*run.stage}:null
 }
@@ -217,7 +221,7 @@ function showShop(run,done,said){
         <div class="shelf">${st.stock.map((w,i)=>`<div class="ware ${w.sold?'sold':''}">${cardHtml(w.k,{attr:`data-i="${i}"`,off:w.sold||run.gold<w.p})}${tag(w.sold,w.p)}</div>`).join('')}
         ${st.knot?`<div class="ware ${st.knot.sold?'sold':''}"><button class="kware" id="knotBuy" ${st.knot.sold||run.gold<st.knot.p?'disabled':''}>${knotFace(st.knot.k)}</button>${tag(st.knot.sold,st.knot.p)}</div>`:''}</div></section>
       <section class="pp"><h4 class="sh sm">手艺</h4><div class="crafts">
-        <button class="craft art" id="sewBtn" ${run.gold<sewPrice(run)?'disabled':''}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>加绣</b><small>给一张牌绣上轻线、锋线或回线</small><small class="nx">绣过 ${run.sewn} 次 · 下次 ${sewPrice(run)+15}</small></span><em>${sewPrice(run)}</em></button>
+        <button class="craft art" id="sewBtn" ${run.gold<sewPrice(run)||!sewable(run)?'disabled':''}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>加绣</b><small>今天的绣线：${offerOf(run).map(x=>STITCH[x].n).join('、')||'没有能用的'}</small><small class="nx">绣过 ${run.sewn} 次 · 下次 ${sewPrice(run)+15}</small></span><em>${sewPrice(run)}</em></button>
         <button class="craft art" id="cutBtn" ${run.gold<cutPrice(run)||run.deck.length<=5?'disabled':''}><i style="background-image:url(img/crafts/cut.jpg)"></i><span><b>拆线</b><small>${run.deck.length<=5?'牌组只剩 5 张，拆不动了':'把一张牌从牌组里拆掉'}</small><small class="nx">拆过 ${run.cut} 次 · 下次 ${cutPrice(run)+25}</small></span><em>${cutPrice(run)}</em></button>
         <button class="craft art" id="mendBtn" ${run.gold<PRICE.mend||st.mended||run.hp>=run.maxhp?'disabled':''}><i style="background-image:url(img/crafts/mend.jpg)"></i><span><b>缝补</b><small>${st.mended?'这次已经缝补过了':run.hp>=run.maxhp?'生命是满的':'回复 15 点生命'}</small><small class="nx">每次进织坊一次</small></span><em>${PRICE.mend}</em></button>
       </div></section>
@@ -242,24 +246,27 @@ function showWheel(run,done){
       <div class="crafts two">
         <button class="craft art big" id="restBtn" ${h?'':'disabled'}><i style="background-image:url(img/crafts/mend.jpg)"></i><span><b>歇息</b><small>${h?`回复 ${h} 点生命`:'生命是满的'}</small>
           <span class="hpbar"><span style="width:${Math.round(100*run.hp/run.maxhp)}%"></span><span class="gain" style="left:${Math.round(100*run.hp/run.maxhp)}%;width:${Math.round(100*h/run.maxhp)}%"></span><b>${run.hp} → ${run.hp+h} / ${run.maxhp}</b></span></span></button>
-        <button class="craft art big" id="sewBtn" ${run.deck.some(k=>stitchesFor(k).length)?'':'disabled'}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>织补</b><small>免费给一张牌加绣（织坊里要 ${sewPrice(run)} 金线）</small>
-          <small class="nx">能绣的牌 ${run.deck.filter(k=>stitchesFor(k).length).length} 张</small></span></button></div></div>
+        <button class="craft art big" id="sewBtn" ${sewable(run)?'':'disabled'}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>织补</b><small>免费给一张牌加绣（织坊里要 ${sewPrice(run)} 金线）</small>
+          <small class="nx">手边的绣线：${offerOf(run).map(x=>STITCH[x].n).join('、')||'没有能用的'} · 能绣的牌 ${sewable(run)} 张</small></span></button></div></div>
     ${journey(run)}</div>`);
   $('restBtn').onclick=()=>{run.hp+=h;done()};
   $('sewBtn').onclick=()=>showSew(run,0,done,()=>showWheel(run,done));
 }
+// the stitches on hand at this stop of the road: drawn once when you first look, kept until you walk on
+const offerOf=run=>run.offer??=rollStitches(run);
+const sewable=run=>run.deck.filter(k=>stitchesFor(k,offerOf(run)).length).length;
 // why a card or a stitch can't be sewn
-const noSew=k=>CARDS[k].st?`已绣${STITCH[CARDS[k].st].n}`:CARDS[k].t==='诅咒'?'乱线不能绣':'没有合适的绣纹';
+const noSew=k=>CARDS[k].st?`已绣${STITCH[CARDS[k].st].n}`:CARDS[k].t==='诅咒'?'乱线不能绣':'今天的绣线都不合适';
 // stitching, two steps on one page. First pick a card: the three stitches hang above the deck, and pointing at one lights the
 // cards that can take it. Then the card sits in the embroidery hoop, each stitch shows the card it would make, and you confirm.
 // cost 0 is the spinning wheel's free stitch; done(id) gets the stitched card
 function showSew(run,cost,done,cancel=done,sel=null){
-  const can=run.deck.map(k=>stitchesFor(k));
+  const offer=offerOf(run),can=run.deck.map(k=>stitchesFor(k,offer));
   const fee=cost?`这次加绣 <b>${cost}</b> 金线 · 你有 <b>${run.gold}</b>`:'纺车边的织补 · <b>免费</b>';
   if(sel==null){
     openScr('shop',pageHd('加绣',run),`<div class="body sewpg">
       <h2 class="ttl">挑一张牌加绣</h2><p class="lead">${fee}</p>
-      <div class="stlegend">${Object.keys(STITCH).map(x=>`<button class="stx" data-s="${x}"><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${STITCH[x].d}</small><small class="nx">能绣 ${can.filter(c=>c.includes(x)).length} 张</small></span></button>`).join('')}</div>
+      <div class="stlegend">${offer.map(x=>`<button class="stx" data-s="${x}"><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${STITCH[x].d}</small><small class="nx">能绣 ${can.filter(c=>c.includes(x)).length} 张</small></span></button>`).join('')}</div>
       <section class="pp"><h4 class="sh sm">牌组 · 能绣的 ${can.filter(c=>c.length).length} 张</h4>
         <div class="rewards deckpick">${run.deck.map((k,i)=>`<span class="dp" data-s="${can[i].join(' ')}">${cardHtml(k,{attr:`data-i="${i}"`,off:!can[i].length})}${can[i].length?`<span class="sts">${can[i].map(x=>`<i style="background-image:url(img/stitches/${x}.jpg)" title="${STITCH[x].n}"></i>`).join('')}</span>`:`<span class="why">${noSew(k)}</span>`}</span>`).join('')}</div></section>
       <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}算了</button></div></div>`,'backBtn');
@@ -275,7 +282,8 @@ function showSew(run,cost,done,cancel=done,sel=null){
   const k=run.deck[sel],ok=can[sel];let pick=ok[0];
   const after=x=>{const id=k+'+'+x;card(id);return id};
   // the change a stitch makes, written under the stitched card
-  const diff=x=>{const A=card(after(x)),C=CARDS[k];return x==='light'?(C.c>0?`费用 ${C.c} → ${A.c}`:`怒气 ${C.r} → ${A.r}`):x==='edge'?'每次伤害 +4':'打出后 → 牌库顶'};
+  const diff=x=>{const A=card(after(x)),C=CARDS[k];return {light:()=>(C.c>0?`费用 ${C.c} → ${A.c}`:`怒气 ${C.r} → ${A.r}`)+' · 每场一次',edge:()=>'每次伤害 +4',loop:()=>'打出后 → 牌库顶',
+    lead:()=>`费用 ${C.c} → ${A.c} · 开局在手`,kin:()=>STITCH.kin.d}[x]()};
   const lbl=x=>`绣上${STITCH[x].n}${cost?` · ${cost} 金线`:''}`;
   openScr('shop',pageHd('加绣',run),`<div class="body sewpg">
     <h2 class="ttl">挑一种绣纹</h2><p class="lead">${fee}</p>
@@ -283,7 +291,7 @@ function showSew(run,cost,done,cancel=done,sel=null){
       <div class="hoop"><span class="ring"></span>${cardHtml(k)}<small>绣之前</small></div>
       <span class="arrow"></span>
       <div class="hoop aft"><span class="ring"></span><span id="aftCard">${cardHtml(after(pick))}</span><small id="aftDiff">${diff(pick)}</small></div>
-      <div class="stitchlist">${Object.keys(STITCH).map(x=>`<button class="stx ${x===pick?'on':''}" data-s="${x}" ${ok.includes(x)?'':'disabled'}><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${ok.includes(x)?STITCH[x].d:STITCH[x].no}</small></span></button>`).join('')}</div></div>
+      <div class="stitchlist">${offer.map(x=>`<button class="stx ${x===pick?'on':''}" data-s="${x}" ${ok.includes(x)?'':'disabled'}><i style="background-image:url(img/stitches/${x}.jpg)"></i><span><b>${STITCH[x].n}</b><small>${ok.includes(x)?STITCH[x].d:STITCH[x].no}</small></span></button>`).join('')}</div></div>
     <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}换一张</button><button class="btn go" id="sewGo" ${run.gold<cost?'disabled':''}>${SVG.SHUTTLE}<span id="sewLbl">${lbl(pick)}</span></button></div></div>`,'sewGo');
   document.querySelectorAll('.stitchlist .stx').forEach(b=>b.onclick=()=>{pick=b.dataset.s;
     document.querySelectorAll('.stitchlist .stx').forEach(x=>x.classList.toggle('on',x===b));
@@ -307,9 +315,9 @@ function showCut(run,done){
   pickCard(run,'拆线','拆掉哪一张？',i=>{if(run.gold<p)return;run.gold-=p;run.cut++;done(unpick(run,i))},()=>done(),`拆一张 <b>${p}</b> 金线 · 你有 <b>${run.gold}</b> · 牌组越薄，好牌来得越勤`);
 }
 const knotFace=k=>`<span class="kn-ic">${SVG.KNOT}</span><b>${KNOTS[k].n}</b>${KNOTS[k].cls?`<small>${CLASSES[KNOTS[k].cls].n}</small>`:'<small>线结</small>'}<span class="d">${KNOTS[k].d}</span>`;
-function showKnotPick(run,done){
+function showKnotPick(run,done,lead='线结整局都在，每枚改写一条小规则'){
   const ks=shuffle(knotPool(run)).slice(0,3);
-  openScr('road',pageHd('线结',run),`<div class="body"><span class="kpbanner" style="background-image:url(img/road/cache.jpg)"></span><h2 class="ttl">挑一枚线结</h2><p class="lead">线结整局都在，每枚改写一条小规则</p>
+  openScr('road',pageHd('线结',run),`<div class="body"><span class="kpbanner" style="background-image:url(img/road/cache.jpg)"></span><h2 class="ttl">挑一枚线结</h2><p class="lead">${lead}</p>
     <div class="fork">${ks.map(k=>`<button class="thr kn" data-k="${k}">${knotFace(k)}</button>`).join('')}</div>
     <div class="acts end"><button class="btn" id="skipBtn">${SVG.SKIP}都不要</button></div></div>`);
   document.querySelectorAll('.thr.kn').forEach(b=>b.onclick=()=>{run.knots.push(b.dataset.k);done()});

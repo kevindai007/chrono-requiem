@@ -22,7 +22,7 @@ function renderTop(){
       :T('mg',S.events.some(e=>e.side==='c'),`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.ff,`霜火 +${S.ff}`)+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
   let st='';
   if(F.moods){const m=F.mood();st+=`<span class="mood ${m}" style="background-image:url(img/moods/${m}.jpg)" title="${MOODS[m]}"></span>`}
-  $('enemyStatus').innerHTML=st+(F.status?F.status():'')+(S.poison?`<span class="tag p2">中毒 ${S.poison} 层</span>`:'');
+  $('enemyStatus').innerHTML=st+(S.tw?`<span class="tag twist" title="${TWISTS[S.tw].d}">异纹 · ${TWISTS[S.tw].n}</span>`:'')+(F.status?F.status():'')+(S.poison?`<span class="tag p2">中毒 ${S.poison} 层</span>`:'');
   $('dock').classList.toggle('busy',S.busy);
   $('sandNum').textContent=S.sand;
   if(lastSand!==null&&lastSand!==S.sand)restart($('sandNum'),'bump',450);lastSand=S.sand;

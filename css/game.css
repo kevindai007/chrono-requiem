@@ -602,6 +602,8 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .tag.fate{border-color:var(--gold);background:var(--indigo);color:var(--gold3)}
 .lead.fate{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;color:var(--indigo)}
 .fatebox p{margin:0 0 10px;font-size:15px;line-height:1.7;text-align:center}
+.twbox p{margin:0;font-size:15px;line-height:1.7;text-align:center}
+.tag.twist{border-color:var(--madder);background:var(--flax);color:var(--madder)}
 .fatebox .btn{width:100%;font-size:18px;padding:10px 16px}
 .skipcard.weave{background:var(--indigo) var(--weave);box-shadow:inset 0 0 0 3px var(--indigo),inset 0 0 0 4.5px var(--gold),0 6px 14px rgba(32,45,58,.3)}
 .skipcard.weave b{color:var(--gold3)!important}.skipcard.weave>i{color:#d3d7da;font-size:12px;line-height:1.5}
