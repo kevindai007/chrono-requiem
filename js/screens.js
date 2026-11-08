@@ -18,10 +18,12 @@ function openScr(mode,mast,main,focus,quiet){
   const s=$('scr'),y=s.scrollTop;calmDown();s.className='scr '+mode;
   $('scrIn').innerHTML=mast+main;
   s.hidden=false;s.scrollTop=quiet?y:0;delete s.dataset.end;
-  if(!quiet)enter(mode);
+  if(!quiet){enter(mode);setMood(mode==='brief'?fightMood():mode==='road'||mode==='shop'?'road':null);SFX(SCR_SOUND[mode]||'page')}
   const f=$(focus);if(f)f.focus({preventScroll:true});
 }
-function closePanel(){calmDown();$('scr').hidden=true}
+function closePanel(){calmDown();$('scr').hidden=true;setMood(fightMood())}
+const fightMood=()=>S.stage>=5?'boss':'battle';
+const SCR_SOUND={win:'win',lose:'lose',end:'summit'};
 function floorPicker(){
   return `<details class="dbg"><summary>试玩：直接跳到任一只怪（从头开始的生命和牌组）</summary><div class="floors">${TOWER.map((p,i)=>`<div class="fl"><em>${FOE[p[0]].floor}</em><div>${p.map(k=>`<button data-fl="${i}" data-k="${k}" class="${i===S.stage&&k===FL().key?'cur':''}">${FOE[k].name}</button>`).join('')}</div></div>`).join('')}</div></details>`;
 }
@@ -51,7 +53,7 @@ function showClassPick(first){
   $('pkRows').innerHTML=Object.keys(CLASSES).map(pkRow).join('');
   document.querySelectorAll('.pk-row').forEach(r=>{r.onclick=()=>{pickSel=r.dataset.cl;updatePick();sway(r)};r.ondblclick=()=>$('pkGo').click()});
   $('pkBack').hidden=first===true;
-  $('pick').hidden=false;$('pick').scrollTop=0;updatePick();
+  $('pick').hidden=false;$('pick').scrollTop=0;updatePick();setMood('road');
   if(!CALM)gsap.from('.pk-row',{y:-70,rotation:i=>(i-1)*3,opacity:0,stagger:.12,duration:.8,ease:'back.out(1.3)',clearProps:'transform,opacity'});
   const f=document.querySelector('.pk-row.on');if(f)f.focus({preventScroll:true});
 }
@@ -84,7 +86,7 @@ function showRules(intro){
   wireFloors();$('pickBtn').onclick=()=>showClassPick();
   // toggle in place: rebuilding the briefing would replay its entrance and jump back to the top
   const fb=$('fateBtn');if(fb)fb.onclick=()=>{S.fate.on=!S.fate.on;fb.classList.toggle('go',S.fate.on);fb.textContent=S.fate.on?'已接下（再点放弃）':'接下';renderTop()};
-  $('startBtn').onclick=()=>{closePanel();if(fresh)banner(F.floor,F.name)};
+  $('startBtn').onclick=()=>{closePanel();if(fresh){banner(F.floor,F.name);fightIn()}};
 }
 
 function showEnd(){
@@ -99,7 +101,7 @@ function showEnd(){
         <h4 class="sh sm">它的节奏</h4>${rulesList(F.rules)}
         <div class="acts"><button class="btn" id="runBtn">${SVG.REDO}重新选职业</button><button class="btn red" id="retryBtn">${SVG.SHUTTLE}重试本层</button></div>
         <p class="coda">钟针仍在前行</p></div></div>`,'retryBtn');
-    $('retryBtn').onclick=()=>{closePanel();startFight(S.run,S.foeKey);render();banner(FL().floor,FL().name)};
+    $('retryBtn').onclick=()=>{closePanel();startFight(S.run,S.foeKey);render();fightIn();banner(FL().floor,FL().name)};
     $('runBtn').onclick=()=>showClassPick();
   }else if(last){
     const ks=[...new Set(S.run.deck)];
@@ -210,7 +212,7 @@ const deckFold=(run,cls='')=>{const n={};run.deck.forEach(k=>n[k]=(n[k]||0)+1);
 function showShop(run,done,said){
   const st=run.stall??={stock:stockFor(run),knot:knotWare(run),mended:false};st.hi??=weaverHi(run);
   const leave=()=>{delete run.stall;done()},back=say=>showShop(run,done,say);
-  const pay=p=>{if(run.gold<p)return false;run.gold-=p;return true};
+  const pay=p=>{if(run.gold<p){SFX('err');return false}run.gold-=p;SFX('buy');return true};
   const tag=(sold,p)=>`<span class="price ${sold?'':run.gold<p?'short':''}">${sold?'已售':`${p} 金线`}${!sold&&run.gold<p?`<small>还差 ${p-run.gold}</small>`:''}</span>`;
   openScr('shop',pageHd('织坊',run),`<div class="body shoppg">
     <aside class="weaver ip"><div class="pic" style="background-image:url(img/road/weaver.jpg)" role="img" aria-label="老织娘"></div>
@@ -236,7 +238,7 @@ function showShop(run,done,said){
   if($('knotBuy'))$('knotBuy').onclick=()=>{if(st.knot.sold||!pay(st.knot.p))return;st.knot.sold=true;run.knots.push(st.knot.k);back(WEAVER.knot(st.knot.k))};
   $('sewBtn').onclick=()=>showSew(run,sewPrice(run),k=>back(WEAVER.sew(k)),()=>back(''));
   $('cutBtn').onclick=()=>showCut(run,k=>back(k?WEAVER.cut(k):''));
-  $('mendBtn').onclick=()=>{if(!pay(PRICE.mend))return;st.mended=true;run.hp=Math.min(run.maxhp,run.hp+15);back(WEAVER.mend)};
+  $('mendBtn').onclick=()=>{if(!pay(PRICE.mend))return;st.mended=true;run.hp=Math.min(run.maxhp,run.hp+15);SFX('heal');back(WEAVER.mend)};
   $('goOn').onclick=leave;
 }
 function showWheel(run,done){
@@ -249,7 +251,7 @@ function showWheel(run,done){
         <button class="craft art big" id="sewBtn" ${sewable(run)?'':'disabled'}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>织补</b><small>免费给一张牌加绣（织坊里要 ${sewPrice(run)} 金线）</small>
           <small class="nx">手边的绣线：${offerOf(run).map(x=>STITCH[x].n).join('、')||'没有能用的'} · 能绣的牌 ${sewable(run)} 张</small></span></button></div></div>
     ${journey(run)}</div>`);
-  $('restBtn').onclick=()=>{run.hp+=h;done()};
+  $('restBtn').onclick=()=>{run.hp+=h;SFX('heal');done()};
   $('sewBtn').onclick=()=>showSew(run,0,done,()=>showWheel(run,done));
 }
 // the stitches on hand at this stop of the road: drawn once when you first look, kept until you walk on
@@ -288,7 +290,7 @@ function showSew(run,cost,done,cancel=done,st=null,sel=null,quiet=false){
       <span class="arrow"></span>
       <div class="hoop aft"><span class="ring"></span>${cardHtml(id)}<small>${diff}</small></div></div>
     <div class="acts end"><button class="btn" id="backBtn">${SVG.REDO}换一张</button><button class="btn go" id="sewGo" ${run.gold<cost?'disabled':''}>${SVG.SHUTTLE}绣上${STITCH[st].n}${cost?` · ${cost} 金线`:''}</button></div></div>`,'sewGo');
-  $('sewGo').onclick=()=>{if(run.gold<cost)return;run.gold-=cost;if(cost)run.sewn++;run.deck[sel]=id;done(id)};
+  $('sewGo').onclick=()=>{if(run.gold<cost)return SFX('err');SFX('sew');run.gold-=cost;if(cost)run.sewn++;run.deck[sel]=id;done(id)};
   $('backBtn').onclick=()=>showSew(run,cost,done,cancel,st);
 }
 // pick one card of the deck; onPick gets its index. head is the page title, sub the line under it
@@ -303,7 +305,7 @@ function unpick(run,i){const [k]=run.deck.splice(i,1);if(run.picks){const j=run.
 // done(k) gets the card that was cut, or nothing when you changed your mind
 function showCut(run,done){
   const p=cutPrice(run);
-  pickCard(run,'拆线','拆掉哪一张？',i=>{if(run.gold<p)return;run.gold-=p;run.cut++;done(unpick(run,i))},()=>done(),`拆一张 <b>${p}</b> 金线 · 你有 <b>${run.gold}</b> · 牌组越薄，好牌来得越勤`);
+  pickCard(run,'拆线','拆掉哪一张？',i=>{if(run.gold<p)return SFX('err');SFX('snip');run.gold-=p;run.cut++;done(unpick(run,i))},()=>done(),`拆一张 <b>${p}</b> 金线 · 你有 <b>${run.gold}</b> · 牌组越薄，好牌来得越勤`);
 }
 const knotFace=k=>`<span class="kn-ic">${SVG.KNOT}</span><b>${KNOTS[k].n}</b>${KNOTS[k].cls?`<small>${CLASSES[KNOTS[k].cls].n}</small>`:'<small>线结</small>'}<span class="d">${KNOTS[k].d}</span>`;
 function showKnotPick(run,done,lead='线结整局都在，每枚改写一条小规则'){
@@ -311,7 +313,7 @@ function showKnotPick(run,done,lead='线结整局都在，每枚改写一条小�
   openScr('road',pageHd('线结',run),`<div class="body"><span class="kpbanner" style="background-image:url(img/road/cache.jpg)"></span><h2 class="ttl">挑一枚线结</h2><p class="lead">${lead}</p>
     <div class="fork">${ks.map(k=>`<button class="thr kn" data-k="${k}">${knotFace(k)}</button>`).join('')}</div>
     <div class="acts end"><button class="btn" id="skipBtn">${SVG.SKIP}都不要</button></div></div>`);
-  document.querySelectorAll('.thr.kn').forEach(b=>b.onclick=()=>{run.knots.push(b.dataset.k);done()});
+  document.querySelectorAll('.thr.kn').forEach(b=>b.onclick=()=>{run.knots.push(b.dataset.k);SFX('knot');done()});
   $('skipBtn').onclick=done;
 }
 

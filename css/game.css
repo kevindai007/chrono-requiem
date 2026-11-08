@@ -58,17 +58,16 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 /* Arena: one indigo story frieze, hero at left facing the foe at right */
 .arena{position:relative;display:grid;grid-template-columns:1fr 1fr;height:clamp(240px,27vw,350px);background:var(--indigo) var(--weave);overflow:hidden;border-block:3px solid var(--indigo)}
 .half{position:relative;overflow:hidden;min-width:0}
-.half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transform-origin:50% 90%}
+.half .art{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;transform-origin:50% 90%;animation:idle 5s ease-in-out infinite}
+.half.foe .art{animation-delay:-2.5s}
+@keyframes idle{50%{scale:1.014}}
+.half .art.ghost{pointer-events:none;animation:none;mix-blend-mode:screen}
 .half.hero .art{background-image:var(--hero,url(../img/classes/hero_warrior.jpg));background-position:30% 40%;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
 .half.foe .art{background-position:70% 40%;-webkit-mask-image:linear-gradient(270deg,#000 80%,transparent);mask-image:linear-gradient(270deg,#000 80%,transparent)}
 .half::after{content:"";position:absolute;inset:auto 0 0;height:34%;pointer-events:none;background:linear-gradient(0deg,rgba(32,45,58,.7),transparent)}
 .half.foe.rage .art{filter:saturate(1.25) sepia(.25) hue-rotate(-12deg)}
 .half.foe.rage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 60% 45%,rgba(146,63,53,.38),transparent 70%);animation:breathe 1.8s ease-in-out infinite}
 @keyframes breathe{50%{opacity:.35}}
-.half .art.hitfx{animation:hitfx .32s}
-@keyframes hitfx{0%{filter:brightness(1.7) sepia(.6)}100%{filter:none}}
-.half .art.shake{animation:shake .35s,hitfx .32s}
-@keyframes shake{25%{translate:-8px 0}50%{translate:7px 0}75%{translate:-3px 0}}
 .roundel{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:clamp(110px,13vw,170px);aspect-ratio:1;z-index:4;pointer-events:none;color:var(--gold2)}
 .roundel svg{width:100%;height:100%;overflow:visible}
 .roundel .rays{transform-origin:50% 50%;animation:spin 90s linear infinite}
@@ -97,6 +96,12 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .mood{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold2);background:var(--indigo) center/cover;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .mood.judge{border-color:var(--gold3)} .mood.rage{border-color:var(--madder3);box-shadow:0 0 0 2px var(--madder)}
 .floats{position:absolute;inset:0;pointer-events:none;z-index:6}
+.floats .slash{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.floats .guard{position:absolute;left:50%;top:40%;width:84px;height:84px;margin:-42px 0 0 -42px;color:var(--gold3);filter:drop-shadow(0 0 6px var(--indigo)) drop-shadow(0 0 14px rgba(207,169,95,.6))}
+.floats .guard svg{width:100%;height:100%}
+.floats .pt{position:absolute;left:50%;top:45%;border-radius:1px;pointer-events:none}
+.floats .pt.round{border-radius:50%}
+#goldNo{display:inline-block}
 .flt{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-family:var(--f-display);font-weight:900;font-size:34px;white-space:nowrap;animation:rise 1.3s ease-out forwards;color:var(--flax2);-webkit-text-stroke:1px var(--indigo);paint-order:stroke fill;text-shadow:0 2px 0 var(--indigo)}
 .flt.dmg{color:var(--gold3)} .flt.big{font-size:54px;color:var(--gold3);text-shadow:0 3px 0 var(--madder2),0 0 0 var(--indigo)}
 .flt.hurt{color:#f0a493} .flt.info{font-size:19px;color:var(--flax2);letter-spacing:.12em;-webkit-text-stroke:0;text-shadow:0 1px 3px var(--indigo),0 0 8px var(--indigo)} .flt.heal{color:#b9c9a3}
@@ -253,7 +258,8 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .card.rg .cost small{position:relative;font-size:11px;color:var(--gold3);letter-spacing:.06em;font-weight:700}
 .card:hover:not(:disabled),.card:focus-visible{transform:translateY(-14px) rotate(-1deg);outline:none;z-index:3}
 .card:hover:not(:disabled) .fr,.card:focus-visible .fr{box-shadow:0 0 0 2.5px var(--gold2),0 16px 26px rgba(32,45,58,.4)}
-.card.sel{transform:translateY(-20px);z-index:3}
+.card.sel{transform:translateY(-20px);z-index:3;animation:selbob 1.6s ease-in-out infinite}
+@keyframes selbob{50%{translate:0 -4px}}
 .card.sel .fr{box-shadow:0 0 0 3px var(--madder),0 0 0 5px var(--gold3),0 18px 28px rgba(32,45,58,.45)}
 .card:disabled{filter:grayscale(.7) brightness(.82) opacity(.75);cursor:not-allowed}
 .card.flying{pointer-events:none}
@@ -690,6 +696,7 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 @media (max-width:820px){
   .mast{padding:8px 2px 6px;gap:6px 12px}.vine{display:none}
   .meta{font-size:14px;flex-wrap:wrap}.meta>*{padding:2px 10px}.tbtn{font-size:14px}
+  #soundBtn .lb{display:none}
   .arena{height:240px}
   .roundel{width:84px;top:36%}
   .lr{min-width:0;padding:5px 22px 9px;gap:8px}.lr .nm{font-size:14px;letter-spacing:.04em}.lr .hp{font-size:14px}.lr .res{display:none}
