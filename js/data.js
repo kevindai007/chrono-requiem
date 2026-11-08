@@ -44,7 +44,7 @@ const CARDS={
   bloodwar:{n:'血战',c:1,t:'战士',a:'blood',ks:1,x:1,d:'本场战斗，拼刀输了你那一击照样打出；拼刀赢了回复 3。'},
   grudge:{n:'怨报',c:2,t:'战士',a:'blood',d:'在一拍放一次攻击，伤害等于你上回合受到的伤害（最多 30）。',tg:'any'},
   // assassin
-  dodge:{n:'闪身',c:1,t:'刺客',a:'combo',d:'选一拍，敌人在该拍的攻击落空，连击不中断。',tg:'any'},
+  dodge:{n:'闪身',c:1,t:'刺客',a:'combo',d:'选一拍，敌人在该拍的攻击落空。',tg:'any'},
   poison:{n:'淬毒',c:1,t:'刺客',a:'venom',d:'敌人 +4 层毒。'},
   shadow:{n:'影袭',c:1,t:'刺客',a:'mark',d:'在一拍插入一次 6 点攻击。',tg:'any'},
   finisher:{n:'绝杀',c:2,t:'刺客',a:'combo',d:'消耗全部连击，每层立刻造成 4 点伤害。'},
@@ -108,9 +108,9 @@ const CLASSES={
     pool:['shield','bash','taunt','cleave','warcry','backwater','ironwall','frenzy','riposte','towershield','lure','wrath','skybreaker','whet','bloodlust','gamble','drain','undying','steadfast','breaker','quake','bloodwar','grudge']},
   rogue:{n:'刺客',hp:70,atk:{every:1,dmg:2},
     sub:'在缝隙里连刺',
-    rule:'你<b>每一拍</b>都自动攻击一次（2 点）。<b>连击</b>：没有敌人干扰的拍命中一次，连击 +1，每 2 层让每拍伤害 +1（上限 8 层）。你那一拍被敌人攻击（哪怕拼刀赢了）或没攻击，连击归零。<b>背刺</b>：敌人不出手的拍，伤害 +1。<b>毒</b>：敌人每拍受到 毒层数 点伤害（无视护甲），然后毒减 1 层，最多 15 层。',
+    rule:'你<b>每一拍</b>都自动攻击一次（2 点）。<b>连击</b>：你出手而且没受伤的拍，连击 +1；拼刀赢了（弹反）连击 +2。每 2 层让每拍伤害 +1（上限 8 层）。只有<b>受到伤害</b>才会让连击归零。<b>影杀</b>：连击满层时，你下一次出手伤害翻倍，然后连击减半。<b>背刺</b>：敌人不出手的拍，伤害 +1。<b>毒</b>：敌人每拍受到 毒层数 点伤害（无视护甲），然后毒减 1 层，最多 15 层。',
     arch:{combo:'连击',venom:'淬毒',mark:'标记'},
-    pitch:'想要连续的空拍。避开敌人的攻击拍，在中间连续出手，越连越痛。和敌人拼刀反而会断掉连击。',
+    pitch:'想要不挨打的拍子。闪开、弹反敌人的攻击，连击越叠越高，满层时一刀翻倍。只有挨打才会断掉连击。',
     deck:['dodge','dodge','poison','shift','shadow','finisher','boomerang','mark','smoke'],
     pool:['dodge','poison','shadow','finisher','smoke','boomerang','mark','assassinate','momentum','vanish','flurry','ready','venomblade','corrode','detonate','converge','expose','clone','shift','zanshin','toxin','plague','omen']},
   mage:{n:'法师',hp:90,sand:4,atk:{every:3,dmg:4},
@@ -122,21 +122,35 @@ const CLASSES={
     pool:['fireball','icelance','chain','meteor','barrier','quick','meditate','frostarmor','spark','ember','prism','trinity','overcharge','manaflow','aria','glacier','nova','rime','tide','linger','zero','frostfire']}
 };
 /* ---------- The weavery's stitches: a stitched card is its own entry, CARDS['fireball+edge'], built from the base card ---------- */
-// base: the card it was stitched from (its art and rules), st: its stitch. A card takes one stitch at most
+// base: the card it was stitched from (its art and rules), st: its stitch. A card takes one stitch at most.
+// Every stitch pays for what it gives in a different coin (uses, draws, sand), so which one is best depends on the card and the build;
+// and a weaver only has STITCH_OFFER of them on hand each visit (run.offer), so the choice is never the same twice
 const EDGE=['echo','shadow','clone','boomerang','cleave','skybreaker','quake','bash','grudge','frenzy','finisher','detonate'];
+// 魂线 feeds the class's own resource each time the card is played
+const KIN={warrior:{d:'打出时 +2 怒气',f:()=>gainRage(2)},rogue:{d:'打出时连击 +1',f:()=>addCombo(1)},mage:{d:'打出时霜冻 +1',f:()=>addFrost(1)}};
 const STITCH={
-  light:{n:'轻线',d:'费用 −1（怒气牌 −1 怒气）',sd:'费用 −1',no:'费用已经最低了',ok:C=>C.c>0||(C.r||0)>1},
+  light:{n:'轻线',d:'费用 −1（怒气牌 −1 怒气），但每场战斗只能打一次',sd:'费用 −1 · 每场一次',no:'费用已经最低，或本来就只能打一次',ok:C=>(C.c>0||(C.r||0)>1)&&!C.x},
   edge:{n:'锋线',d:'这张牌打出的每次伤害 +4',sd:'每次伤害 +4',no:'只有造成伤害的牌能绣',ok:(C,k)=>!!C.cast||EDGE.includes(k)},
-  loop:{n:'回线',d:'打出后放回牌库顶，而不是弃牌堆',sd:'打出后回到牌库顶',no:'消耗牌不能绣',ok:C=>!C.x}
+  loop:{n:'回线',d:'打出后放回牌库顶：下回合还会抽到它',sd:'打出后回到牌库顶',no:'只能打一次的牌不能绣',ok:C=>!C.x},
+  lead:{n:'引线',d:'每场战斗开局一定在手里，但费用 +1',sd:'开局在手 · 费用 +1',no:'怒气牌不能绣',ok:C=>!C.r},
+  kin:{n:'魂线',get d(){return KIN[S.run.cls].d},get sd(){return KIN[S.run.cls].d},no:'',ok:()=>true}
 };
+const STITCH_OFFER=3;
 const baseOf=k=>k.split('+')[0];
 function card(k){
   if(CARDS[k])return CARDS[k];
   const [b,st]=k.split('+'),B=CARDS[b],C={...B,base:b,st};
-  if(st==='light'){if(B.c>0)C.c=B.c-1;else C.r=B.r-1}
+  if(st==='light'){if(B.c>0)C.c=B.c-1;else C.r=B.r-1;C.x=1}
+  if(st==='lead')C.c=B.c+1;
   return CARDS[k]=C;
 }
-const stitchesFor=k=>CARDS[k].st||CARDS[k].t==='诅咒'?[]:Object.keys(STITCH).filter(s=>STITCH[s].ok(CARDS[k],k));
+// offer: the stitches on hand (all of them when left out)
+const stitchesFor=(k,offer=Object.keys(STITCH))=>CARDS[k].st||CARDS[k].t==='诅咒'?[]:offer.filter(s=>STITCH[s].ok(CARDS[k],baseOf(k)));
+// a visit's stitches: STITCH_OFFER drawn at random among those some card in the deck can take
+const rollStitches=run=>shuffle(Object.keys(STITCH).filter(s=>run.deck.some(k=>stitchesFor(k,[s]).length))).slice(0,STITCH_OFFER);
+// a stitched copy of k with a random stitch it can take, or k itself
+const stitchRandom=k=>{const xs=stitchesFor(k);if(!xs.length)return k;const id=k+'+'+xs[Math.floor(Math.random()*xs.length)];card(id);return id};
+
 /* ---------- Knots: passives that last the whole run, each bending one small rule ---------- */
 // cls: only offered to that class. The hooks read hasK(key) where the rule lives
 const KNOTS={
@@ -214,6 +228,8 @@ const star=(cx,cy,n,ro,ri)=>'M'+Array.from({length:n*2},(_,i)=>{const r=i%2?ri:r
 const SVG={
   KNOT:`<svg viewBox="0 0 48 48"><path d="${star(24,24,8,23,15)}" fill="currentColor"/><g fill="none" stroke="#f1e7d1" stroke-width="1.6"><rect x="15" y="15" width="18" height="18"/><rect x="15" y="15" width="18" height="18" transform="rotate(45 24 24)"/><circle cx="24" cy="24" r="4.5"/></g></svg>`,
   GEAR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/><circle cx="12" cy="12" r="6.5"/></svg>',
+  GLASS:`<svg viewBox="0 0 84 110" fill="currentColor"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 8h36M24 102h36"/><path d="M29 8c0 26 13 30 13 47S29 76 29 102M55 8c0 26-13 30-13 47s13 21 13 47"/></g><path d="M34 30h16c-2 7-8 11-8 18 0-7-6-11-8-18z" opacity=".75"/><path d="M42 70c-6 6-9 14-10 26h20c-1-12-4-20-10-26z"/>
+    <g fill="none" stroke="#69745c" stroke-width="1.6"><path d="M14 104C4 76 4 40 16 10M70 104C80 76 80 40 68 10"/></g><g fill="#69745c">${[20,34,48,62,76,90].map(y=>`<ellipse cx="${y<50?11:8}" cy="${y}" rx="5" ry="2.2" transform="rotate(-35 ${y<50?11:8} ${y})"/><ellipse cx="${84-(y<50?11:8)}" cy="${y}" rx="5" ry="2.2" transform="rotate(35 ${84-(y<50?11:8)} ${y})"/>`).join('')}</g></svg>`,
   REDO:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 3.5v5h-5"/></svg>',
   FLEUR:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2 3-2.5 6-1 9-2-1-5-1-6.5 1 1.5 0 3 .5 4 2-2 0-3 1-3.5 2.5 2-.5 4-.2 5.5 1.5L12 22l1.5-4c1.5-1.7 3.5-2 5.5-1.5-.5-1.5-1.5-2.5-3.5-2.5 1-1.5 2.5-2 4-2-1.5-2-4.5-2-6.5-1 1.5-3 1-6-1-9z"/></svg>',
   ROUNDEL:`<svg viewBox="0 0 120 120"><g class="rays" stroke="#cfa95f" stroke-width="1.6">${Array.from({length:32},(_,i)=>{const a=i*Math.PI/16,r1=48,r2=i%2?55:62;return `<line x1="${(60+r1*Math.cos(a)).toFixed(1)}" y1="${(60+r1*Math.sin(a)).toFixed(1)}" x2="${(60+r2*Math.cos(a)).toFixed(1)}" y2="${(60+r2*Math.sin(a)).toFixed(1)}"/>`}).join('')}</g>
@@ -270,12 +286,12 @@ const FOES=[
   open:'黑暗里亮起一双眼睛。开战。',
   init:()=>({mad:false}),
   beat(b){if(S.E.mad)ev({beat:b,side:'e',label:'咬',dmg:7});else if(b%3!==0)ev({beat:b,side:'e',label:'咬',dmg:9})},
-  onDealt(){if(!S.E.mad&&S.ehp<=30&&S.ehp>0){S.E.mad=true;const c=cur();S.events=S.events.filter(e=>!(e.side==='e'&&e.beat>c));for(let b=c+1;b<=S.genUpTo;b++)this.beat(b);log('野狼红了眼，每一拍都扑上来！');banner('狂性','FRENZY',true)}},
+  onDealt(){if(!S.E.mad&&S.ehp<=30&&S.ehp>0){S.E.mad=true;const c=cur();S.events=S.events.filter(e=>!(e.side==='e'&&e.beat>c));for(let b=c+1;b<=S.genUpTo;b++)foeBeat(this,b);log('野狼红了眼，每一拍都扑上来！');banner('狂性','FRENZY',true)}},
   status:()=>S.E.mad?'<span class="tag p2">狂性</span>':'',
   rage:()=>S.E.mad},
 
  {key:'bat',floor:'第 1 层',name:'吸血蝠',lane:'蝙蝠',hp:65,
-  rules:['<b>撕咬</b>：每 3 拍里咬 2 次，每次 9 点。','<b>吸血</b>：撕咬真正打到你身上的伤害，蝙蝠全部回给自己。格挡、闪身、残影、弹反都能让它喝不到血。','战士：盾放在撕咬上，挡下的就是它喝不到的。刺客：第 III、VI、IX 拍它不咬，正好背刺。法师：吟唱被咬断就是双亏，先用寒冰枪把撕咬推开。'],
+  rules:['<b>撕咬</b>：每 3 拍里咬 2 次，每次 9 点。','<b>吸血</b>：撕咬真正打到你身上的伤害，蝙蝠全部回给自己。格挡、闪身、残影、弹反都能让它喝不到血。','战士：盾放在撕咬上，挡下的就是它喝不到的。刺客：每 3 拍有一拍它不咬，正好背刺。法师：吟唱被咬断就是双亏，先用寒冰枪把撕咬推开。'],
   reward:['echo','charge','ghost'],stagger:2,
   open:'头顶传来一阵扑翅声。开战。',
   init:()=>({}),
@@ -329,12 +345,12 @@ const FOES=[
   init:()=>({split:0}),
   dmgNow(){return 9+3*S.E.split},
   beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'黏',dmg:this.dmgNow()})},
-  onDealt(x,o){if(x>=15&&S.E.split<3&&S.ehp>0&&o.src!=='poison'){S.E.split++;const d=this.dmgNow();foeE(e=>e.label==='黏').forEach(e=>e.dmg=d);log(`史莱姆被打裂了！分裂 ${S.E.split}/3，黏击升到 ${d} 点。`);flt('enemy','分裂！','info')}},
+  onDealt(x,o){if(x>=15&&S.E.split<3&&S.ehp>0&&o.src!=='poison'){S.E.split++;const d=this.dmgNow();foeE(e=>e.label==='黏').forEach(e=>e.dmg=twD(d));log(`史莱姆被打裂了！分裂 ${S.E.split}/3，黏击升到 ${d} 点。`);flt('enemy','分裂！','info')}},
   status:()=>`<span class="tag">分裂 ${S.E.split}/3</span>`,
   rage:()=>S.E.split>=3},
 
  {key:'mirror',floor:'第 3 层',name:'镜之妖精',lane:'妖精',hp:90,
-  rules:['<b>镜影</b>：第 III、VI、IX、XII 拍各有一面镜影，那一拍你的攻击全部被吞掉；法术、毒和残影反击不受影响。用「迅步」「蓄时」把攻击挪出去，或用「错位」把镜影换走。','<b>镜饲</b>：镜影每吞掉一拍攻击，妖精回复 6 点生命。','<b>碎光</b>：镜影之间的两拍各一次，每次 9 点。','法师几乎不怕镜影；战士和刺客得学会挪动自己的攻击。'],
+  rules:['<b>镜影</b>：每 3 拍有一面镜影，那一拍你的攻击全部被吞掉；法术、毒和残影反击不受影响。用「迅步」「蓄时」把攻击挪出去，或用「错位」把镜影换走。','<b>镜饲</b>：镜影每吞掉一拍攻击，妖精回复 6 点生命。','<b>碎光</b>：镜影之间的两拍各一次，每次 9 点。','法师几乎不怕镜影；战士和刺客得学会挪动自己的攻击。'],
   reward:['unity','stop','paradox'],
   open:'钟面玻璃里，有个影子对你眨了眨眼。开战。',
   init:()=>({}),
@@ -348,7 +364,7 @@ const FOES=[
   open:'咔哒、咔哒，傀儡背上的发条转了起来。开战。',
   init:()=>({wind:0}),
   dmgNow(){return 8+2*S.E.wind},
-  retune(){const d=this.dmgNow();foeE(e=>e.label==='锤').forEach(e=>e.dmg=d)},
+  retune(){const d=this.dmgNow();foeE(e=>e.label==='锤').forEach(e=>e.dmg=twD(d))},
   beat(b){if(b%3!==2)ev({beat:b,side:'e',label:'锤',dmg:this.dmgNow()})},
   onDelay(src){if(src==='stagger'||S.E.wind>=5)return;S.E.wind++;this.retune();flt('enemy',`上弦 ${S.E.wind}`,'info');log(`上弦：发条拧紧一圈，锤击升到 ${this.dmgNow()} 点。`)},
   onParry(){if(!S.E.wind)return;S.E.wind=Math.max(0,S.E.wind-2);this.retune();log(`松弦：弹反震松了发条，锤击降到 ${this.dmgNow()} 点。`)},
@@ -406,7 +422,7 @@ const FOES=[
   dmgNow(){return 10+Math.min(4,S.E.stole)},
   beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'刀',dmg:this.dmgNow()})},
   onHeroHit(es,x){if(!es.length||x<=0)return;const c=cur(),h=S.events.filter(e=>e.side==='h'&&!e.fx&&e.beat>c).sort((a,b)=>a.beat-b.beat)[0];
-    if(h)h.beat++;S.E.stole++;const d=this.dmgNow();foeE(e=>e.label==='刀').forEach(e=>e.dmg=d);flt('hero','窃时','info');
+    if(h)h.beat++;S.E.stole++;const d=this.dmgNow();foeE(e=>e.label==='刀').forEach(e=>e.dmg=twD(d));flt('hero','窃时','info');
     log(`窃时：${h?`你第 ${roman(h.beat-1)} 拍的攻击被偷到第 ${roman(h.beat)} 拍，`:''}快刀升到 ${d} 点。`)},
   status:()=>`<span class="tag ${S.E.stole>=4?'p2':''}">得手 ${Math.min(4,S.E.stole)}/4</span>`,
   rage:()=>S.E.stole>=4},
@@ -417,7 +433,7 @@ const FOES=[
   open:'锅炉门被一拳砸开，热浪扑面而来。开战。',
   init:()=>({heat:0}),
   dmgNow(){return 8+S.E.heat},
-  retune(){const d=this.dmgNow();foeE(e=>e.label==='熔拳').forEach(e=>e.dmg=d)},
+  retune(){const d=this.dmgNow();foeE(e=>e.label==='熔拳').forEach(e=>e.dmg=twD(d))},
   beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'熔拳',dmg:this.dmgNow()})},
   mod:(x,o)=>o.src==='poison'||x>=4?x:0,modNote:'熔甲 · 无效',modShort:'熔甲',
   onDealt(x,o){if(S.E.heat&&S.ehp>0&&(x>=15||o.el==='冰')){S.E.heat=0;this.retune();flt('enemy','冷却','info');log(`冷却：${o.el==='冰'?'寒冰':'重击'}让魔像的热度归零，熔拳回到 ${this.dmgNow()} 点。`)}},
@@ -434,7 +450,7 @@ const FOES=[
   beat(b){const m=b%12;if(m===0)ev({beat:b,side:'e',kind:'j',label:'重劈',dmg:28,locked:true});else if(m%3!==0&&m!==4&&m!==10)ev({beat:b,side:'e',label:'斩',dmg:S.E.phase===2?13:10});else if(m===4||m===10)ev({beat:b,side:'e',label:'盾',dmg:0,na:true,sh:true})},
   mod:(x,o)=>{if(o.beat&&at(o.beat,'e').some(e=>e.sh)&&o.src!=='poison'&&o.src!=='true')return 0;return armored(x)},modNote:'重甲 · 减半',modShort:'重甲',
   take(x,o,raw){if(o.beat&&at(o.beat,'e').some(e=>e.sh)&&o.src!=='poison'&&o.src!=='true'){const r=Math.floor(raw/2);flt('enemy','盾反！','info');if(r>0){log(`盾反：骑士把 ${r} 点伤害弹了回来。`);dealHero(r,[],{thorn:true})}return 0}return x},
-  onDealt(){if(S.E.phase===1&&S.ehp<=90&&S.ehp>0){S.E.phase=2;foeE(e=>e.label==='斩').forEach(e=>e.dmg=13);log('骑士扔掉了披风，第二阶段·怒斩！斩击变成 13 点。');flt('enemy','怒斩！','info');banner('怒斩','PHASE II · 第二阶段',true)}},
+  onDealt(){if(S.E.phase===1&&S.ehp<=90&&S.ehp>0){S.E.phase=2;foeE(e=>e.label==='斩').forEach(e=>e.dmg=twD(13));log('骑士扔掉了披风，第二阶段·怒斩！斩击变成 13 点。');flt('enemy','怒斩！','info');banner('怒斩','PHASE II · 第二阶段',true)}},
   status:()=>'<span class="tag">重甲</span>'+(S.E.phase===2?'<span class="tag p2">怒斩</span>':''),
   rage:()=>S.E.phase===2,
   mood:()=>S.E.phase===2?'rage':foeE(e=>e.label==='重劈'&&e.beat<S.beat+3).length?'judge':'calm'},
@@ -446,7 +462,7 @@ const FOES=[
   open:'钟针归零。永夜魔王，开战。',
   init:()=>({phase:1,jNext:0,charge:0}),
   jDmg:()=>S.run.cls==='warrior'?25+3*S.E.charge:35,
-  retune(){const d=this.jDmg();foeE(e=>e.label==='审判').forEach(e=>e.dmg=d)},
+  retune(){const d=this.jDmg();foeE(e=>e.label==='审判').forEach(e=>e.dmg=twD(d))},
   view:()=>S.E.phase===3?6:8,
   beat(b){const k=S.run.cls;
     if(S.E.phase===3){if(b%2===1)ev({beat:b,side:'e',label:'刻',dmg:14});return}
@@ -488,6 +504,21 @@ const FOES=[
   rage:()=>S.E.phase===3}
 ];
 const FOE=Object.fromEntries(FOES.map(f=>[f.key,f]));
+/* ---------- A fight is never the same twice: the foe's rhythm and its twist are drawn when the fight starts ---------- */
+// S.ph: the foe runs its pattern that many beats ahead, so it meets your own attacks on a different rhythm each fight
+function foeBeat(F,b){const n=S.events.length;F.beat.call(F,b+S.ph);
+  for(const e of S.events.slice(n)){e.beat-=S.ph;if(e.side!=='e'||e.na||!e.dmg)continue;e.dmg=twD(e.dmg);
+    if(S.tw==='locked'&&!e.locked&&(S.lk=(S.lk||0)+1)%2===0)e.locked=true}}
+// 异纹 (S.tw): most fights below the knight weave one twist into the foe; each one gives back something for what it takes
+const TWISTS={
+  fierce:{n:'凶暴',d:'敌人每次攻击 +3，但生命 −20%。',hp:.8,dd:3},
+  hulk:{n:'厚重',d:'敌人生命 +25%，但每次攻击 −2。',hp:1.25,dd:-2},
+  locked:{n:'锁时',d:'敌人每隔一次攻击被时间锁定，不能挪动；它的生命 −15%。',hp:.85},
+  fog:{n:'迷雾',d:'你的视野 −2 拍；敌人生命 −15%。',hp:.85},
+  gilded:{n:'镀金',d:'敌人每次攻击 +2；打赢了金线 +50%。',dd:2}
+};
+const TWIST_ODDS=.75;
+const twD=d=>S.tw&&TWISTS[S.tw].dd?Math.max(1,d+TWISTS[S.tw].dd):d;
 /* Tapestry art (tools/art/tapestry_art_brief.md): img/foes/<key>.jpg is the right half of the arena frieze (2:1), img/foes/<key>_p.jpg the briefing hunt scene */
 FOES.forEach(f=>{f.img=`img/foes/${f.key}.jpg`;f.portrait=`img/foes/${f.key}_p.jpg`});
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];

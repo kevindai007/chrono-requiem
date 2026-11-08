@@ -12,8 +12,10 @@ function startFight(run,key){
   const F=FOE[key||run.foes[run.stage]];
   S={run,stage:run.stage,beat:1,turn:1,hp:run.hp??run.maxhp,maxhp:run.maxhp,ehp:F.hp,emax:F.hp,sand:CLASSES[run.cls].sand||3,debt:0,shield:0,barrier:0,quick:false,med:false,iceArmor:false,lastSpell:null,
      best:null,turnCards:[],parried:false,parriedPrev:false,foresight:false,rage:0,rageMax:10,combo:0,comboMax:8,poison:0,chain:0,frost:0,refund:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
-     deck:shuffle(run.deck.slice()),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
+     deck:lead(shuffle(run.deck.slice())),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
   if(key){S.foeKey=key;S.emax=S.ehp=Math.round(F.hp*1.25)}
+  const plain=F.boss||F.moods;S.ph=plain?0:Math.floor(Math.random()*6);S.tw=!plain&&Math.random()<TWIST_ODDS?shuffle(Object.keys(TWISTS))[0]:null;
+  if(S.tw&&TWISTS[S.tw].hp)S.emax=S.ehp=Math.round(S.emax*TWISTS[S.tw].hp);
   if(hasK('black'))S.ehp=Math.round(S.emax*.9);
   if(hasK('hourglass'))S.sand++;if(hasK('spindle'))S.drawN=6;if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
   S.shuttle=hasK('shuttle');S.mute=hasK('mute');S.star=hasK('starthread');
@@ -23,12 +25,14 @@ function startFight(run,key){
   draw(S.drawN);S.drawN=5;
   log(F.open);
 }
+// 引线 cards go on top of the shuffled deck, so the opening hand draws them
+const lead=d=>d.filter(k=>CARDS[k].st!=='lead').concat(d.filter(k=>CARDS[k].st==='lead'));
 // climb to the next floor with the HP this fight left you, taking card k (or none) and the gold thread the fight earned;
 // with ui, the steps of ROAD for this gap are walked before the next fight (the balance AI calls it without, straight to the fight)
 function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=hasK('black')?S.hp:Math.min(run.maxhp,S.hp+5+Math.round(run.maxhp*FLOOR_HEAL));
   payFate(run);run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
 // gold thread for a win: a base that grows with the floor, one per 10 of the fight's best beat, two per parry
-const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1));
+const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1)*(S.tw==='gilded'?1.5:1));
 
 /* ---------- The road between floors: a queue of steps, so a longer journey is only a longer queue ---------- */
 // run.road holds the steps still to walk before the next fight. A step is a THREADS key, or 'fork': FORK_N different threads
@@ -55,7 +59,7 @@ const THREADS={
 };
 const spoolGold=run=>30+5*run.stage,wheelHeal=run=>Math.min(run.maxhp-run.hp,Math.round(run.maxhp*.3));
 function walk(run){
-  const step=run.road.shift();
+  const step=run.road.shift();delete run.offer;
   if(!step){startFight(run);render();showRules(true);return}
   if(step==='fork')return showFork(run,()=>walk(run));
   THREADS[step].go(run,()=>walk(run));
@@ -75,8 +79,10 @@ function rewardPool(run,F){
   if(late){const n={};picks.forEach((k,i)=>{const a=CARDS[k].a;n[a]=(n[a]||0)+1+i/100});
     const top=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];cls.push(shuffle(pool.filter(k=>CARDS[k].a===top))[0])}
   for(const k of shuffle(pool.slice())){if(cls.length>=2)break;if(cls.includes(k)||(CARDS[k].ks&&cls.some(c=>CARDS[c].ks)))continue;cls.push(k)}
-  return cls.concat(shuffle(F.reward.slice()).slice(0,1));
+  return cls.map(k=>Math.random()<STITCHED_ODDS?stitchRandom(k):k).concat(shuffle(F.reward.slice()).slice(0,1));
 }
+// now and then a class card on offer comes already stitched, with a stitch drawn at random
+const STITCHED_ODDS=.25;
 const healTo=()=>hasK('black')?S.hp:Math.min(S.maxhp+5,S.hp+5+Math.round((S.maxhp+5)*FLOOR_HEAL));
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function draw(n){for(let i=0;i<n;i++){if(!S.deck.length){if(!S.discard.length)return;S.deck=shuffle(S.discard);S.discard=[]}S.hand.push(S.deck.pop())}}
@@ -85,12 +91,12 @@ function gen(h){
   const F=FL();
   for(let b=S.genUpTo+1;b<=h;b++){
     const A=CL().atk;if(b%A.every===0)ev({beat:b,side:'h',dmg:A.dmg});
-    F.beat(b);
+    foeBeat(F,b);
   }
   S.genUpTo=h;F.fill?.call(F,h);
 }
 const baseView=()=>FL().view?FL().view():8;
-const W=()=>baseView()+(S.foresight?4:0)+(hasK('spyglass')?2:0);
+const W=()=>baseView()+(S.foresight?4:0)+(hasK('spyglass')?2:0)-(S.tw==='fog'?2:0);
 const at=(b,side)=>S.events.filter(e=>e.beat===b&&(!side||e.side===side));
 // backstab: the assassin hits a beat where no enemy attack lands on them
 const openBeat=b=>!atkE(b).length||at(b,'d').length>0;
@@ -99,7 +105,7 @@ function heroTotal(hs){
   let x=hs.reduce((a,e)=>a+e.dmg+(S.cry&&b<S.beat+3?4:0),0);
   if(S.blood&&S.hp*2<S.maxhp)x+=5*hs.length;
   x+=((hasW('wolf')&&S.hp*10<S.maxhp*3?3:0)+(hasW('puppet')?S.windUp||0:0)+(hasW('golem')?S.heat||0:0))*hs.length;
-  if(S.run.cls==='rogue'){x+=Math.floor(S.combo/2);if(openBeat(b))x+=1}
+  if(S.run.cls==='rogue'){x+=Math.floor(S.combo/2);if(openBeat(b))x+=1;if(S.combo>=S.comboMax)x*=2}
   const ks=at(b,'k');if(ks.length)x*=Math.max(...ks.map(k=>k.v||2));
   return Math.round(x*mult(hs.length));
 }
@@ -140,7 +146,7 @@ function dealHero(x,es,opt={}){
   if(x>0&&S.totem>0){const a=Math.min(S.totem,x);S.totem-=a;x-=a;wvFx('shaman');log(`图腾替你挡下 ${a} 点${S.totem?'':'，碎了'}。`);if(!x)return}
   if(x>0&&hasK('rope')&&!S.roped&&S.hp*10<S.maxhp*3){S.roped=true;x=Math.ceil(x/2);flt('hero','打结绳','info');log(`打结绳：这一下减半到 ${x}。`)}
   if(S.iceArmor){x=Math.max(0,x-3);if(!x){flt('hero','冰甲','info');return}}
-  S.hp=Math.max(0,S.hp-x);S.dmgThis+=x;flt('hero','-'+x,'hurt');if(!opt.thorn)gainRage(2);
+  S.hp=Math.max(0,S.hp-x);S.dmgThis+=x;if(x>0&&!opt.thorn)S.hurt=true;flt('hero','-'+x,'hurt');if(!opt.thorn)gainRage(2);
   if(x>0&&hasW('golem'))S.heat=0;
   if(x>0&&hasW('treant')&&!opt.thorn&&S.ehp>0){wvFx('treant');dealEnemy(2,'荆棘',{src:'true'})}
   if(S.hp<=0&&hasW('skeleton')&&!S.rebuilt){S.rebuilt=true;S.hp=Math.min(S.maxhp,11);wvFx('skeleton');log('重组：骨头拼了回去，你带着 11 点生命站起来。')}
@@ -276,6 +282,7 @@ function commit(i,target){
   if(C.r&&S.rage<C.r)return '怒气不足';
   const was=new Map(S.events.map(e=>[e.id,e.beat])),e0=S.ehp;
   S.edge=C.st==='edge'?4:0;const err=apply(C.base||key,target);S.edge=0;if(err)return err;
+  if(C.st==='kin')KIN[S.run.cls].f();
   for(const e of S.events)if(was.get(e.id)!==e.beat)(e.by??=[]).push(C.n);
   if(!C.tg&&!C.ks)S.turnCards.push(C.n);
   if(e0-S.ehp>(S.best?.d||0))S.best={d:e0-S.ehp,cards:[C.n]};
@@ -341,12 +348,14 @@ function resolveTarget(i,slot,chip){
 }
 function resolveBeat(b){
   const F=FL();
-  let hs=at(b,'h');let es=atkE(b);const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
+  S.hurt=false;let hs=at(b,'h');let es=atkE(b);const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
   if(at(b,'m').length&&hs.length){flt('hero','镜影 · 落空','info');log(`第 ${roman(b)} 拍：你的攻击被镜影吞没。`);hs=[];F.onMirror?.call(F)}
   // 破军: a heavy hit smashes the unlocked attacks on its beat before they can clash
   if(S.breaker&&hs.some(h=>h.fx)){const sm=atkE(b).filter(e=>!e.locked);if(sm.length){S.events=S.events.filter(e=>!sm.includes(e));es=atkE(b);gainRage(2*sm.length);flt('enemy','破招','info');log(`第 ${roman(b)} 拍：重击砸掉了${sm.map(e=>e.label).join('、')}。`)}}
   const res=hs.length>=2;if(res)S.resThis=true;
-  const ht=heroTotal(hs);let struck=false,blkd=0;let et=es.reduce((a,e)=>a+e.dmg,0);
+  // 影杀: the assassin's hit at full combo deals double (heroTotal), then the combo halves
+  const kill=S.run.cls==='rogue'&&hs.length>0&&S.combo>=S.comboMax;
+  const ht=heroTotal(hs);let struck=false,blkd=0,par=false;let et=es.reduce((a,e)=>a+e.dmg,0);
   // a spell going off on this beat clashes too
   const sp=at(b,'c').reduce((a,c)=>a+c.dmg*c.hits,0),ct=ht+sp;
   const rev=hs.length===1&&hs[0].rev;
@@ -354,7 +363,6 @@ function resolveBeat(b){
   const hit=()=>{if(rev)healEnemy(ht,`第 ${roman(b)} 拍的逆攻击`);else{struck=true;dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length})}};
   const names=[...new Set(es.map(e=>e.label))].join('、');
   if(res)flt('hero',resLbl,'info');
-  let clean=hs.length>0;  // assassin combo survives this beat
   if(es.length&&S.smoke.includes(b)){const h=Math.floor(et/2);flt('hero',`烟幕 −${et-h}`,'info');log(`第 ${roman(b)} 拍：烟幕里${F.lane}的${names}只打出一半（${et}→${h}）。`);et=h;if(et<=0)es=[]}
   if(es.length&&dodge){flt('hero','闪身','info');log(`第 ${roman(b)} 拍：你闪开了${names}。`);
     if(S.zanshin){const n=es.length;addCombo(n);dealEnemy(3*n,'残心',{src:'ghost',beat:b});if(S.over)return}
@@ -367,15 +375,14 @@ function resolveBeat(b){
     if(et<=0){es=[]}
   }
   if(es.length){
-    clean=false;
     const ghostOK=g&&!es.some(e=>e.noGhost);
     if(g&&!ghostOK)log(`第 ${roman(b)} 拍：残影挡不住${names}。`);
     if(ghostOK){
-      flt('hero','残影 · 落空','info');log(`第 ${roman(b)} 拍：${F.lane}击中了残影。`);clean=hs.length>0;
+      flt('hero','残影 · 落空','info');log(`第 ${roman(b)} 拍：${F.lane}击中了残影。`);
       dealEnemy(6,'残影反击',{src:'ghost',beat:b});if(hs.length&&!S.over)hit();
     }else if(hs.length||sp){
       if(ct>et){
-        flt('hero','弹反！','info');S.parried=true;S.parries=(S.parries||0)+1;gainRage(2);if(hasK('shears')&&!S.sheared){S.sheared=true;dealEnemy(12,'断线剪',{src:'true'})}
+        flt('hero','弹反！','info');S.parried=true;par=true;S.parries=(S.parries||0)+1;gainRage(2);if(hasK('shears')&&!S.sheared){S.sheared=true;dealEnemy(12,'断线剪',{src:'true'})}
         if(hasW('bat')){const h=Math.min(3,S.maxhp-S.hp);if(h){S.hp+=h;wvFx('bat',b)}}if(hasW('thief')&&!S.stole){S.stole=true;S.refund++;wvFx('thief',b)}if(hasW('ogre')&&!S.over){freeze('震荡');wvFx('ogre',b)}log(`第 ${roman(b)} 拍：拼刀 ${ct} 对 ${et}，弹反成功！${rev?'逆针被弹反净化。':''}`);
         if(S.bloodwar){const h=Math.min(3,S.maxhp-S.hp);if(h>0){S.hp+=h;flt('hero','+'+h,'heal')}}
         if(hs.length){struck=true;const e0=S.ehp;dealEnemy(ht,resLbl,{res,src:'atk',beat:b,n:hs.length});
@@ -395,9 +402,11 @@ function resolveBeat(b){
   }else if(hs.length){hit()}
   if(struck&&!S.over&&hs.some(h=>h.quake))freeze('震地');
   for(const c of at(b,'c')){if(S.over)break;castFire(c,b)}
+  // the assassin's combo: only a hit that hurts breaks it; a beat you strike unhurt builds it, a parry builds it twice
   if(S.run.cls==='rogue'&&!S.over){
-    if(clean)addCombo(1)
-    else if(S.combo){let k=S.keep?Math.floor(S.combo/2):0;if(hasK('silk')&&!S.silked){S.silked=true;k=Math.max(k,S.combo-2)}log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层${k?`，余势留下 ${k} 层`:''}）。`);S.combo=k}
+    if(!S.hurt&&kill&&struck){const n=S.combo;S.combo=Math.floor(n/2);banner('影杀',`连击 ${n} 层 · 伤害翻倍`);log(`影杀：满层连击化作一刀，连击减半到 ${S.combo}。`)}
+    else if(!S.hurt&&hs.length){const up=addCombo(par?2:1);if(par&&up)flt('hero',`连击 +${up}`,'info')}
+    else if(S.hurt&&S.combo){let k=S.keep?Math.floor(S.combo/2):0;if(hasK('silk')&&!S.silked){S.silked=true;k=Math.max(k,S.combo-2)}log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层${k?`，余势留下 ${k} 层`:''}）。`);S.combo=k}
   }
   if(S.poison>0&&!S.over){const d=S.poison;if(!S.plague)S.poison--;dealEnemy(d,`毒（${d} 层）`,{src:'poison',beat:b})}
   if(!S.over)F.afterBeat?.call(F,b);
