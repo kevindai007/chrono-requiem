@@ -155,6 +155,9 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .slot.tgt{cursor:pointer}
 .slot.tgt::after{content:"";position:absolute;inset:4px;border:1.5px dashed var(--indigo2);pointer-events:none;opacity:.55;z-index:2}
 .slot.tgt:hover{background:#fbf3df}
+.slot.hov::after,.slot.no::after{content:"";position:absolute;inset:2px;border:2px solid var(--gold);opacity:1;pointer-events:none;z-index:2}
+.slot.no{cursor:not-allowed}.slot.no::after{border:1.5px dashed var(--madder);opacity:.75}
+.mid.chg .mt{box-shadow:0 0 0 1.5px var(--gold),0 0 10px rgba(178,138,69,.45)}
 .slot.smk{background-image:repeating-linear-gradient(135deg,rgba(105,116,92,.14) 0 6px,transparent 6px 12px)}
 .lane{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;padding:4px 6px}
 .mid{display:flex;align-items:center;justify-content:center;font-size:13px;text-align:center;padding:0 3px;line-height:1.3}
@@ -273,6 +276,10 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .endbtn:disabled{opacity:.6;cursor:wait}
 .busy .endbtn .shuttle{animation:weave .6s ease-in-out infinite alternate}
 @keyframes weave{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+.undobtn{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 6px;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.06em;color:var(--indigo);background:var(--flax2);border:0;box-shadow:inset 0 0 0 1.5px var(--indigo2)}
+.undobtn svg{width:18px;height:18px;transform:scaleX(-1)}
+.undobtn:hover:not(:disabled),.undobtn:focus-visible{background:#fbf3df;box-shadow:inset 0 0 0 1.5px var(--gold);outline:none}
+.undobtn:disabled{color:var(--muted);box-shadow:inset 0 0 0 1px var(--muted);cursor:default}
 .pilecount{text-align:center;padding:9px 6px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--ink);background:var(--flax2);box-shadow:inset 0 0 0 1.5px var(--ink2)}
 
 /* Chronicle: the battle log rolls up from an indigo band at the foot */
@@ -642,6 +649,7 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .deck{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:4px 0 6px}
 .deck span{display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:6px 6px 6px;font-family:var(--f-display);font-weight:700;font-size:13px;color:var(--ink);background:var(--flax2);box-shadow:inset 0 0 0 1.5px var(--ink2)}
 .deck span i{width:100%;aspect-ratio:1;background:var(--indigo) center/cover;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.deck span i.gl{display:grid;place-items:center;color:var(--gold3)}.deck span i.gl svg{width:64%;height:64%}
 .deck em{font-style:normal;color:var(--madder);margin-left:2px}
 
 /* ---------- Class pick: three heraldic banners ---------- */
@@ -697,6 +705,7 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
   .mast{padding:8px 2px 6px;gap:6px 12px}.vine{display:none}
   .meta{font-size:14px;flex-wrap:wrap}.meta>*{padding:2px 10px}.tbtn{font-size:14px}
   #soundBtn .lb{display:none}
+  .undobtn{font-size:13px;padding:5px 4px}
   .arena{height:240px}
   .roundel{width:84px;top:36%}
   .lr{min-width:0;padding:5px 22px 9px;gap:8px}.lr .nm{font-size:14px;letter-spacing:.04em}.lr .hp{font-size:14px}.lr .res{display:none}

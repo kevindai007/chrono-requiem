@@ -2,6 +2,11 @@
 const MOODS={calm:'静默',judge:'蓄力',rage:'狂怒'};
 const SPELLS=new Set(Object.values(CARDS).filter(C=>C.cast).map(C=>C.n));
 
+// how fast the clock hand walks a turn's beats; kept in localStorage like the sound setting
+const SPEED={v:1};
+try{const v=+localStorage.getItem('cr-speed');if([1,2,4].includes(v))SPEED.v=v}catch(e){}
+function applySpeed(){$('speedBtn').innerHTML=SVG.GLASS+`<span class="lb">${SPEED.v}×</span>`;$('speedBtn').title=`结算速度：${SPEED.v}×（1× → 2× → 4×）。弹反、重击这些关键拍不会快过 0.6 秒`}
+
 let lastSand=null;
 function render(){renderTop();renderBoard();renderHand()}
 function renderTop(){
@@ -28,6 +33,9 @@ function renderTop(){
   if(lastSand!==null&&lastSand!==S.sand)restart($('sandNum'),'bump',450);lastSand=S.sand;
   $('debt').textContent=S.debt?`下回合 −${S.debt}`:'';
   $('endBtn').disabled=S.busy||!!S.over;
+  const ub=$('undoBtn');ub.disabled=!UNDO.length||S.busy||!!S.over;
+  ub.innerHTML=SVG.REDO+(UNDO.length||!UNDO_LOCK?'撤回上一张':'已看到新牌');
+  ub.title=UNDO.length?`撤回刚打出的牌（本回合还能撤回 ${UNDO.length} 张）`:UNDO_LOCK?'这回合抽过牌或看得更远了，之前的出牌不能再撤回':'本回合还没有出牌';
   $('piles').textContent=`牌库 ${S.deck.length} · 弃牌 ${S.discard.length}`;
   $('latest').innerHTML=S.log[0]?`<span class="t">${roman(S.log[0].t)}</span>${S.log[0].msg}`:'';
   $('log').innerHTML=S.log.map(l=>`<p><span class="t">${roman(l.t)}</span>${l.msg}</p>`).join('');
@@ -106,27 +114,40 @@ function liveSlot(b,o){
   const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'':SVG.SWORD}${e.rev?'逆':e.fx?'重击':'击'} <b>${e.dmg}</b></div>`).join('')
     +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')
     +cs.map(e=>`<div class="chip sp" data-el="${e.el}" data-id="${e.id}">${EL[e.el]}${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
-  const m=now?midRec(o.rec):guessMid(b,F);
-  return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} " data-b="${b}">${wvHtml(b)}
-    <div class="bn"><span>${roman(b)}</span></div><div class="lane e">${ech}</div><div class="mid ${m.c}"><span class="mt">${m.h}</span></div><div class="lane h">${hch}</div></div>`;
+  const m=now?midRec(o.rec,o.bs):guessMid(b,F);
+  return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} ${o.hov?'hov':''} ${o.no?'no':''}" data-b="${b}">${wvHtml(b)}
+    <div class="bn"><span>${roman(b)}</span></div><div class="lane e">${ech}</div><div class="mid ${m.c} ${m.chg?'chg':''}"><span class="mt">${m.h}</span></div><div class="lane h">${hch}</div></div>`;
 }
+// hov: the beat the pointer rests on while a card is picked, and the foresight of playing the card there.
+// The loom then shows the board as it would be after the card, with what each of this turn's beats came to before struck through
+let hov=null;
+const hovSig=()=>`${S.pending}|${S.hand.length}|${S.uid}|${S.beat}|${S.sand}`;
 let scrollKey='';
 function renderBoard(){
   const F=FL();
   const pend=S.pending!=null?CARDS[S.hand[S.pending]]:null;
-  const fc=forecast(),recs=fc.base.out;
+  if(hov&&(hov.sig!==hovSig()||S.busy))hov=null;
+  const fc=forecast(),base=fc.base.out,pv=hov?.fc;
   let html=lanesHtml()+S.hist.filter(h=>h.b>=S.beat-3).map(pastSlot).join('');
-  for(let b=S.doneUpTo+1;b<S.beat+W();b++)html+=liveSlot(b,{pend,rec:recs.find(r=>r.b===b)});
-  $('timeline').innerHTML=html;
+  const real=S;if(pv)S=pv.pre;
+  try{const recs=pv?pv.alt.out:base;
+    for(let b=S.doneUpTo+1;b<S.beat+W();b++)html+=liveSlot(b,{pend,rec:recs.find(r=>r.b===b),bs:pv&&base.find(r=>r.b===b),hov:hov?.b===b,no:hov?.err&&hov.b===b})}
+  finally{S=real}
+  $('timeline').innerHTML=html;$('timeline').classList.toggle('pv',!!pv);
   // keep this turn's beats in view when the ribbon scrolls
   const sc=$('tlscroll'),first=document.querySelector('#timeline .slot[data-b]'),sk=S.beat+':'+S.doneUpTo;
   if(first&&sk!==scrollKey){scrollKey=sk;if(sc.scrollWidth>sc.clientWidth){const lw=document.querySelector('#timeline .lanes').offsetWidth;sc.scrollLeft=Math.max(0,first.offsetLeft-lw-70)}}
   const n=$('needle'),cs=S.resolving&&document.querySelector(`#timeline [data-b="${S.resolving}"],#timeline [data-pb="${S.resolving}"]`);
   if(cs){n.style.left=(cs.offsetLeft+cs.offsetWidth/2)+'px';n.classList.add('on')}else n.classList.remove('on');
-  renderHint(pend);
+  renderHint(pend,base);
 }
-function renderHint(pend){
+// the turn's three beats added up: what you take and what you deal
+const sumRecs=rs=>rs.reduce((a,r)=>({took:a.took+Math.max(0,r.took),net:a.net+Math.max(0,r.net)}),{took:0,net:0});
+const sumTxt=t=>t.took||t.net?[t.took?`受 ${t.took}`:'',t.net?`打 ${t.net}`:''].filter(Boolean).join(' · '):'无事';
+function renderHint(pend,base){
   let h=hintMsg;
+  if(!h&&pend&&hov?.err)h=hov.err;
+  if(!h&&pend&&hov?.fc){const a=sumTxt(sumRecs(hov.fc.alt.out)),o=sumTxt(sumRecs(base));h=`放在第 ${roman(hov.b)} 拍：本回合 <b>${a}</b>${a!==o?`（原来 ${o}）`:'（没有变化）'}。${TOUCH?'再点一次':'点击'}确认出牌。`}
   if(!h&&pend)h=HINTS[pend.tg];
   if(!h&&S.busy)h='时针正在走过本回合的 3 拍……';
   if(!h&&!S.busy)h='亮色的 3 拍会在本回合结算，交锋一栏是它们的结果。';
@@ -144,16 +165,41 @@ $('hand').addEventListener('click',e=>{
   if(C.r&&S.rage<C.r)return setHint('怒气不足');
   if(C.tg){S.pending=i;hintMsg='';SFX('pick');render()}else playCard(i);
 });
+// what the pointer is on: the slot, and a chip only if that action really sits on this beat now,
+// so a chip the preview has moved under the pointer never retargets the card
+function aimAt(el){
+  const slot=el.closest?.('.slot[data-b]');if(!slot)return null;
+  const c=el.closest('.chip[data-id]'),b=+slot.dataset.b,real=c&&S.events.some(e=>e.id===+c.dataset.id&&e.beat===b)?c:null;
+  return {slot,chip:real,key:`${S.pending}:${b}:${real?real.dataset.id:''}`};
+}
+function hoverAim(a){
+  if(!a||S.pending==null||S.busy){if(hov){hov=null;renderBoard()}return}
+  if(hov&&hov.key===a.key&&hov.sig===hovSig())return;
+  const t=resolveTarget(S.pending,a.slot,a.chip);
+  hov={key:a.key,sig:hovSig(),b:+a.slot.dataset.b,err:t.err,fc:null};
+  if(!t.err){const f=forecast(S.pending,t.t);if(f.err)hov.err=f.err;else hov.fc=f}
+  renderBoard();
+}
+// on a touch screen the first tap on a beat previews it and a second tap on the same beat plays the card
+let TOUCH=false;
+$('timeline').addEventListener('pointerdown',e=>{TOUCH=e.pointerType==='touch'});
+$('timeline').addEventListener('mouseover',e=>{if(!TOUCH)hoverAim(aimAt(e.target))});
+$('timeline').addEventListener('mouseleave',()=>{if(!TOUCH)hoverAim(null)});
 $('timeline').addEventListener('click',e=>{
   if(S.pending==null||S.busy)return;
-  const slot=e.target.closest('.slot[data-b]');if(!slot)return;
-  const tgt=resolveTarget(S.pending,slot,e.target.closest('.chip[data-id]'));
+  const a=aimAt(e.target);if(!a)return;
+  if(TOUCH&&hov?.key!==a.key)return hoverAim(a);
+  const tgt=resolveTarget(S.pending,a.slot,a.chip);
   if(tgt.err)return setHint(tgt.err);
-  playCard(S.pending,tgt.t);
+  hov=null;renderBoard();playCard(S.pending,tgt.t);
 });
 $('hint').addEventListener('click',e=>{if(e.target.id==='cancelBtn'){S.pending=null;SFX('cancel');render()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.pending!=null){S.pending=null;SFX('cancel');render()}});
 $('endBtn').addEventListener('click',endTurn);
+$('undoBtn').addEventListener('click',undoCard);
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&UNDO.length){e.preventDefault();undoCard()}});
+$('speedBtn').addEventListener('click',()=>{SPEED.v={1:2,2:4,4:1}[SPEED.v];try{localStorage.setItem('cr-speed',SPEED.v)}catch(e){}applySpeed();SFX('tap')});
+applySpeed();
 $('rulesBtn').addEventListener('click',()=>showRules(false));
 $('resetBtn').addEventListener('click',()=>{startFight(S.run,S.foeKey);render();fightIn();banner('第 1 回合','HORA I')});
 addEventListener('resize',()=>{if(S)renderBoard()});

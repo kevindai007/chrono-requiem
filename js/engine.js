@@ -20,7 +20,7 @@ function startFight(run,key){
   if(hasK('hourglass'))S.sand++;if(hasK('spindle'))S.drawN=6;if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
   S.shuttle=hasK('shuttle');S.mute=hasK('mute');S.star=hasK('starthread');
   S.totem=hasW('shaman')?10:0;S.hp0=S.hp;S.wfx={};S.fate=run.stage<TOWER.length-1?{k:shuffle(Object.keys(FATES))[0],on:false}:null;
-  gen(S.beat+11);
+  gen(S.beat+11);UNDO=[];UNDO_LOCK=false;
   F.turnStart?.call(F,true);
   draw(S.drawN);S.drawN=5;
   log(F.open);
@@ -289,13 +289,21 @@ function commit(i,target){
   if(!S.played||C.c>=S.played.c)S.played={t:C.t,c:C.c};
   return null;
 }
+// cards played this turn can be taken back, newest first, until one of them shows you something new (a draw, a wider view)
+let UNDO=[],UNDO_LOCK=false;
 function playCard(i,target){
-  const before=chipPos();
+  const before=chipPos(),snap=structuredClone({...S,run:null}),h0=S.hand.length,w0=W();
   const err=commit(i,target);
   if(err){setHint(err);return}
+  if(S.hand.length>=h0||W()!==w0){UNDO=[];UNDO_LOCK=true}else UNDO.push(snap);
   flyCard(i);SFX('play');
   S.pending=null;render();pullThreads(before);
   if(S.over)setTimeout(showEnd,overFx());
+}
+function undoCard(){
+  if(!UNDO.length||S.busy||S.over)return;
+  const before=chipPos();S=Object.assign(UNDO.pop(),{run:S.run,pending:null});
+  SFX('cancel');render();pullThreads(before);
 }
 let hintMsg='';function setHint(m){hintMsg=m;SFX('err');render();setTimeout(()=>{if(hintMsg===m){hintMsg='';render()}},2200)}
 
@@ -461,18 +469,23 @@ function nextTurn(){
   S.sand=Math.max(0,S.sand);
   draw(S.drawN);S.drawN=5;
 }
+// how long the clock hand rests on a beat: the speed setting scales every wait, beats where nothing happens pass at half that,
+// and a parry, a clash, a banner, a heavy blow or the fight's end never drop below 60% of the full pause
+const beatWeight=r=>r.over||r.took>=25||r.net>=25||r.fx.some(x=>x.who==='b'||/^弹反|^拼刀|^打断/.test(x.text))?'key':!r.es.length&&!r.fx.length&&!r.took&&!r.net?'quiet':'';
+const beatWait=(ms,w)=>Math.round(ms*(w==='key'?Math.max(.6,1/SPEED.v):(w==='quiet'?.5:1)/SPEED.v));
 async function endTurn(){
   if(S.busy||S.over)return;
   const F=FL();
   S.busy=true;S.pending=null;
+  UNDO=[];UNDO_LOCK=false;
   discardHand();S.discard.push(...S.hand);S.hand=[];
   for(let k=0;k<3;k++){
-    const b=S.beat+k;S.resolving=b;render();SFX('tick');
-    await sleep(520);
+    const b=S.beat+k,empty=!at(b).length&&!S.events.some(e=>e.side==='c'&&e.from<=b&&e.beat>b);S.resolving=b;render();SFX('tick');
+    await sleep(beatWait(520,empty?'quiet':''));
     const snap=snapBeat(b);snap.rec=stepBeat(b);
     S.hist.forEach(h=>h.fresh=false);snap.fresh=true;S.hist.push(snap);
     render();beatFx(snap);
-    await sleep(650);
+    await sleep(beatWait(650,beatWeight(snap.rec)));
     if(S.over)break;
   }
   S.resolving=null;
