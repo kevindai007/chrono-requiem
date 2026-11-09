@@ -527,5 +527,5 @@ FOES.forEach(f=>{f.img=`img/foes/${f.key}.jpg`;f.portrait=`img/foes/${f.key}_p.j
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];
 const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
 const FL=()=>FOE[S.foeKey||S.run.foes[S.stage]];
-// between floors: max HP +5, and only part of the lost HP comes back
-const FLOOR_HEAL=.2;
+// between floors: max HP +5, and only 15% of it comes back; the rest is for the spinning wheel and the weavery to mend
+const FLOOR_HEAL=.15;

@@ -78,7 +78,7 @@ function showRules(intro){
       ${S.run.knots.length?`<section class="pp"><h4 class="sh sm">线结</h4><ul class="knotlist">${S.run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
         '<b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。',
-        '高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，回复 20% 最大生命，挑一张新牌，再从岔路里选一股走：织坊、纺车……打得越漂亮，拿到的金线越多。'])}</section>`}
+        '高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，只回复 15% 最大生命（要回更多血得去纺车或织坊），挑一张新牌，再从岔路里选一股走：织坊、纺车……打得越漂亮，拿到的金线越多。'])}</section>`}
       ${floorPicker()}
       <div class="acts"><button class="btn" id="pickBtn">${SVG.REDO}换职业重来</button><button class="btn go" id="startBtn">${SVG.SHUTTLE}${fresh?'开战':'继续'}</button></div>
     </div>
@@ -191,7 +191,7 @@ function showNote(run,title,html,done,pic){
 // the weavery's prices: stitching and unpicking cost more each time you do them in a run
 // st: what a card that comes already stitched adds to its price
 const PRICE={card:45,ks:80,time:35,mend:25,st:15};
-const sewPrice=run=>40+15*run.sewn,cutPrice=run=>50+25*run.cut;
+const sewPrice=run=>40+15*run.sewn,cutPrice=run=>25+25*run.cut;
 function stockFor(run){
   const K=CLASSES[run.cls],cls=rewardPool(run,{reward:[]});
   const more=shuffle(K.pool.filter(k=>!cls.includes(k)&&!CARDS[k].ks))[0];
