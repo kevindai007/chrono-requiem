@@ -29,7 +29,7 @@ function startFight(run,key){
 const lead=d=>d.filter(k=>CARDS[k].st!=='lead').concat(d.filter(k=>CARDS[k].st==='lead'));
 // climb to the next floor with the HP this fight left you, taking card k (or none) and the gold thread the fight earned;
 // with ui, the steps of ROAD for this gap are walked before the next fight (the balance AI calls it without, straight to the fight)
-function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=hasK('black')?S.hp:Math.min(run.maxhp,S.hp+5+Math.round(run.maxhp*FLOOR_HEAL));
+function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=healTo();
   payFate(run);run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
 // gold thread for a win: a base that grows with the floor, one per 10 of the fight's best beat, two per parry
 const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1)*(S.tw==='gilded'?1.5:1));
@@ -70,20 +70,25 @@ function forkOptions(run){
     const i=left.findIndex(k=>(r-=THREADS[k].w)<0);out.push(left.splice(i<0?0:i,1)[0])}
   return out;
 }
-// the reward offer: two class cards and one shared time card. From the third pick on, one of the class cards comes from
-// the archetype you have taken the most cards of (ties go to the latest), the other from anywhere in the pool.
-// Keystones only show up from the third pick on, and never two in one offer
+// the reward offer: two class cards and one shared time card. Past the first floor, one of the class cards comes from
+// the archetype you have taken the most cards of (ties go to the latest; any archetype while you have none), and with
+// KS_ODDS it is that archetype's keystone if you do not hold it yet; the other comes from anywhere in the pool.
+// Keystones only show up past the first floor, and never two in one offer
+const KS_ODDS=.4;
 function rewardPool(run,F){
-  const K=CLASSES[run.cls],picks=run.picks||[],cls=[],late=picks.length>=2;
+  const K=CLASSES[run.cls],picks=run.picks||[],cls=[],late=run.stage>=1;
   const pool=K.pool.filter(k=>late||!CARDS[k].ks);
   if(late){const n={};picks.forEach((k,i)=>{const a=CARDS[k].a;n[a]=(n[a]||0)+1+i/100});
-    const top=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];cls.push(shuffle(pool.filter(k=>CARDS[k].a===top))[0])}
+    const top=Object.keys(n).sort((a,b)=>n[b]-n[a])[0]||shuffle(Object.keys(K.arch))[0];
+    const ks=pool.find(k=>CARDS[k].a===top&&CARDS[k].ks&&!run.deck.some(d=>baseOf(d)===k));
+    cls.push(ks&&Math.random()<KS_ODDS?ks:shuffle(pool.filter(k=>CARDS[k].a===top&&!CARDS[k].ks))[0])}
   for(const k of shuffle(pool.slice())){if(cls.length>=2)break;if(cls.includes(k)||(CARDS[k].ks&&cls.some(c=>CARDS[c].ks)))continue;cls.push(k)}
   return cls.map(k=>Math.random()<STITCHED_ODDS?stitchRandom(k):k).concat(shuffle(F.reward.slice()).slice(0,1));
 }
 // now and then a class card on offer comes already stitched, with a stitch drawn at random
 const STITCHED_ODDS=.25;
-const healTo=()=>hasK('black')?S.hp:Math.min(S.maxhp+5,S.hp+5+Math.round((S.maxhp+5)*FLOOR_HEAL));
+// the life you climb to the next floor with: the floor raises your maximum by 5 and mends FLOOR_HEAL of it
+const healTo=()=>hasK('black')?S.hp:Math.min(S.maxhp+5,S.hp+Math.round((S.maxhp+5)*FLOOR_HEAL));
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function draw(n){for(let i=0;i<n;i++){if(!S.deck.length){if(!S.discard.length)return;S.deck=shuffle(S.discard);S.discard=[]}S.hand.push(S.deck.pop())}}
 function ev(o){if(S.edge&&o.dmg&&(o.side==='h'||o.side==='c'))o.dmg+=S.edge;if(o.fx&&hasK('whetstone')&&!S.whet){S.whet=true;o.dmg+=6}o.id=S.uid++;S.events.push(o);return o}
