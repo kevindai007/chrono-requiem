@@ -109,7 +109,7 @@ function showEnd(){
       <div class="pano ip"><div class="pic" style="background-image:url(img/scenes/end_panorama.jpg)" role="img" aria-label="七层钟楼"></div><div class="cap"><h2>永夜终结</h2><span>THE SEVENTH THREAD</span></div></div>
       <svg class="seven" viewBox="0 0 1400 70" preserveAspectRatio="none" aria-hidden="true"><path d="M10 35C110 5 160 65 210 35S310 5 410 35 510 65 610 35 710 5 810 35 910 65 1010 35 1110 5 1210 35 1310 65 1390 35" fill="none" stroke="#923f35" stroke-width="3"/>${ROM.slice(1,8).map((r,i)=>`<g class="kn" transform="translate(${110+i*200} 35)"><circle r="16" fill="#202d3a" stroke="#cfa95f" stroke-width="2.5"/><text y="5.5" text-anchor="middle" font-family="Noto Serif SC,serif" font-weight="900" font-size="15" fill="#ead39a">${r}</text></g>`).join('')}</svg>
       <div class="stats">${stat(SVG.TOWER,'','七层登顶',`第 ${S.turn} 回合`,{zh:1})}${stat(SVG.BURST,'ind','最高一拍',B?B.d:0,{sm:B?bestAt:''})}${stat(SVG.CARDS,'mo','牌组',`${S.run.deck.length} 张`)}</div>
-      <section class="pp"><h4 class="sh sm">登顶的牌组</h4><div class="deck">${ks.map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span><i style="background-image:url(img/cards/${baseOf(k)}.jpg)"></i>${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
+      <section class="pp"><h4 class="sh sm">登顶的牌组</h4><div class="deck">${ks.map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span>${CARDS[k].glyph?`<i class="gl">${SVG[CARDS[k].glyph]}</i>`:`<i style="background-image:url(img/cards/${baseOf(k)}.jpg)"></i>`}${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
       <div class="acts end"><button class="btn go" id="runBtn">${SVG.SHUTTLE}再登钟楼</button></div></div>`,'runBtn');
     $('runBtn').onclick=()=>showClassPick();
   }else if(S.foeKey){
@@ -208,7 +208,7 @@ const WEAVER={rich:['金线不少嘛。好布配好牌，慢慢挑。','这么�
 const weaverHi=run=>rnd(run.gold<PRICE.time?WEAVER.poor:run.gold>=150?WEAVER.rich:WEAVER.mid);
 // the deck, folded: each card once with its count, stitched ones gilded, curses in madder
 const deckFold=(run,cls='')=>{const n={};run.deck.forEach(k=>n[k]=(n[k]||0)+1);
-  return `<div class="deck ${cls}">${Object.keys(n).map(k=>`<span class="${CARDS[k].st?'st':''} ${CARDS[k].t==='诅咒'?'cu':''}" title="${CARDS[k].d}"><i style="background-image:url(img/cards/${baseOf(k)}.jpg)"></i>${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n[k]>1?`<em>×${n[k]}</em>`:''}</span>`).join('')}</div>`};
+  return `<div class="deck ${cls}">${Object.keys(n).map(k=>`<span class="${CARDS[k].st?'st':''} ${CARDS[k].t==='诅咒'?'cu':''}" title="${CARDS[k].d}">${CARDS[k].glyph?`<i class="gl">${SVG[CARDS[k].glyph]}</i>`:`<i style="background-image:url(img/cards/${baseOf(k)}.jpg)"></i>`}${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n[k]>1?`<em>×${n[k]}</em>`:''}</span>`).join('')}</div>`};
 function showShop(run,done,said){
   const st=run.stall??={stock:stockFor(run),knot:knotWare(run),mended:false};st.hi??=weaverHi(run);
   const leave=()=>{delete run.stall;done()},back=say=>showShop(run,done,say);

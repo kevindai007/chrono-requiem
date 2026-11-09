@@ -382,7 +382,7 @@ const FOES=[
   beat(b){if(b%5===4)ev({beat:b,side:'e',label:'扫',dmg:22});else if(b%5===1||b%5===2)ev({beat:b,side:'e',label:'鞭',dmg:7})},
   take(x,o){if(x>0&&o.src!=='poison'){dealHero(2,[],{thorn:true});log('荆棘反刺你 2 点。')}return x},
   turnEnd(){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`生长：树人回复 ${h} 点生命。`)}},
-  status:()=>'<span class="tag">荆棘 · 每击反刺 2</span><span class="tag">每回合回 5</span>'},
+  status:()=>'<span class="tag">荆棘 · 每击反刺 2</span><span class="tag">每回合回 6</span>'},
 
  {key:'ogre',floor:'第 4 层',name:'独眼巨魔',lane:'巨魔',hp:140,
   rules:['<b>连拳</b>：每 6 拍里连打 3 拳，每拳 8 点。','<b>钟锤</b>：连拳之后隔一拍砸下钟锤，26 点，被时间锁定。','<b>震荡</b>：钟锤打到你身上，下回合少 1 粒时之砂。','血厚但慢：战士把盾放在钟锤上；刺客在钟锤拍闪身；法师在两锤之间吟唱大法术。'],
