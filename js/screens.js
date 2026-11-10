@@ -224,7 +224,7 @@ const sewPrice=run=>40+15*run.sewn,cutPrice=run=>25+25*run.cut;
 function stockFor(run){
   const K=CLASSES[run.cls],cls=rewardPool(run,{reward:[]});
   const more=shuffle(K.pool.filter(k=>!cls.includes(k)&&!CARDS[k].ks))[0];
-  const time=shuffle(Object.keys(CARDS).filter(k=>!CARDS[k].a&&!k.includes('+')&&CARDS[k].t!=='诅咒'))[0];
+  const time=shuffle(Object.keys(CARDS).filter(k=>!CARDS[k].a&&!k.includes('+')&&CARDS[k].t!=='诅咒'&&forCls(k,run.cls)))[0];
   return cls.concat(more,time).map(k=>({k,p:(CARDS[k].ks?PRICE.ks:CARDS[k].a?PRICE.card:PRICE.time)+(CARDS[k].st?PRICE.st:0)}));
 }
 function knotWare(run){const k=shuffle(knotPool(run))[0];return k?{k,p:100+10*run.stage}:null

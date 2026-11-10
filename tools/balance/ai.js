@@ -5,6 +5,7 @@ window.AI={
     if(!tg)return [undefined];
     if(tg==='h')return S.events.filter(e=>e.side==='h'&&e.beat>=lo&&e.beat<=hi).map(e=>e.id);
     if(tg==='e')return S.events.filter(e=>e.side==='e'&&e.beat>=lo&&e.beat<=hi).map(e=>e.id);
+    if(tg==='sp')return S.events.filter(e=>e.side==='c'&&!e.echo&&!e.tri&&e.beat>=lo).map(e=>e.id);
     const r=[];for(let b=lo;b<=hi;b++)r.push(b);return r},
   // resolve this turn's beats, then keep going through the visible window with no more cards (discounted)
   look(){const r={};for(let b=S.doneUpTo+1;b<S.beat+3&&!S.over;b++)stepBeat(b);r.hp=S.hp;r.ehp=S.ehp;r.over=S.over;r.rage=S.rage;r.combo=S.combo;r.sand=S.sand;

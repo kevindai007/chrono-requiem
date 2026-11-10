@@ -22,9 +22,9 @@ function renderTop(){
   const K=CL();$('heroName').textContent=K.n;
   $('heroRes').textContent=S.run.cls==='warrior'?`怒气 ${S.rage}/${S.rageMax}`:S.run.cls==='rogue'?`连击 ${S.combo}/${S.comboMax}`:`霜冻 ${S.frost}/${FROST}`;
   const T=(c,on,t)=>on?`<span class="tag ${c}">${t}</span>`:'';
-  $('heroStatus').innerHTML=(S.fate?.on?`<span class="tag fate">命运 · ${FATES[S.fate.k].d(S.stage)}</span>`:'')+(S.totem?`<span class="tag">图腾 ${S.totem}</span>`:'')+(S.heat?`<span class="tag">热度 +${S.heat}</span>`:'')+(S.run.cls==='warrior'?T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,low()?'血怒 · 每击 +5':'血怒')+T('rg',S.undying,'不屈')+T('rg',S.steady,'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
+  $('heroStatus').innerHTML=(S.fate?.on?`<span class="tag fate">命运 · ${FATES[S.fate.k].d(S.stage)}</span>`:'')+(S.totem?`<span class="tag">图腾 ${S.totem}</span>`:'')+(S.heat?`<span class="tag">热度 +${S.heat}</span>`:'')+(S.run.cls==='warrior'?T('rg',S.ripo,'反击架势')+T('rg',S.drain,'饮血')+T('rg',S.blood,`血怒 · 每击 +${low()?6:2}`)+T('rg',S.undying,'不屈')+T('rg',S.steady,S.bank?`不动如山 · 下一击 +${S.bank}`:'不动如山')+T('rg',S.breaker,'破军')+T('rg',S.bloodwar,'血战')
       :S.run.cls==='rogue'?T('cb',S.keep,'余势')+T('cb',S.venom,'毒刃')+T('cb',S.toxin,'毒发')+T('cb',S.zanshin,'残心')+T('cb',S.plague,'瘟疫')+T('cb',S.omen,'死兆')
-      :T('mg',S.events.some(e=>e.side==='c'),`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.quick,'瞬发')+T('mg',S.surge,'超载')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.ff,`霜火 +${S.ff}`)+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +2')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
+      :T('mg',S.events.some(e=>e.side==='c'),`吟唱 ${S.events.filter(e=>e.side==='c').length}`)+T('mg',S.chain,`连锁 ${S.chain}`)+T('mg',S.barrier,'屏障')+T('mg',S.prism,'棱镜')+T('mg',S.flow,'法力回流')+T('mg',S.rime,'寒霜印记')+T('mg',S.tide,'元素潮汐')+T('mg',S.linger,'余韵')+T('mg',S.zero,'绝对零度')+T('mg',S.iceArmor,'冰甲')+T('mg',S.med,'冥想 +1')+T('mg',S.refund,`回流 +${S.refund}`))+(S.cry?'<span class="tag rg">战吼</span>':'')+(S.smoke.length?'<span class="tag cb">烟幕</span>':'')+(S.parried?'<span class="tag ok">本回合已弹反</span>':'')+(S.dmgLast?`<span class="tag">上回合受伤 ${S.dmgLast}</span>`:'');
   let st='';
   if(F.moods){const m=F.mood();st+=`<span class="mood ${m}" style="background-image:url(img/moods/${m}.jpg)" title="${MOODS[m]}"></span>`}
   $('enemyStatus').innerHTML=st+(S.tw?`<span class="tag twist" title="${TWISTS[S.tw].d}">异纹 · ${TWISTS[S.tw].n}</span>`:'')+(F.status?F.status():'')+(S.poison?`<span class="tag p2">中毒 ${S.poison} 层</span>`:'');
@@ -42,7 +42,7 @@ function renderTop(){
 }
 const archName=a=>Object.values(CLASSES).map(K=>K.arch[a]).find(Boolean);
 // one card face, shared by the hand and the reward screen; opt.i is its hand index, opt.off disables it
-function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:var(--indigo)">吟唱 ${castLen(C)} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''} ${C.ks?'ks':''} ${C.st?'st':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
+function cardHtml(k,opt={}){const C=CARDS[k];const rg=C.r&&!C.c;const ex=C.cast?`<span class="cx" style="color:var(--indigo)">吟唱 ${C.cast} 拍 · ${C.el}</span>`:'';return `<button class="card ${opt.cls||''} ${rg?'rg':''} ${C.ks?'ks':''} ${C.st?'st':''}" ${opt.attr||''} data-t="${C.t}" ${opt.off?'disabled':''}>
     <span class="fr"><span class="art">${C.glyph?`<i class="gl">${SVG[C.glyph]}</i>`:`<i style="background-image:url(img/cards/${C.base||k}.jpg)"></i>`}${C.st?`<span class="stl">${STITCH[C.st].n} · ${STITCH[C.st].sd}</span>`:''}</span><span class="txt"><span class="cn">${C.n}</span><span class="ct">${C.a?archName(C.a):C.t==='诅咒'?'诅咒':'通用'}</span><span class="cd">${C.d}</span>${ex}${C.ks?'<span class="ks">基石</span>':C.x?'<span class="cx">消耗 · 用后移出牌组</span>':''}</span></span><span class="cost"><span>${rg?(C.ra?'全':C.r):opt.cost??C.c}</span>${rg?'<small>怒气</small>':''}</span></button>`}
 function renderHand(){
   $('hand').classList.toggle('empty',!S.hand.length);
@@ -108,12 +108,12 @@ function liveSlot(b,o){
   const hs=at(b,'h'),ae=at(b,'e'),gs=at(b,'g'),ms=at(b,'m'),ws=at(b,'w'),ds=at(b,'d'),ks=at(b,'k'),cs=at(b,'c'),cw=S.events.filter(e=>e.side==='c'&&e.from<=b&&e.beat>b);
   const now=b<S.beat+3,far=b>=S.beat+baseView();
   const tg=pend?pend.tg:null;
-  const tgt=(tg==='pair'&&b<S.beat+W()-1)||tg==='any'||tg==='h'||tg==='e'||(tg==='b4'&&b<=S.beat+3)||(tg==='cast'&&b>=S.beat+castLen(pend)-1);
+  const tgt=(tg==='pair'&&b<S.beat+W()-1)||tg==='any'||tg==='h'||tg==='e'||(tg==='b4'&&b<=S.beat+3)||(tg==='cast'&&b>=S.beat+pend.cast-1)||(tg==='sp'&&(cs.length>0||cw.length>0));
   const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${tg==='e'&&!e.locked?'pick':''} " data-id="${e.id}">${foeGlyph(e)}${e.label}${e.na?'':` <b>${e.dmg}</b>`}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
     +gs.map(()=>`<div class="chip g">残影</div>`).join('')+ws.map(w=>`<div class="chip w">${SVG.SHIELD}${w.v?'塔盾':'盾'} −${w.v||SHIELD}</div>`).join('')+ds.map(()=>`<div class="chip d">闪身</div>`).join('')+ms.map(()=>`<div class="chip e mir">镜影</div>`).join('');
   const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'':SVG.SWORD}${e.rev?'逆':e.fx?'重击':'击'} <b>${e.dmg}</b></div>`).join('')
     +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')
-    +cs.map(e=>`<div class="chip sp" data-el="${e.el}" data-id="${e.id}">${EL[e.el]}${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
+    +cs.map(e=>`<div class="chip sp ${tg==='sp'?'pick':''}" data-el="${e.el}" data-id="${e.id}">${EL[e.el]}${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
   const m=now?midRec(o.rec,o.bs):guessMid(b,F);
   return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} ${o.hov?'hov':''} ${o.no?'no':''}" data-b="${b}">${wvHtml(b)}
     <div class="bn"><span>${roman(b)}</span></div><div class="lane e">${ech}</div><div class="mid ${m.c} ${m.chg?'chg':''}"><span class="mt">${m.h}</span></div><div class="lane h">${hch}</div></div>`;
@@ -147,7 +147,7 @@ const sumTxt=t=>t.took||t.net?[t.took?`受 ${t.took}`:'',t.net?`打 ${t.net}`:''
 function renderHint(pend,base){
   let h=hintMsg;
   if(!h&&pend&&hov?.err)h=hov.err;
-  if(!h&&pend&&hov?.fc){const a=sumTxt(sumRecs(hov.fc.alt.out)),o=sumTxt(sumRecs(base));h=`放在第 ${roman(hov.b)} 拍：本回合 <b>${a}</b>${a!==o?`（原来 ${o}）`:'（没有变化）'}。${TOUCH?'再点一次':'点击'}确认出牌。`}
+  if(!h&&pend&&hov?.fc){const a=sumTxt(sumRecs(hov.fc.alt.out)),o=sumTxt(sumRecs(base));h=`${pend.tg==='sp'?'用在':'放在'}第 ${roman(hov.b)} 拍${pend.tg==='sp'?'的法术':''}：本回合 <b>${a}</b>${a!==o?`（原来 ${o}）`:'（没有变化）'}。${TOUCH?'再点一次':'点击'}确认出牌。`}
   if(!h&&pend)h=HINTS[pend.tg];
   if(!h&&S.busy)h='时针正在走过本回合的 3 拍……';
   if(!h&&!S.busy)h='亮色的 3 拍会在本回合结算，交锋一栏是它们的结果。';
