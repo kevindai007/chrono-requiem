@@ -24,7 +24,7 @@ const CARDS={
   taunt:{n:'挑衅',c:1,t:'战士',a:'wall',d:'选择敌人的一个行动，提前 1 拍。',tg:'e'},
   cleave:{n:'裂地斩',c:0,r:4,t:'战士',a:'rage',d:'在一拍放下一次 20 点重击。重击不能被挪动。',tg:'any'},
   warcry:{n:'战吼',c:0,r:3,t:'战士',a:'rage',d:'本回合 3 拍内，你的每次攻击 +4。'},
-  backwater:{n:'背水',c:0,t:'战士',a:'blood',d:'生命不到一半时才能用：你最近的一次攻击伤害翻倍。'},
+  backwater:{n:'背水',c:0,t:'战士',a:'blood',d:'生命低于 70% 时才能用：你最近的一次攻击伤害翻倍。'},
   ironwall:{n:'铁壁',c:2,t:'战士',a:'wall',d:'视野内敌人最重的一次攻击伤害减半，立刻得到 5 怒气。'},
   frenzy:{n:'狂怒',c:0,r:2,ra:1,t:'战士',a:'rage',d:'消耗全部怒气，立刻造成 怒气×3 点伤害。'},
   riposte:{n:'反击架势',c:1,t:'战士',a:'wall',d:'本回合你的盾每挡下 1 点伤害，立刻反击 2 点。'},
@@ -33,7 +33,7 @@ const CARDS={
   wrath:{n:'狂暴之心',c:1,t:'战士',a:'rage',d:'本场战斗怒气上限变为 20。',x:1},
   skybreaker:{n:'天崩',c:0,r:8,t:'战士',a:'rage',d:'在一拍放下一次 38 点重击。重击不能被挪动。',tg:'any'},
   whet:{n:'磨刃',c:1,t:'战士',a:'rage',d:'获得 4 怒气，抽 1 张牌。'},
-  bloodlust:{n:'血怒',c:1,t:'战士',a:'blood',d:'本场战斗中，你生命不到一半时，每次攻击 +5。',x:1},
+  bloodlust:{n:'血怒',c:1,t:'战士',a:'blood',d:'本场战斗中，你生命低于 70% 时，每次攻击 +5。',x:1},
   gamble:{n:'搏命',c:0,t:'战士',a:'blood',d:'失去 6 点生命（不会致死），获得 5 怒气。'},
   drain:{n:'饮血',c:1,t:'战士',a:'blood',d:'本回合你每次弹反，回复造成伤害的一半。'},
   undying:{n:'不屈',c:2,t:'战士',a:'blood',d:'本场战斗第一次受到致命伤时，保留 1 点生命并回复 15 点。',x:1},
@@ -199,16 +199,21 @@ function wvFx(k,b){const at=b??S.resolving??S.beat-1;(S.wfx??={})[at]=k;flt('her
 function wvAt(b){const ws=S.run.woven||[];const lit=S.wfx?.[b];if(lit)return {k:lit,lit:true};if(!ws.length||b%3!==2)return null;return {k:ws[Math.floor(b/3)%ws.length]}}
 const wvHtml=b=>{const w=wvAt(b);return w?`<i class="wv ${w.lit?'lit':''}" style="--wv:url(${art(`img/weaves/${w.k}.png`)})" aria-hidden="true"></i>`:''};
 
-/* ---------- Threads of fate: a wager offered before a fight; taken and kept, the fight's gold doubles, broken, −5 life ---------- */
+/* ---------- Threads of fate: a wager offered before a fight; taken and kept, it pays gold, broken, it costs FATE_COST life ---------- */
+// the plain wagers (quick, hale) are kept by most wins and pay half the fight's gold again; the hard ones (peak, parry)
+// ask you to fight differently and pay the fight's gold again plus 15
 const FATES={
-  peak:{d:s=>`本场某一拍打出 ${30+5*s} 点以上`,ok:()=>(S.best?.d||0)>=30+5*S.stage},
-  parry:{d:s=>`本场弹反至少 ${s<3?2:3} 次`,ok:()=>(S.parries||0)>=(S.stage<3?2:3)},
-  quick:{d:s=>`${6+Math.floor(s/2)} 回合内获胜`,ok:()=>S.turn<=6+Math.floor(S.stage/2)},
-  hale:{d:s=>`本场生命最多少 ${15+3*s} 点`,ok:()=>S.hp0-S.hp<=15+3*S.stage}
+  peak:{d:s=>`本场某一拍打出 ${30+5*s} 点以上`,ok:()=>(S.best?.d||0)>=30+5*S.stage,pay:1,plus:15},
+  parry:{d:s=>`本场弹反至少 ${s<3?2:3} 次`,ok:()=>(S.parries||0)>=(S.stage<3?2:3),pay:1,plus:15},
+  quick:{d:s=>`${4+Math.floor(s/2)} 回合内获胜`,ok:()=>S.turn<=4+Math.floor(S.stage/2),pay:.5,plus:0},
+  hale:{d:s=>`本场生命最多少 ${10+2*s} 点`,ok:()=>S.hp0-S.hp<=10+2*S.stage,pay:.5,plus:0}
 };
+const FATE_COST=8;
+const fateGold=k=>Math.round(loot()*FATES[k].pay)+FATES[k].plus;
+const fateTerms=k=>`做到了，这场的金线${FATES[k].pay===1?'翻倍':'多拿一半'}${FATES[k].plus?`，再加 ${FATES[k].plus}`:''}；没做到，生命 −${FATE_COST}`;
 // true kept, false broken, null when no wager was taken
 const fateRes=()=>S.fate?.on?FATES[S.fate.k].ok():null;
-function payFate(run){const r=fateRes();if(r===true)run.gold+=loot();else if(r===false)run.hp=Math.max(1,run.hp-5)}
+function payFate(run){const r=fateRes();if(r===true)run.gold+=fateGold(S.fate.k);else if(r===false)run.hp=Math.max(1,run.hp-FATE_COST)}
 const knotPool=run=>Object.keys(KNOTS).filter(k=>!run.knots.includes(k)&&(!KNOTS[k].cls||KNOTS[k].cls===run.cls));
 const knotRow=run=>run.knots.length?`<span class="knots">${run.knots.map(k=>`<i title="${KNOTS[k].n}：${KNOTS[k].d}">${SVG.KNOT}</i>`).join('')}</span>`:'';
 // the sand a card costs right now: the golden shuttle makes the turn's first move card free
@@ -529,3 +534,5 @@ const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
 const FL=()=>FOE[S.foeKey||S.run.foes[S.stage]];
 // between floors: max HP +5, and only 15% of it comes back; the rest is for the spinning wheel and the weavery to mend
 const FLOOR_HEAL=.15;
+// the blood archetype wakes up below this share of max HP (背水, 血怒)
+const BLOOD_AT=.7;

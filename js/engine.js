@@ -105,10 +105,11 @@ const W=()=>baseView()+(S.foresight?4:0)+(hasK('spyglass')?2:0)-(S.tw==='fog'?2:
 const at=(b,side)=>S.events.filter(e=>e.beat===b&&(!side||e.side===side));
 // backstab: the assassin hits a beat where no enemy attack lands on them
 const openBeat=b=>!atkE(b).length||at(b,'d').length>0;
+const low=()=>S.hp<S.maxhp*BLOOD_AT;
 function heroTotal(hs){
   if(!hs.length)return 0;const b=hs[0].beat;
   let x=hs.reduce((a,e)=>a+e.dmg+(S.cry&&b<S.beat+3?4:0),0);
-  if(S.blood&&S.hp*2<S.maxhp)x+=5*hs.length;
+  if(S.blood&&low())x+=5*hs.length;
   x+=((hasW('wolf')&&S.hp*10<S.maxhp*3?3:0)+(hasW('puppet')?S.windUp||0:0)+(hasW('golem')?S.heat||0:0))*hs.length;
   if(S.run.cls==='rogue'){x+=Math.floor(S.combo/2);if(openBeat(b))x+=1;if(S.combo>=S.comboMax)x*=2}
   const ks=at(b,'k');if(ks.length)x*=Math.max(...ks.map(k=>k.v||2));
@@ -218,7 +219,7 @@ function apply(key,target){
     case 'taunt':{const e=find(target);if(e.locked)return '这个行动被时间锁定，无法挪动';if(e.beat-1<lo)return '它已经在最早的一拍了';e.beat--;log(`挑衅：${e.label}提前到第 ${roman(e.beat)} 拍。`);break}
     case 'cleave':{ev({beat:target,side:'h',dmg:20,fx:true});log(`裂地斩：第 ${roman(target)} 拍放下一次 20 点重击。`);break}
     case 'warcry':{if(S.cry)return '本回合已经战吼过了';S.cry=true;log('战吼：本回合 3 拍内每次攻击 +4。');flt('hero','战吼','info');break}
-    case 'backwater':{if(S.hp*2>S.maxhp)return '生命还没低于一半';const e=S.events.filter(e=>e.side==='h'&&e.beat>=lo).sort((a,b)=>a.beat-b.beat)[0];if(!e)return '视野内没有你的攻击';e.dmg*=2;e.ch=true;log(`背水：第 ${roman(e.beat)} 拍的攻击翻倍到 ${e.dmg}。`);break}
+    case 'backwater':{if(!low())return `生命还没低于 ${Math.round(BLOOD_AT*100)}%`;const e=S.events.filter(e=>e.side==='h'&&e.beat>=lo).sort((a,b)=>a.beat-b.beat)[0];if(!e)return '视野内没有你的攻击';e.dmg*=2;e.ch=true;log(`背水：第 ${roman(e.beat)} 拍的攻击翻倍到 ${e.dmg}。`);break}
     case 'ironwall':{const e=foeE(e=>!e.na&&e.dmg>0&&e.beat>=lo&&e.beat<=hi).sort((a,b)=>b.dmg-a.dmg)[0];if(!e)return '视野内没有敌人的攻击';e.dmg=Math.ceil(e.dmg/2);S.rage=Math.min(S.rageMax,S.rage+5);log(`铁壁：第 ${roman(e.beat)} 拍的${e.label}减半到 ${e.dmg}，怒气 +5。`);break}
     case 'riposte':{if(S.ripo)return '本回合已经摆好架势了';S.ripo=true;log('反击架势：本回合盾每挡下 1 点，反击 2 点。');break}
     case 'towershield':{if(at(target,'w').some(w=>w.v))return '这一拍已经竖起塔盾了';ev({beat:target,side:'w',v:12});log(`塔盾：第 ${roman(target)} 拍竖起了塔盾。`);break}
@@ -227,7 +228,7 @@ function apply(key,target){
     case 'wrath':{S.rageMax=20;log('狂暴之心：本场怒气上限变为 20。');flt('hero','狂暴','info');break}
     case 'skybreaker':{ev({beat:target,side:'h',dmg:38,fx:true});log(`天崩：第 ${roman(target)} 拍放下一次 38 点重击。`);break}
     case 'whet':{gainRage(4);draw(1);log('磨刃：怒气 +4，抽 1 张牌。');break}
-    case 'bloodlust':{S.blood=true;log('血怒：生命不到一半时，你的每次攻击 +5。');break}
+    case 'bloodlust':{S.blood=true;log('血怒：生命低于 70% 时，你的每次攻击 +5。');break}
     case 'gamble':{if(S.hp<=1)return '生命已经见底了';const l=Math.min(6,S.hp-1);S.hp-=l;S.dmgThis+=l;flt('hero','-'+l,'hurt');gainRage(5);log(`搏命：失去 ${l} 点生命，怒气 +5。`);break}
     case 'drain':{if(S.drain)return '本回合已经饮血了';S.drain=true;log('饮血：本回合弹反时回复造成伤害的一半。');break}
     case 'undying':{S.undying=true;log('不屈：本场第一次受到致命伤时会站住。');break}

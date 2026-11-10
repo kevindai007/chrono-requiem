@@ -73,7 +73,7 @@ function showRules(intro){
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
       ${S.tw?`<section class="pp twbox"><h4 class="sh sm">异纹 · ${TWISTS[S.tw].n}</h4><p>这一只织得和别的不一样：${TWISTS[S.tw].d}</p></section>`:''}
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
-      ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：做到了，这场的金线翻倍；没做到，生命 −5。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
+      ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：${fateTerms(S.fate.k)}。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
       ${S.run.woven.length?`<section class="pp"><h4 class="sh sm">织入的怪物</h4><ul class="knotlist">${S.run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/weaves/${k}.png)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${S.run.knots.length?`<section class="pp"><h4 class="sh sm">线结</h4><ul class="knotlist">${S.run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
@@ -132,7 +132,7 @@ function showEnd(){
           ${WEAVES[F.key]&&!S.run.woven.includes(F.key)?`<button class="skipcard weave" id="weaveBtn"><span class="sk-ic"><i style="background-image:url(img/weaves/${F.key}.png)"></i></span><b>织入${F.lane}</b><i>不拿牌 · ${WEAVES[F.key].n}：${WEAVES[F.key].d}</i></button>`:''}
           <button class="skipcard" id="skipBtn"><span class="sk-ic">${SVG.SKIP}</span><b>直接上楼</b><i>不拿牌</i></button></div>
         <div class="journey ip">${S.run.foes.map((k,i)=>`<span class="jn ${i<=S.stage?'done':i===S.stage+1?'next':''}"><em>${ROM[i+1]}</em><i></i><span>${i<=S.stage+1?FOE[k].name:''}</span></span>`).join('')}</div>
-        ${S.fate?.on?`<p class="lead fate">${fateRes()?`命运之线 · 完成：金线再 <b>+${loot()}</b>`:'命运之线 · 没有完成：生命 <b>−5</b>'}</p>`:''}
+        ${S.fate?.on?`<p class="lead fate">${fateRes()?`命运之线 · 完成：金线再 <b>+${fateGold(S.fate.k)}</b>`:`命运之线 · 没有完成：生命 <b>−${FATE_COST}</b>`}</p>`:''}
         <p class="lead"><span class="rwnote">当前牌组 ${S.run.deck.length} 张 · 金线 ${S.run.gold||0} <em>+${loot()}</em></span></p></div></div>`);
     const next=k=>nextFloor(k,true);
     document.querySelectorAll('.rewards .card').forEach(b=>b.onclick=()=>next(b.dataset.k));
