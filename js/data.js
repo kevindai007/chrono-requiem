@@ -4,118 +4,122 @@ const CARDS={
   swift:{n:'迅步',c:1,t:'挪移',d:'选择你的一次攻击，提前 1 拍。',tg:'h'},
   slow:{n:'迟滞',c:1,t:'挪移',d:'选择敌人的一个行动，延后 1 拍。',tg:'e'},
   swap:{n:'错位',c:1,t:'挪移',d:'选择一拍，与下一拍的全部内容互换。',tg:'pair'},
-  echo:{n:'回响',c:2,t:'共鸣',d:'复制你的一次攻击，放在同一拍，触发共鸣。',tg:'h'},
+  echo:{n:'回响',c:2,t:'共鸣',d:'复制你的一次攻击，放在同一拍，触发共鸣。',tg:'h',no:'mage'},
   gather:{n:'收束',c:2,t:'共鸣',d:'在本回合起 4 拍内选一拍，这 4 拍内你的攻击全部移到那里。',tg:'b4'},
-  charge:{n:'蓄时',c:1,t:'共鸣',d:'选择你的一次攻击，延后 2 拍，伤害 +8。',tg:'h'},
+  charge:{n:'蓄时',c:1,t:'共鸣',d:'选择你的一次攻击，延后 2 拍，伤害 +8。',tg:'h',no:'mage'},
   stasis:{n:'静滞领域',c:2,t:'节奏',d:'本回合 3 拍内，敌人未锁定的行动全部延后 1 拍。'},
-  haste:{n:'疾时',c:2,t:'节奏',d:'接下来 4 拍，每一拍都有你的一次攻击（6）。'},
+  haste:{n:'疾时',c:2,t:'节奏',d:'接下来 4 拍：没有你攻击的拍补一次 6 点攻击，已经有攻击的拍伤害 +3。'},
   ghost:{n:'残影',c:1,t:'守御',d:'在一拍放置残影。敌人在该拍的攻击落空，你反击 6 点。',tg:'any'},
   rewind:{n:'回溯',c:2,t:'守御',d:'恢复上回合受到的全部伤害。',x:1},
   foresee:{n:'预知',c:0,t:'守御',d:'抽 2 张牌，本回合可多看 4 拍。'},
   stop:{n:'时停',c:3,t:'禁术',d:'敌人的时间轴整体冻结 2 拍，锁定的行动也不例外。',x:1},
-  unity:{n:'万象归一',c:3,t:'禁术',d:'视野内你的全部攻击立刻一起结算，每多一次伤害再 +50%。',x:1},
+  unity:{n:'万象归一',c:2,t:'禁术',d:'本回合 3 拍内你的全部攻击立刻一起结算，每多一次伤害再 +100%。',x:1},
   paradox:{n:'悖论',c:0,t:'禁术',d:'本回合 +2 时之砂，下回合 −3。'},
   // a curse from the road: it only clogs the hand, and paying 1 sand clears it for the rest of the fight
   tangle:{n:'乱线',c:1,t:'诅咒',d:'没有效果。打出后本场战斗不再出现。',x:1,glyph:'KNOT'},
   // warrior: rage (r) is spent instead of, or as well as, sand
   // a: the archetype (CLASSES[cls].arch) a class card belongs to; rewards lean toward the one you have taken most
   shield:{n:'举盾',c:1,t:'战士',a:'wall',d:'在一拍举盾。该拍敌人的每次攻击 −6，每挡下 1 点得 1 怒气。',tg:'any'},
-  bash:{n:'盾击',c:2,t:'战士',a:'wall',d:'在一个举盾的拍追加一次攻击，伤害等于该拍敌人的伤害（4~12）。',tg:'any'},
-  taunt:{n:'挑衅',c:1,t:'战士',a:'wall',d:'选择敌人的一个行动，提前 1 拍。',tg:'e'},
+  bash:{n:'盾击',c:2,t:'战士',a:'wall',d:'在一拍举盾并蓄力（已经举盾的拍只蓄力）：该拍盾挡下多少，就反击 3 倍。',tg:'any'},
+  taunt:{n:'挑衅',c:0,t:'战士',a:'wall',d:'选择敌人的一个行动，提前 1 拍。',tg:'e'},
   cleave:{n:'裂地斩',c:0,r:4,t:'战士',a:'rage',d:'在一拍放下一次 20 点重击。重击不能被挪动。',tg:'any'},
-  warcry:{n:'战吼',c:0,r:3,t:'战士',a:'rage',d:'本回合 3 拍内，你的每次攻击 +4。'},
-  backwater:{n:'背水',c:0,t:'战士',a:'blood',d:'生命低于 70% 时才能用：你最近的一次攻击伤害翻倍。'},
-  ironwall:{n:'铁壁',c:2,t:'战士',a:'wall',d:'视野内敌人最重的一次攻击伤害减半，立刻得到 5 怒气。'},
-  frenzy:{n:'狂怒',c:0,r:2,ra:1,t:'战士',a:'rage',d:'消耗全部怒气，立刻造成 怒气×3 点伤害。'},
+  warcry:{n:'战吼',c:0,r:3,t:'战士',a:'rage',d:'本回合 3 拍内，你的每次攻击 +4，重击 +8。'},
+  backwater:{n:'背水',c:0,t:'战士',a:'blood',d:'你最近的一次攻击伤害 + 你已损失生命的一半。'},
+  ironwall:{n:'铁壁',c:2,t:'战士',a:'wall',d:'视野内敌人最重的一次攻击伤害减半，减掉的点数立刻反击给它，怒气 +3。'},
+  frenzy:{n:'狂怒',c:0,r:2,ra:1,t:'战士',a:'rage',d:'消耗全部怒气，立刻造成 怒气×4 点伤害。'},
   riposte:{n:'反击架势',c:1,t:'战士',a:'wall',d:'本回合你的盾每挡下 1 点伤害，立刻反击 2 点。'},
   towershield:{n:'塔盾',c:2,t:'战士',a:'wall',d:'在一拍竖起塔盾。该拍敌人的每次攻击 −12，每挡下 1 点得 1 怒气。',tg:'any'},
   lure:{n:'引战',c:1,t:'战士',a:'wall',d:'在本回合起 4 拍内选一拍，这 4 拍内敌人未锁定的攻击全部挪到那里。',tg:'b4'},
-  wrath:{n:'狂暴之心',c:1,t:'战士',a:'rage',d:'本场战斗怒气上限变为 20。',x:1},
+  wrath:{n:'狂暴之心',c:1,t:'战士',a:'rage',d:'本场战斗怒气上限变为 25。',x:1},
   skybreaker:{n:'天崩',c:0,r:8,t:'战士',a:'rage',d:'在一拍放下一次 38 点重击。重击不能被挪动。',tg:'any'},
   whet:{n:'磨刃',c:1,t:'战士',a:'rage',d:'获得 4 怒气，抽 1 张牌。'},
-  bloodlust:{n:'血怒',c:1,t:'战士',a:'blood',d:'本场战斗中，你生命低于 70% 时，每次攻击 +5。',x:1},
-  gamble:{n:'搏命',c:0,t:'战士',a:'blood',d:'失去 6 点生命（不会致死），获得 5 怒气。'},
+  bloodlust:{n:'血怒',c:1,t:'战士',a:'blood',d:'本场战斗，你的每次攻击 +2；生命低于 70% 时改为 +6。',x:1},
+  gamble:{n:'搏命',c:0,t:'战士',a:'blood',d:'失去 6 点生命（不会致死），获得 6 怒气，抽 1 张牌。'},
   drain:{n:'饮血',c:1,t:'战士',a:'blood',d:'本回合你每次弹反，回复造成伤害的一半。'},
   undying:{n:'不屈',c:2,t:'战士',a:'blood',d:'本场战斗第一次受到致命伤时，保留 1 点生命并回复 15 点。',x:1},
   // ks: a keystone changes one rule for the rest of the fight; rewards offer at most one, and only from the third pick on
-  steadfast:{n:'不动如山',c:2,t:'战士',a:'wall',ks:1,x:1,d:'本场战斗，你的盾挡下攻击后留到下一拍（最多连留 3 拍）。'},
+  steadfast:{n:'不动如山',c:2,t:'战士',a:'wall',ks:1,x:1,d:'本场战斗，你的盾每挡下一次攻击，你的下一次攻击加上挡下的点数。'},
   breaker:{n:'破军',c:1,t:'战士',a:'rage',ks:1,x:1,d:'本场战斗，重击砸掉同一拍未锁定的敌人攻击，每砸一次 +2 怒气。'},
   quake:{n:'震地',c:0,r:3,t:'战士',a:'rage',d:'在一拍放下一次 12 点重击，命中后敌人下一次行动延后 1 拍。重击不能被挪动。',tg:'any'},
-  bloodwar:{n:'血战',c:1,t:'战士',a:'blood',ks:1,x:1,d:'本场战斗，拼刀输了你那一击照样打出；拼刀赢了回复 3。'},
+  bloodwar:{n:'血战',c:1,t:'战士',a:'blood',ks:1,x:1,d:'本场战斗，拼刀输了你那一击照样打出；生命低于 70% 时它伤害翻倍。'},
   grudge:{n:'怨报',c:2,t:'战士',a:'blood',d:'在一拍放一次攻击，伤害等于你上回合受到的伤害（最多 30）。',tg:'any'},
   // assassin
   dodge:{n:'闪身',c:1,t:'刺客',a:'combo',d:'选一拍，敌人在该拍的攻击落空。',tg:'any'},
-  poison:{n:'淬毒',c:1,t:'刺客',a:'venom',d:'敌人 +4 层毒。'},
+  poison:{n:'淬毒',c:1,t:'刺客',a:'venom',d:'敌人 +6 层毒。'},
   shadow:{n:'影袭',c:1,t:'刺客',a:'mark',d:'在一拍插入一次 6 点攻击。',tg:'any'},
-  finisher:{n:'绝杀',c:2,t:'刺客',a:'combo',d:'消耗全部连击，每层立刻造成 4 点伤害。'},
-  smoke:{n:'烟幕',c:2,t:'刺客',a:'venom',d:'本回合 3 拍内，敌人每次攻击的伤害减半。'},
+  finisher:{n:'绝杀',c:2,t:'刺客',a:'combo',d:'每层连击立刻造成 4 点伤害，然后连击减半。'},
+  smoke:{n:'烟幕',c:2,t:'刺客',a:'venom',d:'本回合 3 拍内，敌人每次攻击的伤害减半，敌人 +2 层毒。'},
   boomerang:{n:'回旋刃',c:1,t:'刺客',a:'mark',d:'在一拍放一次 5 点攻击，2 拍后再命中一次。',tg:'any'},
   mark:{n:'标记',c:1,t:'刺客',a:'mark',d:'标记一拍，那一拍你的伤害翻倍。',tg:'any'},
-  assassinate:{n:'暗杀',c:3,t:'刺客',a:'mark',d:'敌人生命低于 25% 时直接击杀（魔王改为 40 点伤害）。',x:1},
+  assassinate:{n:'暗杀',c:2,t:'刺客',a:'mark',d:'敌人生命低于 35% 时直接击杀（魔王改为 40 点伤害）。',x:1},
   momentum:{n:'余势',c:1,t:'刺客',a:'combo',d:'本场战斗连击上限变为 12，连击中断时只掉一半。',x:1},
   vanish:{n:'影遁',c:2,t:'刺客',a:'combo',d:'本回合 3 拍你全部闪身。'},
   flurry:{n:'乱刃',c:1,t:'刺客',a:'combo',d:'本回合 3 拍，每拍多一次 2 点攻击（与普攻共鸣）。'},
   ready:{n:'蓄势',c:0,t:'刺客',a:'combo',d:'连击 +2。'},
-  venomblade:{n:'毒刃',c:1,t:'刺客',a:'venom',d:'本回合你的攻击每命中一次，敌人 +2 层毒。'},
+  venomblade:{n:'毒刃',c:1,t:'刺客',a:'venom',d:'本回合你的攻击每命中一次，敌人 +3 层毒。'},
   corrode:{n:'蚀骨',c:1,t:'刺客',a:'venom',d:'敌人的毒层数翻倍。'},
-  detonate:{n:'毒爆',c:2,t:'刺客',a:'venom',d:'立刻造成 毒层×2 点伤害，毒层不减。'},
+  detonate:{n:'毒爆',c:2,t:'刺客',a:'venom',d:'立刻造成 毒层×3 点伤害，毒层不减。'},
   converge:{n:'聚刃',c:1,t:'刺客',a:'mark',d:'选一个标记过的拍，本回合起 4 拍内你的攻击全部挪到那里。',tg:'any'},
   expose:{n:'破绽',c:2,t:'刺客',a:'mark',d:'标记一拍，那一拍你的伤害 ×3。',tg:'any'},
   clone:{n:'分影',c:1,t:'刺客',a:'mark',d:'在一拍插入两次 4 点攻击（自带共鸣）。',tg:'any'},
   shift:{n:'换影',c:1,t:'刺客',a:'combo',d:'选敌人的一次攻击，挪到它后面最近的另一次敌人攻击的拍上。',tg:'e'},
   zanshin:{n:'残心',c:1,t:'刺客',a:'combo',ks:1,x:1,d:'本场战斗，你每闪开一次攻击，连击 +1，并反刺 3 点。'},
   toxin:{n:'毒发',c:1,t:'刺客',a:'venom',d:'本回合你的连击每 +1，敌人 +1 层毒。'},
-  plague:{n:'瘟疫',c:2,t:'刺客',a:'venom',ks:1,x:1,d:'本场战斗，毒上限 30，不再每拍减层，改为每回合结束减半。'},
+  plague:{n:'瘟疫',c:2,t:'刺客',a:'venom',ks:1,x:1,d:'本场战斗，毒上限 30，毒伤也吃标记的倍率。'},
   omen:{n:'死兆',c:1,t:'刺客',a:'mark',ks:1,x:1,d:'本场战斗，标记的拍上你打出了伤害，标记就移到下一拍。'},
   // mage: a spell with cast:n takes n beats; it goes off on the last one unless a hit lands inside the window
   fireball:{n:'火球',c:1,t:'法师',a:'chain',cast:2,el:'火',dmg:16,d:'吟唱 2 拍，造成 16 点火焰伤害。',tg:'cast'},
   icelance:{n:'寒冰枪',c:1,t:'法师',a:'ice',cast:1,el:'冰',dmg:9,frz:1,d:'吟唱 1 拍，9 点冰伤，敌人下一次攻击延后 1 拍。',tg:'cast'},
-  chain:{n:'雷链',c:2,t:'法师',a:'grand',cast:3,el:'雷',dmg:10,hits:3,d:'吟唱 3 拍，连续 3 次 10 点雷伤。',tg:'cast'},
-  meteor:{n:'流星',c:3,t:'法师',a:'grand',cast:5,el:'火',dmg:40,d:'吟唱 5 拍，40 点火焰伤害。',tg:'cast'},
+  chain:{n:'雷暴',c:2,t:'法师',a:'grand',cast:3,el:'雷',dmg:12,hits:3,d:'吟唱 3 拍，连续 3 次 12 点雷伤。',tg:'cast'},
+  meteor:{n:'流星',c:3,t:'法师',a:'grand',cast:5,el:'火',dmg:60,d:'吟唱 5 拍，60 点火焰伤害。',tg:'cast'},
   barrier:{n:'法力屏障',c:1,t:'法师',a:'grand',d:'本回合内，你的吟唱第一次被打中时不会中断。'},
-  quick:{n:'瞬发',c:0,t:'法师',a:'chain',d:'下一张法术的吟唱时间 −2（最少 1 拍）。'},
-  meditate:{n:'冥想',c:0,t:'法师',a:'grand',d:'跳过你最近的一次普通攻击，下回合 +2 时之砂。'},
+  quick:{n:'瞬发',c:0,t:'法师',a:'chain',d:'选织机上你的一发法术，释放提前 2 拍（吟唱最少 1 拍）。',tg:'sp'},
+  meditate:{n:'冥想',c:0,t:'法师',a:'grand',d:'下回合 +1 时之砂，抽 1 张牌。'},
   frostarmor:{n:'冰甲',c:1,t:'法师',a:'ice',d:'本回合你受到的每次伤害 −3。'},
   spark:{n:'电火花',c:0,t:'法师',a:'chain',cast:1,el:'雷',dmg:4,d:'吟唱 1 拍，4 点雷伤。',tg:'cast'},
   ember:{n:'余烬',c:0,t:'法师',a:'chain',cast:1,el:'火',dmg:4,d:'吟唱 1 拍，4 点火焰伤害。',tg:'cast'},
   prism:{n:'棱镜',c:1,t:'法师',a:'chain',d:'本回合隔 2 拍的法术也能反应，连锁每层再 +4。'},
   trinity:{n:'三相咒',c:2,t:'法师',a:'chain',cast:3,el:'火',dmg:6,tri:1,d:'吟唱 3 拍，这 3 拍依次释放火、冰、雷，各 6 点（自带两次反应）。',tg:'cast'},
-  overcharge:{n:'超载',c:1,t:'法师',a:'grand',d:'下一张法术的吟唱时间 +2，伤害翻倍。'},
+  overcharge:{n:'超载',c:1,t:'法师',a:'grand',d:'选织机上你的一发法术，释放延后 2 拍，伤害翻倍。',tg:'sp'},
   manaflow:{n:'法力回流',c:0,t:'法师',a:'grand',d:'本回合吟唱被打断时，下回合返还它的时之砂。'},
-  aria:{n:'时之咏叹',c:2,t:'法师',a:'grand',cast:4,el:'雷',dmg:30,d:'吟唱 4 拍，30 点雷伤。',tg:'cast'},
+  aria:{n:'时之咏叹',c:2,t:'法师',a:'grand',cast:4,el:'雷',dmg:40,d:'吟唱 4 拍，40 点雷伤。',tg:'cast'},
   glacier:{n:'冰川',c:2,t:'法师',a:'ice',cast:2,el:'冰',dmg:10,frz:2,d:'吟唱 2 拍，10 点冰伤，敌人接下来两次攻击各延后 1 拍。',tg:'cast'},
   nova:{n:'霜冻新星',c:1,t:'法师',a:'ice',d:'霜冻 +2。'},
   rime:{n:'寒霜印记',c:1,t:'法师',a:'ice',d:'本场战斗中，敌人的行动每被你推迟一次，受到 4 点冰伤。',x:1},
   tide:{n:'元素潮汐',c:1,t:'法师',a:'chain',ks:1,x:1,d:'本场战斗，每次元素反应让下回合 +1 沙（每回合最多 +3）。'},
   linger:{n:'余韵',c:2,t:'法师',a:'grand',ks:1,x:1,d:'本场战斗，吟唱 4 拍以上的法术释放后，下一拍再响一次，伤害减半。'},
   zero:{n:'绝对零度',c:2,t:'法师',a:'ice',ks:1,x:1,d:'本场战斗，被冻碎的攻击以 ×2 伤害反噬敌人，并算一次冰法术。'},
-  frostfire:{n:'霜火',c:1,t:'法师',a:'ice',d:'消耗全部霜冻，每层让你下一张火焰法术 +6 伤害。'}
+  frostfire:{n:'霜火',c:1,t:'法师',a:'ice',d:'选织机上你的一发火焰法术，消耗全部霜冻，每层让它 +6 伤害。',tg:'sp'}
 };
 // two spells of different elements going off on the same or adjacent beats react; reactions in a row build a chain, +CHAIN per link
 const CHAIN=4;
+// a spell that takes LONG beats or more shrugs off the first hit inside its window
+const LONG=4;
 // the mage's frost: each delay you put on an enemy action adds one; at FROST the enemy's next attack shatters
 const FROST=3;
 const REACT={'火冰':{n:'碎裂',dmg:10},'冰火':{n:'碎裂',dmg:10},'冰雷':{n:'感电',dmg:8,frz:1},'雷冰':{n:'感电',dmg:8,frz:1},'雷火':{n:'爆燃',dmg:12},'火雷':{n:'爆燃',dmg:12}};
-// the time cards are shared by every class; each class starts with the same five
+// the time cards are shared by every class; each class starts with the same five.
+// no: a class the card is never offered to (it only works on plain attacks, and the mage's are too small to carry it)
+const forCls=(k,cls)=>CARDS[k].no!==cls;
 const GENERAL=['swift','slow','swap','ghost','foresee'];
 const CLASSES={
-  warrior:{n:'战士',hp:80,atk:{every:2,dmg:7},
+  warrior:{n:'战士',hp:72,atk:{every:2,dmg:7},
     sub:'迎着刀上，以伤换伤',
-    rule:'你每 <b>2 拍</b>自动攻击一次（7 点）。<b>怒气</b>：举盾挡下伤害、被打中（+2）、弹反（+2）都会攒怒气，上限 10，整场战斗不清空。红色费用的牌花的是怒气。',
+    rule:'你每 <b>2 拍</b>自动攻击一次（7 点）。<b>怒气</b>：举盾挡下伤害、被打中（+2）、弹反（+2）都会攒怒气，上限 15，整场战斗不清空。红色费用的牌花的是怒气。',
     arch:{wall:'铁壁',rage:'重击',blood:'背水'},
     pitch:'想要敌人出手的拍。把盾放在敌人的攻击上，挡下的伤害变成怒气，再用怒气打出不能挪动的重击。',
     deck:['shield','shield','shield','bash','grudge','taunt','cleave','warcry','ironwall'],
     pool:['shield','bash','taunt','cleave','warcry','backwater','ironwall','frenzy','riposte','towershield','lure','wrath','skybreaker','whet','bloodlust','gamble','drain','undying','steadfast','breaker','quake','bloodwar','grudge']},
   rogue:{n:'刺客',hp:70,atk:{every:1,dmg:2},
     sub:'在缝隙里连刺',
-    rule:'你<b>每一拍</b>都自动攻击一次（2 点）。<b>连击</b>：你出手而且没受伤的拍，连击 +1；拼刀赢了（弹反）连击 +2。每 2 层让每拍伤害 +1（上限 8 层）。只有<b>受到伤害</b>才会让连击归零。<b>影杀</b>：连击满层时，你下一次出手伤害翻倍，然后连击减半。<b>背刺</b>：敌人不出手的拍，伤害 +1。<b>毒</b>：敌人每拍受到 毒层数 点伤害（无视护甲），然后毒减 1 层，最多 15 层。',
+    rule:'你<b>每一拍</b>都自动攻击一次（2 点）。<b>连击</b>：你出手而且没受伤的拍，连击 +1；拼刀赢了（弹反）连击 +2。每 2 层让你在敌人不出手的拍伤害 +1（上限 8 层）。只有<b>受到伤害</b>才会让连击归零。<b>影杀</b>：连击满层时，你下一次出手伤害翻倍，然后连击减半。<b>背刺</b>：敌人不出手的拍，伤害 +1。<b>毒</b>：敌人每拍受到 毒层数 点伤害（无视护甲），每回合结束毒减半，最多 20 层。',
     arch:{combo:'连击',venom:'淬毒',mark:'标记'},
     pitch:'想要不挨打的拍子。闪开、弹反敌人的攻击，连击越叠越高，满层时一刀翻倍。只有挨打才会断掉连击。',
     deck:['dodge','dodge','poison','shift','shadow','finisher','boomerang','mark','smoke'],
     pool:['dodge','poison','shadow','finisher','smoke','boomerang','mark','assassinate','momentum','vanish','flurry','ready','venomblade','corrode','detonate','converge','expose','clone','shift','zanshin','toxin','plague','omen']},
   mage:{n:'法师',hp:90,sand:4,atk:{every:3,dmg:4},
     sub:'守住时间的空窗',
-    rule:'你每 <b>3 拍</b>自动攻击一次（4 点），每回合 <b>4 粒时之砂</b>。<b>吟唱</b>：法术要吟唱好几拍，在最后一拍释放；吟唱期间你被敌人打中就会中断，法术作废、沙不退。<b>释放那一拍法术也参与拼刀</b>：法术伤害高过敌人那一击就弹反，挡下它。<b>元素反应</b>：火、冰、雷两种不同元素在同一拍或相邻两拍释放，触发碎裂（火+冰 +10）、感电（冰+雷 +8，敌人下一击延后）或爆燃（雷+火 +12）。<b>连锁</b>：反应一个接一个，每多一环反应伤害 +4。<b>霜冻</b>：你每把敌人的行动推迟一次，霜冻 +1，到 3 层时敌人下一次未锁定的攻击被冻碎。',
+    rule:'你每 <b>3 拍</b>自动攻击一次（4 点），每回合 <b>4 粒时之砂</b>。<b>吟唱</b>：法术要吟唱好几拍，在最后一拍释放；吟唱期间你被敌人打中就会中断，法术作废、沙不退；吟唱 4 拍以上的法术能扛住第一下。<b>释放那一拍法术也参与拼刀</b>：法术伤害高过敌人那一击就弹反，挡下它。<b>元素反应</b>：火、冰、雷两种不同元素在同一拍或相邻两拍释放，触发碎裂（火+冰 +10）、感电（冰+雷 +8，敌人下一击延后）或爆燃（雷+火 +12）。<b>连锁</b>：反应一个接一个，每多一环反应伤害 +4。<b>霜冻</b>：你每把敌人的行动推迟一次，霜冻 +1，到 3 层时敌人下一次未锁定的攻击被冻碎。',
     arch:{chain:'连锁',grand:'大咒',ice:'冰封'},
     pitch:'想要敌人不出手的空窗。把吟唱塞进敌人两次攻击之间，用迟滞、寒冰枪把攻击推出窗口，再排好元素的先后。',
     deck:['fireball','fireball','icelance','icelance','chain','barrier','quick','meditate','frostarmor'],
@@ -218,9 +222,8 @@ const knotPool=run=>Object.keys(KNOTS).filter(k=>!run.knots.includes(k)&&(!KNOTS
 const knotRow=run=>run.knots.length?`<span class="knots">${run.knots.map(k=>`<i title="${KNOTS[k].n}：${KNOTS[k].d}">${SVG.KNOT}</i>`).join('')}</span>`:'';
 // the sand a card costs right now: the golden shuttle makes the turn's first move card free
 const costOf=C=>C.t==='挪移'&&S.shuttle?0:C.c;
-const castLen=C=>Math.max(1,C.cast-(S.quick?2:0)+(S.surge?2:0));
 const CL=()=>CLASSES[S.run.cls];
-const HINTS={h:'点选时间轴上你的一次攻击（金框），或点选它要挪到的那一拍',e:'点选时间轴上敌人的一个行动（红框），或点选它要挪到的那一拍',pair:'点选一拍，它会与下一拍互换',b4:'点选本回合起 4 拍内的一拍',any:'点选时间轴上的一拍',cast:'点选法术释放的那一拍（前面要留出吟唱的拍数）'};
+const HINTS={h:'点选时间轴上你的一次攻击（金框），或点选它要挪到的那一拍',e:'点选时间轴上敌人的一个行动（红框），或点选它要挪到的那一拍',pair:'点选一拍，它会与下一拍互换',b4:'点选本回合起 4 拍内的一拍',any:'点选时间轴上的一拍',cast:'点选法术释放的那一拍（前面要留出吟唱的拍数）',sp:'点选时间轴上你的一发法术，或它正在吟唱的一拍'};
 const ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
 const roman=n=>{const k=((n-1)%12)+1;const lap=Math.floor((n-1)/12);return ROM[k]+(lap?'·'+(lap+1):'')};
 const $=id=>document.getElementById(id);
@@ -272,8 +275,9 @@ const DIAM=SVG.KNOT;
 // how much one raised shield blocks (a tower shield carries its own v)
 const SHIELD=6;
 const blkAt=b=>Math.max(0,...at(b,'w').map(w=>w.v||SHIELD));
-// poison stacks on the enemy: each beat deals its stacks, then one wears off
-const POISON_MAX=15;
+// poison stacks on the enemy: each beat deals its stacks
+const POISON_MAX=20;
+// at the end of each turn poison halves (rounded down), so stacking is a plan that spans turns
 const addPoison=n=>{S.poison=Math.min(S.plague?30:POISON_MAX,S.poison+n)};
 // every way the assassin's combo goes up runs through here (毒发 turns each step into poison)
 function addCombo(n){const was=S.combo;S.combo=Math.min(S.comboMax,S.combo+n);const up=S.combo-was;if(up>0&&S.toxin)addPoison(up);return up}
@@ -401,7 +405,7 @@ const FOES=[
   rage:()=>foeE(e=>e.label==='钟锤'&&e.beat<S.beat+3).length>0},
 
  {key:'banshee',floor:'第 4 层',name:'哀泣女妖',lane:'女妖',hp:115,
-  rules:['<b>虚体</b>：单次伤害最多 12 点，多出来的穿体而过（毒伤除外）。','<b>冥爪</b>：每 6 拍里抓 3 次，每次 9 点。','<b>尖啸</b>：每 6 拍一次 14 点，紧跟在第一爪后面。尖啸打到你身上，下回合少抽 1 张牌。','大招打她很亏：刺客的多段和毒最合适；战士多拼刀、少攒重击；法师用雷链和元素反应凑多段。'],
+  rules:['<b>虚体</b>：单次伤害最多 12 点，多出来的穿体而过（毒伤除外）。','<b>冥爪</b>：每 6 拍里抓 3 次，每次 9 点。','<b>尖啸</b>：每 6 拍一次 14 点，紧跟在第一爪后面。尖啸打到你身上，下回合少抽 1 张牌。','大招打她很亏：刺客的多段和毒最合适；战士多拼刀、少攒重击；法师用雷暴和元素反应凑多段。'],
   reward:['echo','haste','ghost'],
   open:'钟声里混进了一声长长的哭嚎。开战。',
   init:()=>({hush:0}),
@@ -534,5 +538,5 @@ const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
 const FL=()=>FOE[S.foeKey||S.run.foes[S.stage]];
 // between floors: max HP +5, and only 15% of it comes back; the rest is for the spinning wheel and the weavery to mend
 const FLOOR_HEAL=.15;
-// the blood archetype wakes up below this share of max HP (背水, 血怒)
+// the blood archetype hits harder below this share of max HP (血怒)
 const BLOOD_AT=.7;

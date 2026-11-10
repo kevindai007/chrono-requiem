@@ -213,7 +213,7 @@ function enter(mode){
 }
 
 function start(data){
-  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.run.gold??=0;S.run.road??=[];S.run.knots??=[];S.run.woven??=[];[S.run.deck,S.deck,S.hand,S.discard].flat().forEach(k=>k.includes('+')&&card(k));S.rageMax??=10;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.run.stage!==S.stage)walk(S.run);else if(S.over)showEnd()}
+  if(data&&data.state&&data.state.run&&data.state.run.cls&&data.state.hp!=null){S=data.state;S.run.foes??=TOWER.map(p=>p[0]);S.run.gold??=0;S.run.road??=[];S.run.knots??=[];S.run.woven??=[];[S.run.deck,S.deck,S.hand,S.discard].flat().forEach(k=>k.includes('+')&&card(k));S.rageMax??=15;S.comboMax??=8;S.chain??=0;S.frost??=0;S.refund??=0;S.busy=false;S.resolving=null;S.pending=null;S.hist??=[];S.doneUpTo??=S.beat-1;if(S.doneUpTo>=S.beat)S.doneUpTo=S.beat-1;render();if(S.run.stage!==S.stage)walk(S.run);else if(S.over)showEnd()}
   else{newRun(0,'warrior');render();showClassPick(true)}
 }
 window.claude?.hot?.snapshot?.(()=>({state:JSON.parse(JSON.stringify(S))}));
