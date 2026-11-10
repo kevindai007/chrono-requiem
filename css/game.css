@@ -392,6 +392,15 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .vmain .lead{margin:-10px 0 0;text-align:center;font-size:14px;color:var(--ink2);letter-spacing:.1em}
 .seam{height:0;margin:-4px auto 0;width:min(520px,80%);border-top:2px dashed var(--madder)}
 .seven{display:block;width:100%;height:70px}
+.recap .rsum{margin:0 0 8px;font-size:15px;color:var(--ink2)}.recap .rsum b{color:var(--ink);font-size:17px}
+.rlog{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.rlog li{display:grid;grid-template-columns:38px minmax(0,1fr) 70px 54px 72px;align-items:center;gap:8px;padding:5px 8px;font-size:14px;color:var(--ink2);border-bottom:1px dashed rgba(94,83,67,.3)}
+.rlog li em{font-family:var(--f-latin);font-style:normal;color:var(--gold)}
+.rlog li b{color:var(--ink);font-family:var(--f-display)}.rlog li b small{margin-left:6px;font-size:11px;color:var(--madder)}
+.rlog li.lost,.rlog li.lost b{color:var(--madder)}
+.rlog li span{text-align:right}
+.recap .goal{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-family:var(--f-display);font-weight:700;color:var(--indigo)}
+.recap .goal svg{width:20px;height:20px;color:var(--gold)}.recap .goal.new{color:var(--madder)}
 .acts.end{justify-content:center}.acts.end .btn{max-width:440px}
 .stat small+small,.stat b+small{font-size:11px;letter-spacing:.04em;color:var(--muted);font-weight:500}
 .foecrest{display:flex;align-items:center;justify-content:center;padding:14px;background:var(--madder) var(--linen);box-shadow:inset 0 0 0 3px var(--madder),inset 0 0 0 4.5px var(--gold)}
@@ -503,6 +512,8 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .peek{list-style:none;margin:8px 0 0;padding:8px 0 0;width:100%;border-top:1px dashed rgba(178,138,69,.45);display:flex;flex-direction:column;gap:4px;text-align:left}
 .peek li{position:relative;padding-left:16px;font-size:13px;line-height:1.5;color:var(--gold3)}
 .peek li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;background:var(--madder3);transform:rotate(45deg)}
+.strand .ahead{display:block;margin-top:8px;padding-top:7px;border-top:1px dashed rgba(178,138,69,.45);font-size:12.5px;line-height:1.5;color:var(--flax2);text-align:left}
+.strand .ahead .nx{font-weight:700;color:var(--gold3);white-space:nowrap}
 .strand .pick{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 16px 18px;padding:8px;font-family:var(--f-display);font-weight:900;font-size:17px;letter-spacing:.2em;color:var(--flax2);background:var(--madder) var(--linen);box-shadow:inset 0 0 0 1.5px var(--gold)}
 .strand .pick svg{width:44px;height:20px;color:var(--gold3)}
 .strand:hover,.strand:focus-visible{transform:translateY(-8px);box-shadow:inset 0 0 0 4px var(--indigo),inset 0 0 0 6px var(--gold3),0 0 0 3px var(--gold2),0 16px 28px rgba(32,45,58,.4);outline:none}
