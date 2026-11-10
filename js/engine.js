@@ -3,7 +3,7 @@
 let S;
 function newRun(stage,cls,key){
   const C=CLASSES[cls];
-  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[],woven:[]};run.hp=run.maxhp;
+  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[],woven:[],tales:[],log:[]};run.hp=run.maxhp;
   if(key)run.foes[stage]=key;
   startFight(run);
 }
@@ -64,8 +64,10 @@ function walk(run){
   if(step==='fork')return showFork(run,()=>walk(run));
   THREADS[step].go(run,()=>walk(run));
 }
+// run.ahead: the strands the last fork promised for this one (the fork shows, under each strand, the fork that follows it)
 function forkOptions(run){
   const left=Object.keys(THREADS).filter(k=>THREADS[k].ok(run)),out=[];
+  if(run.ahead){for(const k of run.ahead)if(left.includes(k)){out.push(k);left.splice(left.indexOf(k),1)}delete run.ahead}
   while(out.length<FORK_N&&left.length){let r=Math.random()*left.reduce((a,k)=>a+THREADS[k].w,0);
     const i=left.findIndex(k=>(r-=THREADS[k].w)<0);out.push(left.splice(i<0?0:i,1)[0])}
   return out;

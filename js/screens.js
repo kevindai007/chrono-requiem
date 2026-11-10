@@ -89,8 +89,33 @@ function showRules(intro){
   $('startBtn').onclick=()=>{closePanel();if(fresh){banner(F.floor,F.name);fightIn()}};
 }
 
+// every fight of the run, kept for the recap on the defeat and summit pages
+function logFight(){
+  if(S.logged)return;S.logged=true;const F=FL();
+  S.run.log.push({f:S.stage,foe:F.name,elite:!!S.foeKey,win:S.over==='win',turns:S.turn,lost:Math.max(0,S.hp0-S.hp),best:S.best?.d||0,parries:S.parries||0});
+}
+// the best climb per class, kept in this browser: the highest floor reached, and the fewest turns to the summit
+function bestRecord(run,top){
+  let all={};try{all=JSON.parse(localStorage.getItem('cr-best'))||{}}catch(e){}
+  const was=all[run.cls]||{floor:0},turns=run.log.reduce((a,x)=>a+x.turns,0),now={floor:Math.max(was.floor,run.stage+1),turns:was.turns};
+  const better=top?!was.turns||turns<was.turns:run.stage+1>was.floor;
+  if(top&&better)now.turns=turns;
+  try{localStorage.setItem('cr-best',JSON.stringify({...all,[run.cls]:now}))}catch(e){}
+  return {was,better,turns};
+}
+// the whole climb in one table: each fight, its turns, the life it cost and its best beat; then the record to beat next time
+function recapHtml(run,top){
+  const L=run.log,R=S.rec??=bestRecord(run,top),sum=k=>L.reduce((a,x)=>a+x[k],0),peak=Math.max(0,...L.map(x=>x.best)),tries=L.filter(x=>!x.win).length;
+  const goal=top?(R.better?`新纪录：${R.turns} 回合登顶${R.was.turns?`（原来 ${R.was.turns}）`:''}`:`这次 ${R.turns} 回合，${CLASSES[run.cls].n}的纪录是 ${R.was.turns} 回合`)
+    :(R.better?`新纪录：${CLASSES[run.cls].n}走到了第 ${ROM[run.stage+1]} 层`:`${CLASSES[run.cls].n}最远走到过第 ${ROM[R.was.floor]} 层${R.was.turns?`，最快 ${R.was.turns} 回合登顶`:''}`);
+  return `<section class="pp recap"><h4 class="sh sm">这一局</h4>
+    <p class="rsum">战斗 <b>${L.length}</b> 场${tries?`（重试 ${tries} 次）`:''} · 共 <b>${sum('turns')}</b> 回合 · 弹反 <b>${sum('parries')}</b> 次 · 最高一拍 <b>${peak}</b></p>
+    <ol class="rlog">${L.map(x=>`<li class="${x.win?'':'lost'}"><em>${ROM[x.f+1]}</em><b>${x.foe}${x.elite?'<small>乱线</small>':''}</b><span>${x.turns} 回合</span><span>−${x.lost}</span><span>${x.win?`最高 ${x.best}`:'倒下'}</span></li>`).join('')}</ol>
+    <p class="goal ${R.better?'new':''}">${SVG.KNOT}${goal}</p></section>`;
+}
 function showEnd(){
   if(!$('scr').hidden&&$('scr').dataset.end===String(S.uid))return;
+  logFight();
   const F=FL(),win=S.over==='win',last=S.stage===TOWER.length-1,B=S.best,cls=S.run.cls;
   const bestAt=B?(B.b?`第 ${roman(B.b)} 拍`:'一张牌'):'';
   if(!win){
@@ -99,6 +124,7 @@ function showEnd(){
       <div class="lmain pp"><div class="kick">DEFEAT</div><h2 class="ttl">时间终结</h2><div class="where">${F.floor} · ${F.name}</div>
         <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.BURST,'ind','最高一拍',B?B.d:0,{sm:B?bestAt+(B.cards.length?' · '+B.cards.join('、'):''):''})}${stat(SVG.CLAW,'mo','敌方剩余',S.ehp)}</div>
         <h4 class="sh sm">它的节奏</h4>${rulesList(F.rules)}
+        ${recapHtml(S.run,false)}
         <div class="acts"><button class="btn" id="runBtn">${SVG.REDO}重新选职业</button><button class="btn red" id="retryBtn">${SVG.SHUTTLE}重试本层</button></div>
         <p class="coda">钟针仍在前行</p></div></div>`,'retryBtn');
     $('retryBtn').onclick=()=>{closePanel();startFight(S.run,S.foeKey);render();fightIn();banner(FL().floor,FL().name)};
@@ -110,6 +136,7 @@ function showEnd(){
       <svg class="seven" viewBox="0 0 1400 70" preserveAspectRatio="none" aria-hidden="true"><path d="M10 35C110 5 160 65 210 35S310 5 410 35 510 65 610 35 710 5 810 35 910 65 1010 35 1110 5 1210 35 1310 65 1390 35" fill="none" stroke="#923f35" stroke-width="3"/>${ROM.slice(1,8).map((r,i)=>`<g class="kn" transform="translate(${110+i*200} 35)"><circle r="16" fill="#202d3a" stroke="#cfa95f" stroke-width="2.5"/><text y="5.5" text-anchor="middle" font-family="Noto Serif SC,serif" font-weight="900" font-size="15" fill="#ead39a">${r}</text></g>`).join('')}</svg>
       <div class="stats">${stat(SVG.TOWER,'','七层登顶',`第 ${S.turn} 回合`,{zh:1})}${stat(SVG.BURST,'ind','最高一拍',B?B.d:0,{sm:B?bestAt:''})}${stat(SVG.CARDS,'mo','牌组',`${S.run.deck.length} 张`)}</div>
       <section class="pp"><h4 class="sh sm">登顶的牌组</h4><div class="deck">${ks.map(k=>{const n=S.run.deck.filter(x=>x===k).length;return `<span>${CARDS[k].glyph?`<i class="gl">${SVG[CARDS[k].glyph]}</i>`:`<i style="background-image:url(img/cards/${baseOf(k)}.jpg)"></i>`}${CARDS[k].n}${CARDS[k].st?'·'+STITCH[CARDS[k].st].n:''}${n>1?`<em>×${n}</em>`:''}</span>`}).join('')}</div></section>
+      ${recapHtml(S.run,true)}
       <div class="acts end"><button class="btn go" id="runBtn">${SVG.SHUTTLE}再登钟楼</button></div></div>`,'runBtn');
     $('runBtn').onclick=()=>showClassPick();
   }else if(S.foeKey){
@@ -167,6 +194,8 @@ function pack(run){
 // the red thread drops from a knot and splits into one strand per choice; each strand ends in a woven picture
 function showFork(run,done){
   const opts=forkOptions(run),n=opts.length,more=run.road.includes('fork');
+  // the fork after this one, drawn now for each strand, so a strand can be taken for where it leads
+  const ahead=more||run.stage<ROAD.length?opts.map(()=>forkOptions({...run,stage:more?run.stage:run.stage+1,road:[]})):null;
   openScr('road',pageHd('岔路',run),`<div class="body forkpg">
     ${nextFoe(run)}
     <div class="fmain"><h2 class="ttl">红线在这里分岔</h2>
@@ -174,14 +203,14 @@ function showFork(run,done){
       <div class="strands" style="--n:${n}"><span class="spool">${SVG.KNOT}</span>
         <svg class="split" viewBox="0 0 ${n*100} 60" preserveAspectRatio="none" aria-hidden="true">${opts.map((k,i)=>`<path data-i="${i}" d="M${n*50} 0C${n*50} 34 ${i*100+50} 26 ${i*100+50} 60"/>`).join('')}</svg>
         ${opts.map((k,i)=>{const T=THREADS[k];return `<button class="strand" data-k="${k}" data-i="${i}"><span class="pic" style="background-image:url(img/road/${k}.jpg)"><em class="tg ${T.tg[1]}">${T.tg[0]}</em></span>
-          <span class="tx"><b>${T.n}</b><small>${T.la}</small><span class="d">${T.d}</span><ul class="peek">${T.peek(run).map(x=>`<li>${x}</li>`).join('')}</ul></span>
+          <span class="tx"><b>${T.n}</b><small>${T.la}</small><span class="d">${T.d}</span><ul class="peek">${T.peek(run).map(x=>`<li>${x}</li>`).join('')}</ul>${ahead?`<span class="ahead">${more?'走完这一股':'下一层之后'}，红线分成 <span class="nx">${ahead[i].map(a=>THREADS[a].n).join(' · ')}</span></span>`:''}</span>
           <span class="pick">${SVG.SHUTTLE}${T.to}</span></button>`}).join('')}</div></div>
     ${pack(run)}
     ${journey(run)}</div>`);
   const paths=document.querySelectorAll('.split path');
   document.querySelectorAll('.strand').forEach(b=>{const p=paths[+b.dataset.i];
     b.onmouseenter=b.onfocus=()=>p.classList.add('hot');b.onmouseleave=b.onblur=()=>p.classList.remove('hot');
-    b.onclick=()=>THREADS[b.dataset.k].go(run,done)});
+    b.onclick=()=>{if(ahead)run.ahead=ahead[+b.dataset.i];THREADS[b.dataset.k].go(run,done)}});
 }
 // a short page on the road; pic names one of the road pictures img/rd_<pic>.jpg
 function showNote(run,title,html,done,pic){
@@ -357,10 +386,24 @@ const TALES={
     opts:[{t:'换',ok:r=>r.deck.some(k=>CARDS[k].a),go:(r,done)=>{const own=r.deck.map((k,i)=>i).filter(i=>CARDS[r.deck[i]].a),top=Math.max(...own.map(i=>CARDS[r.deck[i]].c+(CARDS[r.deck[i]].r||0)/3)),
         i=rnd(own.filter(i=>CARDS[r.deck[i]].c+(CARDS[r.deck[i]].r||0)/3===top)),K=CLASSES[r.cls],nw=rnd(K.pool.filter(k=>!r.deck.includes(k))),old=unpick(r,i);r.deck.push(nw);
         showNote(r,'窃贼的赃物',`他拿走了<b>${CARDS[old].n}</b>，你翻开的是<b>${CARDS[nw].n}</b>：${CARDS[nw].d}`,done)}},
-      {t:'不换',go:(r,done)=>done()}]}
+      {t:'不换',go:(r,done)=>done()}]},
+  oath:{n:'染血的誓约',la:'THE BLOOD OATH',d:'石台上摊着一卷誓约，墨迹是红的。签下名字的人，会得到改写规则的力量。',
+    opts:[{t:'割破手指签名：生命 −12，拿一张本职业的基石',ok:r=>r.hp>12&&oathPool(r).length>0,go:(r,done)=>{const k=rnd(oathPool(r));r.hp-=12;r.deck.push(k);
+        showNote(r,'染血的誓约',`誓约卷起来，变成了<b>${CARDS[k].n}</b>：${CARDS[k].d}`,done)}},
+      {t:'不签',go:(r,done)=>done()}]},
+  loom:{n:'无人的织机',la:'THE EMPTY LOOM',d:'一架织机还在自己动，梭子来回穿，却没有人坐在前面。',
+    opts:[{t:'把一张牌织进布里（拆掉它，不花金线），生命 −6',ok:r=>r.deck.length>5&&r.hp>6,go:(r,done)=>pickCard(r,'无人的织机','把哪一张织进布里？',i=>{const k=unpick(r,i);r.hp-=6;
+        showNote(r,'无人的织机',`<b>${CARDS[k].n}</b> 织进了布里，再也取不出来。梭子划破了你的手，生命 <b>−6</b>。`,done)},done)},
+      {t:'坐下织一会儿：金线 +45，生命 −10',ok:r=>r.hp>10,go:(r,done)=>{r.gold+=45;r.hp-=10;showNote(r,'无人的织机','你织到手指发麻，把布卖给了过路人。金线 <b>+45</b>，生命 <b>−10</b>。',done)}}]},
+  dice:{n:'掷骰的老人',la:'THE OLD GAMBLER',d:'台阶上坐着一个老人，手里摇着两颗骨骰：「押三十根金线，赢了给你八十。」',
+    opts:[{t:'押 30 金线（一半机会拿回 80）',ok:r=>r.gold>=30,go:(r,done)=>{r.gold-=30;const w=Math.random()<.5;if(w)r.gold+=80;
+        showNote(r,'掷骰的老人',w?'骰子停在两个六。老人笑着数给你 <b>80</b> 根金线。':'骰子停在一和二。老人把你的 <b>30</b> 根金线收进袖子里。',done)}},
+      {t:'摇摇头走开',go:(r,done)=>done()}]}
 };
+const oathPool=r=>CLASSES[r.cls].pool.filter(k=>CARDS[k].ks&&!r.deck.some(d=>baseOf(d)===k));
 function showTale(run,done){
-  const T=rnd(Object.values(TALES).filter(t=>!t.ok||t.ok(run)));
+  // tales you have not met this run come first; only when they run out does one repeat
+  const can=Object.keys(TALES).filter(k=>!TALES[k].ok||TALES[k].ok(run)),fresh=can.filter(k=>!run.tales.includes(k)),key=rnd(fresh.length?fresh:can),T=TALES[key];run.tales.push(key);
   openScr('road',pageHd('线头',run),`<div class="body"><div class="tale ip"><span class="np" style="background-image:url(img/road/tale.jpg)"></span><span class="kick">${T.la}</span><h2>${T.n}</h2><p>${T.d}</p></div>
     <div class="taleopts">${T.opts.map((o,i)=>`<button class="craft" data-i="${i}" ${o.ok&&!o.ok(run)?'disabled':''}><i>${SVG.FLEUR}</i><span><b>${o.t}</b></span></button>`).join('')}</div></div>`);
   document.querySelectorAll('.taleopts .craft').forEach(b=>b.onclick=()=>T.opts[+b.dataset.i].go(run,done));
