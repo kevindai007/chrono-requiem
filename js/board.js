@@ -68,7 +68,7 @@ function midRec(r,bs){
   if(!h&&r.es.length)h='<span>无伤</span>';
   return {h,c:r.took>0?'bad':t?t.c:r.net>0?'res':'',chg};
 }
-const lanesHtml=()=>'<div class="lanes"><div></div><div class="le">敌方</div><div class="lc">交锋</div><div class="lh">勇者</div></div>';
+const lanesHtml=()=>'<div class="lanes"><div>拍</div><div class="le">敌方</div><div class="lc">交锋</div><div class="lh">勇者</div></div>';
 // the glyph sewn on each patch
 const EL={'火':SVG.FIRE,'冰':SVG.ICE,'雷':SVG.BOLT};
 const foeGlyph=e=>e.na?'':e.kind==='j'||e.fin?SVG.BURST:SVG.CLAW;

@@ -110,7 +110,7 @@ function recapHtml(run,top){
     :(R.better?`新纪录：${CLASSES[run.cls].n}走到了第 ${ROM[run.stage+1]} 层`:`${CLASSES[run.cls].n}最远走到过第 ${ROM[R.was.floor]} 层${R.was.turns?`，最快 ${R.was.turns} 回合登顶`:''}`);
   return `<section class="pp recap"><h4 class="sh sm">这一局</h4>
     <p class="rsum">战斗 <b>${L.length}</b> 场${tries?`（重试 ${tries} 次）`:''} · 共 <b>${sum('turns')}</b> 回合 · 弹反 <b>${sum('parries')}</b> 次 · 最高一拍 <b>${peak}</b></p>
-    <ol class="rlog">${L.map(x=>`<li class="${x.win?'':'lost'}"><em>${ROM[x.f+1]}</em><b>${x.foe}${x.elite?'<small>乱线</small>':''}</b><span>${x.turns} 回合</span><span>−${x.lost}</span><span>${x.win?`最高 ${x.best}`:'倒下'}</span></li>`).join('')}</ol>
+    <ol class="rlog">${L.map(x=>`<li class="${x.win?'':'lost'}"><em>${ROM[x.f+1]}</em><b>${x.foe}${x.elite?'<small>乱线</small>':''}</b><span>${x.turns} 回合</span><span>−${x.lost} 生命</span><span>${x.win?`最高 ${x.best}`:'倒下'}</span></li>`).join('')}</ol>
     <p class="goal ${R.better?'new':''}">${SVG.KNOT}${goal}</p></section>`;
 }
 function showEnd(){
@@ -252,7 +252,7 @@ function showShop(run,done,said){
         <div class="shelf">${st.stock.map((w,i)=>`<div class="ware ${w.sold?'sold':''}">${cardHtml(w.k,{attr:`data-i="${i}"`,off:w.sold||run.gold<w.p})}${tag(w.sold,w.p)}</div>`).join('')}
         ${st.knot?`<div class="ware ${st.knot.sold?'sold':''}"><button class="kware" id="knotBuy" ${st.knot.sold||run.gold<st.knot.p?'disabled':''}>${knotFace(st.knot.k)}</button>${tag(st.knot.sold,st.knot.p)}</div>`:''}</div></section>
       <section class="pp"><h4 class="sh sm">手艺</h4><div class="crafts">
-        <button class="craft art" id="sewBtn" ${run.gold<sewPrice(run)||!sewable(run)?'disabled':''}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>加绣</b><small>今天的绣线：${offerOf(run).map(x=>STITCH[x].n).join('、')||'没有能用的'}</small><small class="nx">绣过 ${run.sewn} 次 · 下次 ${sewPrice(run)+15}</small></span><em>${sewPrice(run)}</em></button>
+        <button class="craft art" id="sewBtn" ${run.gold<sewPrice(run)||!sewable(run)?'disabled':''}><i style="background-image:url(img/crafts/sew.jpg)"></i><span><b>加绣</b><small>绣线：${offerOf(run).map(x=>STITCH[x].n).join('、')||'没有能用的'}</small><small class="nx">绣过 ${run.sewn} 次 · 下次 ${sewPrice(run)+15}</small></span><em>${sewPrice(run)}</em></button>
         <button class="craft art" id="cutBtn" ${run.gold<cutPrice(run)||run.deck.length<=5?'disabled':''}><i style="background-image:url(img/crafts/cut.jpg)"></i><span><b>拆线</b><small>${run.deck.length<=5?'牌组只剩 5 张，拆不动了':'把一张牌从牌组里拆掉'}</small><small class="nx">拆过 ${run.cut} 次 · 下次 ${cutPrice(run)+25}</small></span><em>${cutPrice(run)}</em></button>
         <button class="craft art" id="mendBtn" ${run.gold<PRICE.mend||st.mended||run.hp>=run.maxhp?'disabled':''}><i style="background-image:url(img/crafts/mend.jpg)"></i><span><b>缝补</b><small>${st.mended?'这次已经缝补过了':run.hp>=run.maxhp?'生命是满的':'回复 15 点生命'}</small><small class="nx">每次进织坊一次</small></span><em>${PRICE.mend}</em></button>
       </div></section>
