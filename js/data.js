@@ -218,7 +218,8 @@ const fateTerms=k=>`做到了，这场的金线${FATES[k].pay===1?'翻倍':'多�
 // true kept, false broken, null when no wager was taken
 const fateRes=()=>S.fate?.on?FATES[S.fate.k].ok():null;
 function payFate(run){const r=fateRes();if(r===true)run.gold+=fateGold(S.fate.k);else if(r===false)run.hp=Math.max(1,run.hp-FATE_COST)}
-const knotPool=run=>Object.keys(KNOTS).filter(k=>!run.knots.includes(k)&&(!KNOTS[k].cls||KNOTS[k].cls===run.cls));
+// 黑线 gives up the mending between floors, which the ladder's fifth rung has already taken
+const knotPool=run=>Object.keys(KNOTS).filter(k=>!run.knots.includes(k)&&(!KNOTS[k].cls||KNOTS[k].cls===run.cls)&&!(k==='black'&&(run.asc||0)>=5));
 const knotRow=run=>run.knots.length?`<span class="knots">${run.knots.map(k=>`<i title="${KNOTS[k].n}：${KNOTS[k].d}">${SVG.KNOT}</i>`).join('')}</span>`:'';
 // the sand a card costs right now: the golden shuttle makes the turn's first move card free
 const costOf=C=>C.t==='挪移'&&S.shuttle?0:C.c;
@@ -290,6 +291,24 @@ const foeE=(f)=>S.events.filter(e=>e.side==='e'&&(!f||f(e)));
 const atkE=b=>at(b,'e').filter(e=>!e.na);
 const gainRage=(n,why)=>{if(S.run.cls!=='warrior'||n<=0)return;const was=S.rage;S.rage=Math.min(S.rageMax,S.rage+n);if(S.rage>was)flt('hero',`怒气 +${S.rage-was}`,'info')};
 
+/* ---------- Foe actions that are not attacks: a pale patch on the loom that does something when its beat resolves ---------- */
+// act(b,kind,label,v,brk) lays one down. Like any foe action it can be moved; and if you deal brk damage or more to the foe
+// on its beat, it is broken and does nothing
+const ACTS={
+  // 蓄力: the foe's next attack hits v harder (S.wound waits for it)
+  wind:{go(a){S.wound=(S.wound||0)+a.v;flt('enemy',`蓄力 +${a.v}`,'info');log(`${FL().lane}的${a.label}：下一次攻击 +${a.v}。`)}},
+  // 回复: the foe mends v life
+  mend:{go(a){healEnemy(a.v,a.label)}}
+};
+const act=(b,k,label,v,brk)=>ev({beat:b,side:'e',label,dmg:0,na:true,act:k,v,brk});
+// what 蓄力 adds to attack e as the loom stands: the wind-ups since the foe's attack before it, on the first attack of the beat
+function windOn(e){
+  if(e.na||e.side!=='e'||atkE(e.beat)[0]!==e)return 0;
+  const prev=Math.max(-1,...foeE(x=>!x.na&&x.beat<e.beat).map(x=>x.beat));
+  return (prev<0?S.wound||0:0)+foeE(x=>x.act==='wind'&&x.beat>=prev&&x.beat<e.beat).reduce((a,x)=>a+x.v,0);
+}
+const foeHit=e=>e.dmg+windOn(e);
+
 /* ---------- The foes: floors 1-5 each draw one of three, then the knight and the Demon King ---------- */
 const FOES=[
  {key:'wolf',floor:'第 1 层',name:'灰鬃野狼',lane:'野狼',hp:70,
@@ -303,60 +322,60 @@ const FOES=[
   rage:()=>S.E.mad},
 
  {key:'bat',floor:'第 1 层',name:'吸血蝠',lane:'蝙蝠',hp:65,
-  rules:['<b>撕咬</b>：每 3 拍里咬 2 次，每次 9 点。','<b>吸血</b>：撕咬真正打到你身上的伤害，蝙蝠全部回给自己。格挡、闪身、残影、弹反都能让它喝不到血。','战士：盾放在撕咬上，挡下的就是它喝不到的。刺客：每 3 拍有一拍它不咬，正好背刺。法师：吟唱被咬断就是双亏，先用寒冰枪把撕咬推开。'],
+  rules:['<b>俯冲</b>：连咬 3 拍，每次 9 点，然后盘旋 3 拍不出手。','<b>吸血</b>：撕咬真正打到你身上的伤害，蝙蝠全部回给自己。格挡、闪身、残影、弹反都能让它喝不到血。','战士：盾放在撕咬上，挡下的就是它喝不到的。刺客：它盘旋的 3 拍正好背刺。法师：把吟唱塞进它盘旋的空当。'],
   reward:['echo','charge','ghost'],stagger:2,
   open:'头顶传来一阵扑翅声。开战。',
   init:()=>({}),
-  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'咬',dmg:9})},
+  beat(b){const m=b%6;if(m>=1&&m<=3)ev({beat:b,side:'e',label:'咬',dmg:9})},
   onHeroHit(es,x){if(!es.length||x<=0||S.ehp<=0)return;const h=Math.min(x,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','吸血 +'+h,'heal');log(`吸血：蝙蝠回复 ${h} 点生命。`)}},
   status:()=>'<span class="tag">吸血 · 咬到多少回多少</span>'},
 
  {key:'skeleton',floor:'第 1 层',name:'骷髅兵',lane:'骷髅',hp:55,
-  rules:['<b>骨刃</b>：每 3 拍里砍 2 次，每次 10 点。','<b>重组</b>：第一次被打倒时，骨头会拼回去，带着 25 点生命再站起来。','<b>粉碎</b>：打倒它的那一下如果单次 15 点及以上（共鸣、蓄时、裂地斩、火球……），骨头直接碎掉，不会重组。','战士留一记共鸣或裂地斩收尾；刺客攒一手绝杀；法师把火球留到最后。'],
+  rules:['<b>骨刃</b>：每 6 拍砍 3 次，每次 10 点。','<b>举刀</b>：第三刀之前先举刀蓄力，那一刀 +8。举刀的那一拍你打出 8 点以上就打断它；也可以把举刀挪到那一刀后面去。','<b>重组</b>：第一次被打倒时，骨头会拼回去，带着 25 点生命再站起来。','<b>粉碎</b>：打倒它的那一下如果单次 15 点及以上（共鸣、蓄时、裂地斩、火球……），骨头直接碎掉，不会重组。','战士留一记共鸣或裂地斩收尾；刺客攒一手绝杀；法师把火球留到最后。'],
   reward:['echo','charge','haste'],
   open:'一堆白骨咔咔作响地站了起来。开战。',
   init:()=>({up:false}),
-  beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'砍',dmg:10})},
+  beat(b){const m=b%6;if(m===1||m===3||m===5)ev({beat:b,side:'e',label:'砍',dmg:10});else if(m===4)act(b,'wind','举刀',8,8)},
   onDealt(x){if(S.ehp>0||S.E.up)return;S.E.up=true;if(x>=15){log(`粉碎！${x} 点的一击把骨头砸成了粉。`);banner('粉碎','SHATTER');return}
     S.ehp=25;flt('enemy','重组','info');log('骷髅散了架……又咔咔地拼了回去，带着 25 点生命站起来。');banner('重组','REASSEMBLE',true)},
   status:()=>S.E.up?'<span class="tag p2">已重组</span>':'<span class="tag">重组 · 最后一击 ≥15 才能粉碎</span>',
   rage:()=>S.E.up},
 
  {key:'beetle',floor:'第 2 层',name:'铁壳甲虫',lane:'甲虫',hp:95,
-  rules:['<b>铁甲</b>：单拍低于 7 点的伤害无效。毒伤无视铁甲。','<b>蜷缩</b>：每 4 拍蜷成一团（灰色「缩」），那一拍你的攻击全部无效。蜷缩可以被「迟滞」「错位」挪开。','<b>撞击</b>：每 3 拍里撞 2 次，每次 11 点。','刺客的小刀很难打穿它，靠共鸣、标记和淬毒。'],
+  rules:['<b>铁甲</b>：单拍低于 7 点的伤害无效。毒伤无视铁甲。','<b>蜷缩</b>：每 5 拍蜷成一团（灰色「缩」），那一拍你的攻击全部无效。蜷缩可以被「迟滞」「错位」挪开。','<b>撞击</b>：慢而重，每 5 拍撞 2 次，每次 16 点。','刺客的小刀很难打穿它，靠共鸣、标记和淬毒。'],
   reward:['stasis','gather','rewind'],
   open:'铁壳摩擦石地，发出刺耳的声音。开战。',
   init:()=>({}),
-  beat(b){if(b%4===0)ev({beat:b,side:'e',label:'缩',dmg:0,na:true});if(b%3!==1)ev({beat:b,side:'e',label:'撞',dmg:11})},
+  beat(b){const m=b%5;if(m===0)ev({beat:b,side:'e',label:'缩',dmg:0,na:true});else if(m===1||m===3)ev({beat:b,side:'e',label:'撞',dmg:16})},
   mod:(x,o)=>{if(o.src==='poison'||o.src==='true')return x;if(o.beat&&at(o.beat,'e').some(e=>e.na))return 0;return x<7?0:x},modNote:'铁甲 · 无效',modShort:'铁甲',
   status:()=>'<span class="tag">铁甲 · 低于 7 无效</span>'},
 
  {key:'spider',floor:'第 2 层',name:'剧毒织蛛',lane:'蜘蛛',hp:90,
-  rules:['<b>毒牙</b>：每 3 拍里咬 2 次，每次 8 点。','<b>蛛毒</b>：毒牙咬中你，你身上叠 3 层毒（最多 6 层）；之后每拍掉 1 点生命、毒减 1 层。蛛毒不会打断吟唱，也不给怒气。','别让它咬到：战士举盾、拼刀；刺客闪身；法师用寒冰枪和迟滞把毒牙推开。「回溯」也能把毒掉的血一起拿回来。'],
+  rules:['<b>毒牙</b>：每隔一拍咬一次，每次 9 点。','<b>蛛毒</b>：毒牙咬中你，你身上叠 3 层毒（最多 6 层）；之后每拍掉 1 点生命、毒减 1 层。蛛毒不会打断吟唱，也不给怒气。','别让它咬到：战士举盾、拼刀；刺客闪身；法师用寒冰枪和迟滞把毒牙推开。「回溯」也能把毒掉的血一起拿回来。'],
   reward:['stasis','gather','rewind'],
   open:'齿轮缝里垂下一根发亮的丝。开战。',
   init:()=>({tox:0}),
-  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'毒牙',dmg:8})},
+  beat(b){if(b%2)ev({beat:b,side:'e',label:'毒牙',dmg:9})},
   onHeroHit(es,x){if(es.length&&x>0&&S.E.tox<6){S.E.tox=Math.min(6,S.E.tox+3);flt('hero','蛛毒','info')}},
   afterBeat(){if(S.E.tox>0&&!S.over){S.E.tox--;log('蛛毒发作，你掉了 1 点生命。');dealHero(1,[],{thorn:true})}},
   status:()=>'<span class="tag">毒牙 · 咬中叠 3 层毒</span>'+(S.E.tox?`<span class="tag p2">你中毒 ${S.E.tox}</span>`:'')},
 
  {key:'gargoyle',floor:'第 2 层',name:'钟楼石像鬼',lane:'石像鬼',hp:95,
-  rules:['<b>俯扑</b>：每 3 拍里扑 2 次，每次 11 点。','<b>石肤</b>：它不俯扑的拍，以及立刻结算的牌，伤害减半。只有它俯扑的那一拍吃全额伤害。毒伤无视石肤。','战士：普攻撞上俯扑就是全额，用战吼、蓄时把拼刀打赢。刺客：在俯扑拍闪身白打，或者靠淬毒。法师：把释放拍对准俯扑，用屏障护住吟唱。'],
+  rules:['<b>俯扑</b>：每 5 拍扑 3 次（连扑两拍，隔一拍再扑一次），每次 12 点。','<b>石肤</b>：它不俯扑的拍，以及立刻结算的牌，伤害减半。只有它俯扑的那一拍吃全额伤害。毒伤无视石肤。','战士：普攻撞上俯扑就是全额，用战吼、蓄时把拼刀打赢。刺客：在俯扑拍闪身白打，或者靠淬毒。法师：把释放拍对准俯扑，用屏障护住吟唱。'],
   reward:['stasis','gather','rewind'],
   open:'檐角的石像慢慢转过了脖子。开战。',
   init:()=>({}),
-  beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'扑',dmg:11})},
+  beat(b){const m=b%5;if(m===1||m===2||m===4)ev({beat:b,side:'e',label:'扑',dmg:12})},
   mod:(x,o)=>{if(o.src==='poison'||(o.beat&&atkE(o.beat).length))return x;return Math.floor(x/2)},modNote:'石肤 · 减半',modShort:'石肤',
   status:()=>'<span class="tag">石肤 · 只有俯扑拍吃全额</span>'},
 
  {key:'slime',floor:'第 3 层',name:'分裂史莱姆',lane:'史莱姆',hp:100,
-  rules:['<b>黏击</b>：每 3 拍里黏 2 次，基础 9 点。','<b>分裂</b>：单次受到 15 点及以上的伤害就分裂一次（最多 3 次），之后每次黏击 +3。','<b>细碎</b>：低于 15 的伤害不会让它分裂。刺客的连击、毒、小刀都很合适；战士的裂地斩和大共鸣要算好时机再用。'],
+  rules:['<b>黏击</b>：每 6 拍黏 3 次，基础 10 点。','<b>聚合</b>：每 6 拍聚合一次，回复 10 点生命。那一拍你打出 10 点以上就打断它（打到 15 点它又会分裂）。','<b>分裂</b>：单次受到 15 点及以上的伤害就分裂一次（最多 3 次），之后每次黏击 +3。','<b>细碎</b>：低于 15 的伤害不会让它分裂。刺客的连击、毒、小刀都很合适；战士的裂地斩和大共鸣要算好时机再用。'],
   reward:['unity','stop','paradox'],
   open:'一团软泥蠕动着挡住了楼梯。开战。',
   init:()=>({split:0}),
-  dmgNow(){return 9+3*S.E.split},
-  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'黏',dmg:this.dmgNow()})},
+  dmgNow(){return 10+3*S.E.split},
+  beat(b){const m=b%6;if(m===1||m===2||m===4)ev({beat:b,side:'e',label:'黏',dmg:this.dmgNow()});else if(m===5)act(b,'mend','聚合',10,10)},
   onDealt(x,o){if(x>=15&&S.E.split<3&&S.ehp>0&&o.src!=='poison'){S.E.split++;const d=this.dmgNow();foeE(e=>e.label==='黏').forEach(e=>e.dmg=twD(d));log(`史莱姆被打裂了！分裂 ${S.E.split}/3，黏击升到 ${d} 点。`);flt('enemy','分裂！','info')}},
   status:()=>`<span class="tag">分裂 ${S.E.split}/3</span>`,
   rage:()=>S.E.split>=3},
@@ -371,27 +390,26 @@ const FOES=[
   status:()=>'<span class="tag">镜影 · 每 3 拍吞掉攻击</span>'},
 
  {key:'puppet',floor:'第 3 层',name:'发条傀儡',lane:'傀儡',hp:100,
-  rules:['<b>锤击</b>：每 3 拍里锤 2 次，基础 8 点。','<b>上弦</b>：它的行动每被你的牌延后一次（迟滞、错位、静滞领域、时停、寒冰枪、感电），发条就拧紧一圈，之后每次锤击 +2（最多 5 圈）。','<b>松弦</b>：拼刀弹反它，发条松掉 2 圈。','别拖它，正面接：战士举盾拼刀；刺客用闪身和残影；法师少用冰，靠屏障硬扛。'],
+  rules:['<b>锤击</b>：连锤 3 拍，基础 8 点，然后停 1 拍上油。','<b>上弦</b>：它的行动每被你的牌延后一次（迟滞、错位、静滞领域、时停、寒冰枪、感电），发条就拧紧一圈，之后每次锤击 +2（最多 5 圈）。','<b>松弦</b>：拼刀弹反它，发条松掉 2 圈。','别拖它，正面接：战士举盾拼刀；刺客用闪身和残影；法师少用冰，靠屏障硬扛。'],
   reward:['echo','haste','ghost'],
   open:'咔哒、咔哒，傀儡背上的发条转了起来。开战。',
   init:()=>({wind:0}),
   dmgNow(){return 8+2*S.E.wind},
   retune(){const d=this.dmgNow();foeE(e=>e.label==='锤').forEach(e=>e.dmg=twD(d))},
-  beat(b){if(b%3!==2)ev({beat:b,side:'e',label:'锤',dmg:this.dmgNow()})},
+  beat(b){if(b%4)ev({beat:b,side:'e',label:'锤',dmg:this.dmgNow()})},
   onDelay(src){if(src==='stagger'||S.E.wind>=5)return;S.E.wind++;this.retune();flt('enemy',`上弦 ${S.E.wind}`,'info');log(`上弦：发条拧紧一圈，锤击升到 ${this.dmgNow()} 点。`)},
   onParry(){if(!S.E.wind)return;S.E.wind=Math.max(0,S.E.wind-2);this.retune();log(`松弦：弹反震松了发条，锤击降到 ${this.dmgNow()} 点。`)},
   status:()=>`<span class="tag ${S.E.wind>=4?'p2':''}">上弦 ${S.E.wind}/5</span>`,
   rage:()=>S.E.wind>=4},
 
  {key:'treant',floor:'第 4 层',name:'荆棘树人',lane:'树人',hp:110,
-  rules:['<b>荆棘</b>：每次受到伤害，反刺你 2 点（毒伤除外）。反刺不会打断吟唱，也不给怒气。','<b>横扫</b>：每 5 拍一次 22 点，很慢但很痛。','<b>藤鞭</b>：横扫之间连抽 2 次，每次 7 点。','<b>生长</b>：每回合结束回复 6 点生命。','刺客出手次数多，被扎得最狠，靠淬毒和绝杀；战士举盾挡横扫；法师一发大火球最划算。'],
+  rules:['<b>荆棘</b>：每次受到伤害，反刺你 2 点（毒伤除外）。反刺不会打断吟唱，也不给怒气。','<b>横扫</b>：每 5 拍一次 22 点，很慢但很痛。','<b>藤鞭</b>：横扫之间连抽 2 次，每次 7 点。','<b>生长</b>：每 5 拍生长一次，回复 10 点生命。那一拍你打出 10 点以上就打断它，也可以把它往后挪。','刺客出手次数多，被扎得最狠，靠淬毒和绝杀；战士举盾挡横扫；法师一发大火球最划算。'],
   reward:['stasis','haste','rewind'],
   open:'枝条沙沙作响，荆棘一根根竖起。开战。',
   init:()=>({}),
-  beat(b){if(b%5===4)ev({beat:b,side:'e',label:'扫',dmg:22});else if(b%5===1||b%5===2)ev({beat:b,side:'e',label:'鞭',dmg:7})},
+  beat(b){const m=b%5;if(m===4)ev({beat:b,side:'e',label:'扫',dmg:22});else if(m===1||m===2)ev({beat:b,side:'e',label:'鞭',dmg:7});else if(m===0)act(b,'mend','生长',10,10)},
   take(x,o){if(x>0&&o.src!=='poison'){dealHero(2,[],{thorn:true});log('荆棘反刺你 2 点。')}return x},
-  turnEnd(){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`生长：树人回复 ${h} 点生命。`)}},
-  status:()=>'<span class="tag">荆棘 · 每击反刺 2</span><span class="tag">每回合回 6</span>'},
+  status:()=>'<span class="tag">荆棘 · 每击反刺 2</span>'},
 
  {key:'ogre',floor:'第 4 层',name:'独眼巨魔',lane:'巨魔',hp:140,
   rules:['<b>连拳</b>：每 6 拍里连打 3 拳，每拳 8 点。','<b>钟锤</b>：连拳之后隔一拍砸下钟锤，26 点，被时间锁定。','<b>震荡</b>：钟锤打到你身上，下回合少 1 粒时之砂。','血厚但慢：战士把盾放在钟锤上；刺客在钟锤拍闪身；法师在两锤之间吟唱大法术。'],
@@ -416,23 +434,23 @@ const FOES=[
   status:()=>'<span class="tag">虚体 · 单次最多 12</span>'+(S.E.hush?'<span class="tag p2">下回合少抽 1</span>':'')},
 
  {key:'shaman',floor:'第 5 层',name:'哥布林萨满',lane:'萨满',hp:110,
-  rules:['<b>图腾</b>（12 点）：图腾在的时候，你的每一下伤害都先打在图腾上，打碎图腾那一下不会溢出到萨满身上。图腾在场时萨满每回合结束回复 6 点。','<b>重立图腾</b>：图腾碎了，每 3 回合会重新立起来。','<b>巫火</b>：每 3 拍里 2 次，每次 11 点。','战士难攒怒气；刺客的多段小刀砸图腾最快；法师的一发大招打在图腾上很浪费，先用小法术或普攻敲碎它。'],
+  rules:['<b>图腾</b>（12 点）：图腾在的时候，你的每一下伤害都先打在图腾上，打碎图腾那一下不会溢出到萨满身上。图腾在场时萨满每回合结束回复 6 点。','<b>重立图腾</b>：图腾碎了，每 3 回合会重新立起来。','<b>巫火</b>：连放 3 拍，每次 11 点，然后歇 2 拍。','战士难攒怒气；刺客的多段小刀砸图腾最快；法师的一发大招打在图腾上很浪费，先用小法术或普攻敲碎它。'],
   reward:['unity','stop','paradox'],
   open:'图腾上的眼睛亮了。开战。',
   init:()=>({totem:12,broke:0}),
-  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'巫火',dmg:11})},
+  beat(b){const m=b%5;if(m>=1&&m<=3)ev({beat:b,side:'e',label:'巫火',dmg:11})},
   take(x,o){if(S.E.totem<=0||x<=0)return x;const a=Math.min(S.E.totem,x);S.E.totem-=a;flt('enemy',`图腾 −${a}`,'info');if(S.E.totem<=0){S.E.broke=S.turn;log('图腾被砸碎了！');banner('图腾碎裂','TOTEM')}else log(`图腾挡下 ${a} 点（还剩 ${S.E.totem}）。`);return 0},
   turnEnd(){if(S.E.totem>0){const h=Math.min(6,S.emax-S.ehp);if(h){S.ehp+=h;flt('enemy','+'+h,'heal');log(`图腾庇佑：萨满回复 ${h} 点生命。`)}}},
   turnStart(first){if(!first&&S.E.totem<=0&&S.turn-S.E.broke>=3){S.E.totem=12;log('萨满重新立起了图腾。');flt('enemy','图腾','info')}},
   status:()=>S.E.totem>0?`<span class="tag sh">图腾 ${S.E.totem}/12</span>`:`<span class="tag ok">图腾已碎 · ${Math.max(0,3-(S.turn-S.E.broke))} 回合后重立</span>`},
 
  {key:'thief',floor:'第 5 层',name:'时之窃贼',lane:'窃贼',hp:115,
-  rules:['<b>快刀</b>：每 3 拍里 2 刀，基础 10 点。','<b>窃时</b>：快刀打到你身上，你的下一次普通攻击延后 1 拍（重击不受影响）。','<b>得手</b>：每偷到一次，快刀永久 +1（最多 +4）。','开局要稳：战士趁刀还轻，用战吼、蓄时多拼刀弹反；刺客用闪身保住连击；法师怕他打断吟唱，屏障和寒冰枪要早用。'],
+  rules:['<b>快刀</b>：每 7 拍 4 刀，忽快忽慢，基础 10 点。','<b>瞄准</b>：最后一刀之前先瞄准，那一刀 +10。瞄准的那一拍你打出 12 点以上就打断它；也可以把瞄准挪到那一刀后面去。','<b>窃时</b>：快刀打到你身上，你的下一次普通攻击延后 1 拍（重击不受影响）。','<b>得手</b>：每偷到一次，快刀永久 +1（最多 +4）。','开局要稳：战士趁刀还轻，用战吼、蓄时多拼刀弹反；刺客用闪身保住连击；法师怕他打断吟唱，屏障和寒冰枪要早用。'],
   reward:['stasis','gather','rewind'],
   open:'影子里有人轻轻笑了一声。开战。',
   init:()=>({stole:0}),
   dmgNow(){return 10+Math.min(4,S.E.stole)},
-  beat(b){if(b%3!==1)ev({beat:b,side:'e',label:'刀',dmg:this.dmgNow()})},
+  beat(b){const m=b%7;if(m===1||m===3||m===4||m===6)ev({beat:b,side:'e',label:'刀',dmg:this.dmgNow()});else if(m===5)act(b,'wind','瞄准',10,12)},
   onHeroHit(es,x){if(!es.length||x<=0)return;const c=cur(),h=S.events.filter(e=>e.side==='h'&&!e.fx&&e.beat>c).sort((a,b)=>a.beat-b.beat)[0];
     if(h)h.beat++;S.E.stole++;const d=this.dmgNow();foeE(e=>e.label==='刀').forEach(e=>e.dmg=twD(d));flt('hero','窃时','info');
     log(`窃时：${h?`你第 ${roman(h.beat-1)} 拍的攻击被偷到第 ${roman(h.beat)} 拍，`:''}快刀升到 ${d} 点。`)},
@@ -440,13 +458,13 @@ const FOES=[
   rage:()=>S.E.stole>=4},
 
  {key:'golem',floor:'第 5 层',name:'熔核魔像',lane:'魔像',hp:120,
-  rules:['<b>熔拳</b>：每 3 拍里 2 拳，每拳 8 点 + 热度。','<b>升温</b>：每回合结束热度 +1（最多 8）。','<b>冷却</b>：单次 15 点及以上的伤害，或寒冰枪命中，热度清零。','<b>熔甲</b>：单拍低于 4 点的伤害无效（毒伤除外）。','战士用共鸣和裂地斩定时降温；刺客攒连击、上毒，用绝杀降温；法师的寒冰枪是天生的克星。'],
+  rules:['<b>熔拳</b>：每 5 拍 3 拳（一拳，隔一拍再连打两拳），每拳 8 点 + 热度。','<b>升温</b>：每回合结束热度 +1（最多 8）。','<b>冷却</b>：单次 15 点及以上的伤害，或寒冰枪命中，热度清零。','<b>熔甲</b>：单拍低于 4 点的伤害无效（毒伤除外）。','战士用共鸣和裂地斩定时降温；刺客攒连击、上毒，用绝杀降温；法师的寒冰枪是天生的克星。'],
   reward:['unity','stop','paradox'],
   open:'锅炉门被一拳砸开，热浪扑面而来。开战。',
   init:()=>({heat:0}),
   dmgNow(){return 8+S.E.heat},
   retune(){const d=this.dmgNow();foeE(e=>e.label==='熔拳').forEach(e=>e.dmg=twD(d))},
-  beat(b){if(b%3!==0)ev({beat:b,side:'e',label:'熔拳',dmg:this.dmgNow()})},
+  beat(b){const m=b%5;if(m===1||m===3||m===4)ev({beat:b,side:'e',label:'熔拳',dmg:this.dmgNow()})},
   mod:(x,o)=>o.src==='poison'||x>=4?x:0,modNote:'熔甲 · 无效',modShort:'熔甲',
   onDealt(x,o){if(S.E.heat&&S.ehp>0&&(x>=15||o.el==='冰')){S.E.heat=0;this.retune();flt('enemy','冷却','info');log(`冷却：${o.el==='冰'?'寒冰':'重击'}让魔像的热度归零，熔拳回到 ${this.dmgNow()} 点。`)}},
   turnEnd(){if(S.E.heat<8){S.E.heat++;this.retune();log(`升温：魔像热度 ${S.E.heat}，熔拳升到 ${this.dmgNow()} 点。`)}},
@@ -481,7 +499,7 @@ const FOES=[
     if(S.E.phase===2&&k==='warrior'){if(b%3===0)ev({beat:b,side:'e',label:'刻',dmg:10});return}
     if(S.E.phase===2&&k==='mage'){if(b%2===1)ev({beat:b,side:'e',label:'刻',dmg:6});return}
     if(b%3!==0)ev({beat:b,side:'e',label:'刻',dmg:10})},
-  fill(h){if(S.E.phase!==2)return;while(S.E.jNext<=h){ev({beat:S.E.jNext,side:'e',kind:'j',label:'审判',dmg:this.jDmg(),locked:true});S.E.jNext+=S.run.cls==='warrior'?6:8}},
+  fill(h){if(S.E.phase!==2)return;while(S.E.jNext<=h){ev({beat:S.E.jNext,side:'e',kind:'j',label:'审判',dmg:twD(this.jDmg()),locked:true});S.E.jNext+=S.run.cls==='warrior'?6:8}},
   take(x,o){if(S.E.phase===2&&S.run.cls==='rogue'&&x>0&&o.src!=='poison'){dealHero(1,[],{thorn:true});log('反甲刺了你 1 点。')}return x},
   turnEnd(){if(S.E.phase===2&&S.run.cls==='warrior'&&S.E.charge<8){S.E.charge=Math.min(8,S.E.charge+3);this.retune();log(`魔王蓄力到 ${S.E.charge} 层，审判升到 ${this.jDmg()} 点。`);flt('enemy','蓄力','info')}},
   mod:(x)=>armored(x),modNote:'齿轮护甲 · 减半',modShort:'护甲',
@@ -493,7 +511,7 @@ const FOES=[
       S.E.phase=2;S.E.jNext=c+4;
       S.events=S.events.filter(e=>!['g','w','d','k'].includes(e.side)&&!(e.side==='e'&&e.beat>c));
       S.events.forEach(e=>{if(e.side==='h'){e.rev=false;if(e.ch){e.dmg=Math.max(6,e.dmg-8);e.ch=false}}});
-      for(let b=c+1;b<=S.genUpTo;b++)this.beat(b);
+      for(let b=c+1;b<=S.genUpTo;b++)foeBeat(this,b);
       this.fill(S.genUpTo);
       const how={warrior:'刻刃放慢了，他开始蓄力。',rogue:'他披上了反甲。',mage:'刻刃变快了，专等你吟唱。'}[S.run.cls];
       log(`回拨：魔王拨动钟面，你布下的残影、盾、闪身、标记和蓄时全部归零。第二阶段·看穿！${how}`);banner('看穿','PHASE II · 第二阶段',true);
@@ -501,7 +519,7 @@ const FOES=[
     if(S.E.phase===2&&S.ehp<=120&&S.ehp>0){
       S.E.phase=3;
       S.events=S.events.filter(e=>!((e.side==='e'&&e.beat>c&&!e.fin)||e.side==='m'));
-      for(let b=c+1;b<=S.genUpTo;b++)this.beat(b);
+      for(let b=c+1;b<=S.genUpTo;b++)foeBeat(this,b);
       ev({beat:c+15,side:'e',kind:'j',label:'终焉',dmg:99,locked:true,noGhost:true,fin:true});
       log('永夜降临：视野缩短，刻刃加速。终焉钟鸣在 15 拍后落下！');banner('永夜','PHASE III · 终焉倒数',true);
     }
@@ -530,7 +548,7 @@ const TWISTS={
   gilded:{n:'镀金',d:'敌人每次攻击 +2；打赢了金线 +50%。',dd:2}
 };
 const TWIST_ODDS=.75;
-const twD=d=>S.tw&&TWISTS[S.tw].dd?Math.max(1,d+TWISTS[S.tw].dd):d;
+const twD=d=>{const x=(S.tw&&TWISTS[S.tw].dd||0)+(asc(6)?2:0);return x?Math.max(1,d+x):d};
 /* Tapestry art (tools/art/tapestry_art_brief.md): img/foes/<key>.jpg is the right half of the arena frieze (2:1), img/foes/<key>_p.jpg the briefing hunt scene */
 FOES.forEach(f=>{f.img=`img/foes/${f.key}.jpg`;f.portrait=`img/foes/${f.key}_p.jpg`});
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];

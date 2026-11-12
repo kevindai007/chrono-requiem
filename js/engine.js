@@ -1,9 +1,17 @@
 /* The rules engine: runs and fights, the road between floors, dealing damage, playing cards, resolving beats, foresight. */
 /* ---------- Run & fight setup ---------- */
 let S;
+/* ---------- The ladder: reach the summit and the next rung opens for that class; a climb on rung n carries rules 1..n ---------- */
+const LADDER=['每只小怪都带一条异纹','起始牌组里混着一张「乱线」','敌人生命 +12%','胜利拿到的金线 −25%','层与层之间不再回复生命','敌人每次攻击 +2'];
+const ascName=n=>n?'一二三四五六'[n-1]+'重':'素织';
+const asc=n=>(S.run.asc||0)>=n;
+const stored=k=>{try{return JSON.parse(localStorage.getItem(k))||{}}catch(e){return {}}};
+// the highest rung a class has opened (kept with its records in cr-best), and the one picked for its next climb (cr-asc)
+const ascOpen=cls=>Math.min(LADDER.length,stored('cr-best')[cls]?.asc||0);
+function ascPick(cls){return Math.max(0,Math.min(ascOpen(cls),stored('cr-asc')[cls]??ascOpen(cls)))}
 function newRun(stage,cls,key){
-  const C=CLASSES[cls];
-  const run={stage,cls,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[],woven:[],tales:[],log:[]};run.hp=run.maxhp;
+  const C=CLASSES[cls],lv=ascPick(cls);
+  const run={stage,cls,asc:lv,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck,lv>=2?['tangle']:[]),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[],woven:[],tales:[],log:[]};run.hp=run.maxhp;
   if(key)run.foes[stage]=key;
   startFight(run);
 }
@@ -14,8 +22,9 @@ function startFight(run,key){
      best:null,turnCards:[],parried:false,parriedPrev:false,foresight:false,rage:0,rageMax:15,combo:0,comboMax:8,poison:0,chain:0,frost:0,refund:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
      deck:lead(shuffle(run.deck.slice())),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
   if(key){S.foeKey=key;S.emax=S.ehp=Math.round(F.hp*1.25)}
-  const plain=F.boss||F.moods;S.ph=plain?0:Math.floor(Math.random()*6);S.tw=!plain&&Math.random()<TWIST_ODDS?shuffle(Object.keys(TWISTS))[0]:null;
+  const plain=F.boss||F.moods;S.ph=plain?0:Math.floor(Math.random()*6);S.tw=!plain&&Math.random()<(asc(1)?1:TWIST_ODDS)?shuffle(Object.keys(TWISTS))[0]:null;
   if(S.tw&&TWISTS[S.tw].hp)S.emax=S.ehp=Math.round(S.emax*TWISTS[S.tw].hp);
+  if(asc(3))S.emax=S.ehp=Math.round(S.emax*1.12);
   if(hasK('black'))S.ehp=Math.round(S.emax*.9);
   if(hasK('hourglass'))S.sand++;if(hasK('spindle'))S.drawN=6;if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
   S.shuttle=hasK('shuttle');S.mute=hasK('mute');S.star=hasK('starthread');
@@ -32,7 +41,7 @@ const lead=d=>d.filter(k=>CARDS[k].st!=='lead').concat(d.filter(k=>CARDS[k].st==
 function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=healTo();
   payFate(run);run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
 // gold thread for a win: a base that grows with the floor, one per 10 of the fight's best beat, two per parry
-const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1)*(S.tw==='gilded'?1.5:1));
+const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1)*(S.tw==='gilded'?1.5:1)*(asc(4)?.75:1));
 
 /* ---------- The road between floors: a queue of steps, so a longer journey is only a longer queue ---------- */
 // run.road holds the steps still to walk before the next fight. A step is a THREADS key, or 'fork': FORK_N different threads
@@ -90,7 +99,7 @@ function rewardPool(run,F){
 // now and then a class card on offer comes already stitched, with a stitch drawn at random
 const STITCHED_ODDS=.25;
 // the life you climb to the next floor with: the floor raises your maximum by 5 and mends FLOOR_HEAL of it
-const healTo=()=>hasK('black')?S.hp:Math.min(S.maxhp+5,S.hp+Math.round((S.maxhp+5)*FLOOR_HEAL));
+const healTo=()=>hasK('black')||asc(5)?S.hp:Math.min(S.maxhp+5,S.hp+Math.round((S.maxhp+5)*FLOOR_HEAL));
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function draw(n){for(let i=0;i<n;i++){if(!S.deck.length){if(!S.discard.length)return;S.deck=shuffle(S.discard);S.discard=[]}S.hand.push(S.deck.pop())}}
 function ev(o){if(S.edge&&o.dmg&&(o.side==='h'||o.side==='c'))o.dmg+=S.edge;if(o.fx&&hasK('whetstone')&&!S.whet){S.whet=true;o.dmg+=6}o.id=S.uid++;S.events.push(o);return o}
@@ -368,7 +377,10 @@ function resolveTarget(i,slot,chip){
 }
 function resolveBeat(b){
   const F=FL();
-  S.hurt=false;let hs=at(b,'h');let es=atkE(b);const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
+  S.hurt=false;let hs=at(b,'h');let es=atkE(b);const ehp0=S.ehp;
+  // 蓄力 lands on the foe's next attack
+  if(S.wound&&es.length){es[0].dmg+=S.wound;S.wound=0}
+  const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
   if(at(b,'m').length&&hs.length){flt('hero','镜影 · 落空','info');log(`第 ${roman(b)} 拍：你的攻击被镜影吞没。`);hs=[];F.onMirror?.call(F)}
   // 破军: a heavy hit smashes the unlocked attacks on its beat before they can clash
   if(S.breaker&&hs.some(h=>h.fx)){const sm=atkE(b).filter(e=>!e.locked);if(sm.length){S.events=S.events.filter(e=>!sm.includes(e));es=atkE(b);gainRage(2*sm.length);flt('enemy','破招','info');log(`第 ${roman(b)} 拍：重击砸掉了${sm.map(e=>e.label).join('、')}。`)}}
@@ -431,6 +443,9 @@ function resolveBeat(b){
     else if(S.hurt&&S.combo){let k=S.keep?Math.floor(S.combo/2):0;if(hasK('silk')&&!S.silked){S.silked=true;k=Math.max(k,S.combo-2)}log(`连击在第 ${roman(b)} 拍中断（${S.combo} 层${k?`，余势留下 ${k} 层`:''}）。`);S.combo=k}
   }
   if(S.poison>0&&!S.over){const ks=S.plague?at(b,'k'):[],d=S.poison*(ks.length?Math.max(...ks.map(k=>k.v||2)):1);dealEnemy(d,`毒（${S.poison} 层${ks.length?'，标记':''}）`,{src:'poison',beat:b})}
+  // the foe's other actions on this beat go off, unless what you dealt it on the beat breaks them
+  for(const a of at(b,'e').filter(e=>e.act)){if(S.over)break;const d=ehp0-S.ehp;
+    if(d>=a.brk){flt('enemy',`断 · ${a.label}`,'info');log(`第 ${roman(b)} 拍：你打出 ${d} 点，打断了${F.lane}的${a.label}。`)}else ACTS[a.act].go(a)}
   if(!S.over)F.afterBeat?.call(F,b);
   // 不动如山: what a shield blocked is banked for your next hit
   if(S.steady&&blkd>0)S.bank=(S.bank||0)+blkd;
@@ -487,7 +502,7 @@ function nextTurn(){
 }
 // how long the clock hand rests on a beat: the speed setting scales every wait, beats where nothing happens pass at half that,
 // and a parry, a clash, a banner, a heavy blow or the fight's end never drop below 60% of the full pause
-const beatWeight=r=>r.over||r.took>=25||r.net>=25||r.fx.some(x=>x.who==='b'||/^弹反|^拼刀|^打断/.test(x.text))?'key':!r.es.length&&!r.fx.length&&!r.took&&!r.net?'quiet':'';
+const beatWeight=r=>r.over||r.took>=25||r.net>=25||r.fx.some(x=>x.who==='b'||/^弹反|^拼刀|^打断|^断 · /.test(x.text))?'key':!r.es.length&&!r.fx.length&&!r.took&&!r.net?'quiet':'';
 const beatWait=(ms,w)=>Math.round(ms*(w==='key'?Math.max(.6,1/SPEED.v):(w==='quiet'?.5:1)/SPEED.v));
 async function endTurn(){
   if(S.busy||S.over)return;

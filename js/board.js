@@ -50,7 +50,7 @@ function renderHand(){
 }
 
 /* what a resolved (or simulated) beat came to, in a word or two */
-const TAGS=[[/^打断/,'吟唱打断','bad'],[/^屏障/,'屏障护住','ok'],[/^弹反/,'弹反','ok'],[/^闪身/,'闪身','ok'],[/^残影/,'残影','ok'],[/^镜影/,'镜影吞没','bad'],[/^盾反/,'盾反','bad'],[/^拼刀失利/,'拼刀失利','bad'],[/^格挡/,null,'ok'],[/^烟幕/,null,'ok'],[/^冰甲/,'冰甲','ok'],[/^共鸣/,null,'res'],[/^背刺/,null,'res']];
+const TAGS=[[/^打断/,'吟唱打断','bad'],[/^屏障/,'屏障护住','ok'],[/^弹反/,'弹反','ok'],[/^断 · /,null,'ok'],[/^蓄力 \+/,null,'bad'],[/^闪身/,'闪身','ok'],[/^残影/,'残影','ok'],[/^镜影/,'镜影吞没','bad'],[/^盾反/,'盾反','bad'],[/^拼刀失利/,'拼刀失利','bad'],[/^格挡/,null,'ok'],[/^烟幕/,null,'ok'],[/^冰甲/,'冰甲','ok'],[/^共鸣/,null,'res'],[/^背刺/,null,'res']];
 function tagOf(r){
   for(const [re,w,c] of TAGS){const f=r.fx.find(x=>x.who!=='b'&&re.test(x.text));if(f)return {t:w||f.text,c}}
   const re=r.fx.find(x=>x.who==='b');if(re)return {t:re.text,c:'res'};
@@ -72,6 +72,8 @@ const lanesHtml=()=>'<div class="lanes"><div>拍</div><div class="le">敌方</di
 // the glyph sewn on each patch
 const EL={'火':SVG.FIRE,'冰':SVG.ICE,'雷':SVG.BOLT};
 const foeGlyph=e=>e.na?'':e.kind==='j'||e.fin?SVG.BURST:SVG.CLAW;
+// what a foe's patch reads: an attack's damage (with the wind-up waiting on it), or what an action does and what breaks it
+const foeTxt=e=>foeGlyph(e)+e.label+(e.act?` <b>+${e.v}</b><span class="lock">断 ${e.brk}</span>`:e.na?'':` <b>${foeHit(e)}</b>`);
 function pastSlot(h){
   const m=midRec(h.rec);
   return `<div class="slot past ${h.fresh?'fresh':''}" data-pb="${h.b}">${wvHtml(h.b)}<div class="bn"><span>${roman(h.b)}</span></div>
@@ -82,7 +84,7 @@ function pastSlot(h){
 // the analytic guess for beats past this turn: what the board looks like if nothing else changes
 function guessMid(b,F){
   const hs=at(b,'h'),ae=at(b,'e'),es=atkE(b),gs=at(b,'g'),ms=at(b,'m'),ws=at(b,'w'),ds=at(b,'d'),cs=at(b,'c'),cw=S.events.filter(e=>e.side==='c'&&e.from<=b&&e.beat>b);
-  let mid='',mc='';const ht=heroTotal(hs);let et=es.reduce((a,e)=>a+e.dmg,0);const ct=ht+cs.reduce((a,c)=>a+c.dmg*c.hits,0);
+  let mid='',mc='';const ht=heroTotal(hs);let et=es.reduce((a,e)=>a+foeHit(e),0);const ct=ht+cs.reduce((a,c)=>a+c.dmg*c.hits,0);
   const ghostOK=gs.length&&!es.some(e=>e.noGhost);
   const blk=es.length&&ws.length&&!ghostOK&&!ds.length?Math.min(blkAt(b),et):0;et-=blk;
   const armor=v=>{if(!F.mod)return v;return F.mod(v,{res:hs.length>=2,src:'atk',beat:b})};
@@ -101,6 +103,7 @@ function guessMid(b,F){
   const hurts=es.length&&!ds.length&&!ghostOK&&et>0&&!(ct&&ct>et);
   if((cs.length||cw.length)&&hurts){mid=S.barrier?'屏障<br>护住吟唱':'打断<br>吟唱！';mc=S.barrier?'ok':'bad'}
   else if(cs.length&&!mid){mid=`释放<br>${cs.map(e=>e.el).join('')}`;mc='res'}
+  const ac=ae.find(e=>e.act);if(ac&&!es.length&&armor(ct)>=ac.brk){mid=`打断<br>${ac.label}`;mc='ok'}
   return {h:mid,c:mc};
 }
 function liveSlot(b,o){
@@ -109,7 +112,7 @@ function liveSlot(b,o){
   const now=b<S.beat+3,far=b>=S.beat+baseView();
   const tg=pend?pend.tg:null;
   const tgt=(tg==='pair'&&b<S.beat+W()-1)||tg==='any'||tg==='h'||tg==='e'||(tg==='b4'&&b<=S.beat+3)||(tg==='cast'&&b>=S.beat+pend.cast-1)||(tg==='sp'&&(cs.length>0||cw.length>0));
-  const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${tg==='e'&&!e.locked?'pick':''} " data-id="${e.id}">${foeGlyph(e)}${e.label}${e.na?'':` <b>${e.dmg}</b>`}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
+  const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${windOn(e)?'up':''} ${tg==='e'&&!e.locked?'pick':''}" data-id="${e.id}">${foeTxt(e)}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
     +gs.map(()=>`<div class="chip g">残影</div>`).join('')+ws.map(w=>`<div class="chip w">${SVG.SHIELD}${w.v?'塔盾':'盾'} −${w.v||SHIELD}</div>`).join('')+ds.map(()=>`<div class="chip d">闪身</div>`).join('')+ms.map(()=>`<div class="chip e mir">镜影</div>`).join('');
   const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'':SVG.SWORD}${e.rev?'逆':e.fx?'重击':'击'} <b>${e.dmg}</b></div>`).join('')
     +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')

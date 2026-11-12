@@ -59,7 +59,7 @@ function beatFx(h){const t=h.rec&&tagOf(h.rec);if(!t)return;if(t.t==='弹反'){S
 const side=who=>who==='hero'?{art:$('heroArt'),box:$('heroFloats'),foe:$('enemyArt'),dir:-1}:{art:$('enemyArt'),box:$('enemyFloats'),foe:$('heroArt'),dir:1};
 const rr=([a,b])=>a+Math.random()*(b-a),any=a=>a[Math.floor(Math.random()*a.length)];
 // what a float means for the ear and the eye; damage floats are blows, a few words are guards and dodges
-const FLOAT_FX=[[/弹反/,'parry'],[/共鸣/,'knot'],[/格挡|盾|帷幕|冰甲|屏障|静音织物|图腾|打结绳/,'block',(w)=>guard(w)],[/闪身|残影|落空/,'dodge',w=>ghost(w)],[/毒/,'poison',w=>burst(w,'poison')],[/霜冻|冻结|冻碎/,'ice',w=>burst(w,'ice')],[/打断/,'err'],[/连击|潮汐|破招/,'spawn']];
+const FLOAT_FX=[[/弹反/,'parry'],[/共鸣/,'knot'],[/格挡|盾|帷幕|冰甲|屏障|静音织物|图腾|打结绳/,'block',(w)=>guard(w)],[/闪身|残影|落空/,'dodge',w=>ghost(w)],[/毒/,'poison',w=>burst(w,'poison')],[/霜冻|冻结|冻碎/,'ice',w=>burst(w,'ice')],[/打断/,'err'],[/连击|潮汐|破招|^断 · /,'spawn']];
 function floatFx(who,text,cls){
   if(cls==='dmg'||cls==='big'||cls==='hurt'){SFX(cls==='dmg'?'hit':cls);strike(who,cls==='big'?2:cls==='hurt'?1.3:1);return}
   if(cls==='heal'){SFX('heal');burst(who,'heal');return}

@@ -12,7 +12,7 @@ const rulesList=rs=>`<ul class="rules">${rs.map((r,i)=>`<li><i>${[SVG.CLAW,SVG.S
 const stat=(ic,c,lb,v,o={})=>`<div class="stat"><i class="${c}">${ic}</i><span><small>${lb}</small><b class="${o.zh?'zh':''}">${v}</b>${o.sm?`<small>${o.sm}</small>`:''}</span></div>`;
 // the clock tower: storeys from I at the foot to VII, cleared ones gilded, the current one in madder
 const towerCol=()=>`<ol class="tower" aria-label="钟楼">${S.run.foes.map((k,i)=>`<li class="tw ${i<S.stage?'done':i===S.stage?'cur':''}" title="${i<=S.stage?FOE[k].name:FOE[k].floor}">${ROM[i+1]}</li>`).join('')}</ol>`;
-const patch=e=>`<div class="chip e ${e.na?'na':''} ${e.kind==='j'?'j':''}">${foeGlyph(e)}${e.label}${e.na?'':` <b>${e.dmg}</b>`}</div>`;
+const patch=e=>`<div class="chip e ${e.na?'na':''} ${e.kind==='j'?'j':''}">${foeTxt(e)}</div>`;
 // quiet: redraw the same page in place (a purchase in the weavery), keeping the scroll and skipping the entrance
 function openScr(mode,mast,main,focus,quiet){
   const s=$('scr'),y=s.scrollTop;calmDown();s.className='scr '+mode;
@@ -46,7 +46,12 @@ function updatePick(){
   $('pkCrest').innerHTML=crest(pickSel,P.col);
   $('pkWho').innerHTML=`<b>${C.n}</b><span>${P.la}</span>`;
   $('pkPitch').textContent=C.pitch;
+  const open=ascOpen(pickSel),lv=ascPick(pickSel);
+  $('pkAsc').innerHTML=`<span class="lb">难度</span><button class="st" data-d="-1" ${lv?'':'disabled'} aria-label="降低难度">‹</button><b>${ascName(lv)}</b><button class="st" data-d="1" ${lv<open?'':'disabled'} aria-label="提高难度">›</button>
+    <small>${lv?`${LADDER[lv-1]}${lv>1?`，连同前 ${lv-1} 重的规则`:''}`:open?'没有额外规则':`用${C.n}登顶后解锁一重`}</small>`;
 }
+$('pkAsc').onclick=e=>{const b=e.target.closest('.st');if(!b||b.disabled)return;
+  try{localStorage.setItem('cr-asc',JSON.stringify({...stored('cr-asc'),[pickSel]:ascPick(pickSel)+ +b.dataset.d}))}catch(e){}SFX('tap');updatePick()};
 function showClassPick(first){
   closePanel();
   pickSel=(first!==true&&S&&S.run&&S.run.cls)||'warrior';
@@ -72,13 +77,15 @@ function showRules(intro){
     <div class="bmid">
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
       ${S.tw?`<section class="pp twbox"><h4 class="sh sm">异纹 · ${TWISTS[S.tw].n}</h4><p>这一只织得和别的不一样：${TWISTS[S.tw].d}</p></section>`:''}
+      ${S.run.asc?`<section class="pp twbox"><h4 class="sh sm">难度 · ${ascName(S.run.asc)}</h4><p>${LADDER.slice(0,S.run.asc).join('；')}。</p></section>`:''}
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
       ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：${fateTerms(S.fate.k)}。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
       ${S.run.woven.length?`<section class="pp"><h4 class="sh sm">织入的怪物</h4><ul class="knotlist">${S.run.woven.map(k=>`<li><i class="wvi" style="background-image:url(img/weaves/${k}.png)"></i><b>${WEAVES[k].n}</b><span>${WEAVES[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${S.run.knots.length?`<section class="pp"><h4 class="sh sm">线结</h4><ul class="knotlist">${S.run.knots.map(k=>`<li><i>${SVG.KNOT}</i><b>${KNOTS[k].n}</b><span>${KNOTS[k].d}</span></li>`).join('')}</ul></section>`:''}
       ${intro?'':`<section class="pp"><h4 class="sh sm">时间法则</h4>${rulesList([`时间轴上排着未来的行动：上方是敌人，下方是你。每回合 <b>${C.sand||3} 粒时之砂</b>，点「推进时间」结算亮色的 3 拍。`,
         '<b>共鸣</b>：多次攻击落在同一拍，总伤害 ×1.5（三次及以上 ×2）。<b>拼刀</b>：和敌人同拍且伤害更高就弹反，敌人攻击作废并硬直。',
-        '高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，只回复 15% 最大生命（要回更多血得去纺车或织坊），挑一张新牌，再从岔路里选一股走：织坊、纺车……打得越漂亮，拿到的金线越多。'])}</section>`}
+        '<b>浅色的布片</b>不是攻击，是敌人的别的行动（蓄力、回复……），「断」后面的数字是打断它要的伤害：那一拍你打出这么多，它就作废。它也和攻击一样可以被挪动。',
+        `高塔七层：前五层每层从三只怪里随机遇到一只，第 6 层是黑铁骑士，塔顶是永夜魔王。每层打完最大生命 +5，${asc(5)?'不回复生命':'只回复 15% 最大生命'}（要回血得去纺车或织坊），挑一张新牌，再从岔路里选一股走：织坊、纺车……打得越漂亮，拿到的金线越多。`])}</section>`}
       ${floorPicker()}
       <div class="acts"><button class="btn" id="pickBtn">${SVG.REDO}换职业重来</button><button class="btn go" id="startBtn">${SVG.SHUTTLE}${fresh?'开战':'继续'}</button></div>
     </div>
@@ -96,12 +103,13 @@ function logFight(){
 }
 // the best climb per class, kept in this browser: the highest floor reached, and the fewest turns to the summit
 function bestRecord(run,top){
-  let all={};try{all=JSON.parse(localStorage.getItem('cr-best'))||{}}catch(e){}
-  const was=all[run.cls]||{floor:0},turns=run.log.reduce((a,x)=>a+x.turns,0),now={floor:Math.max(was.floor,run.stage+1),turns:was.turns};
+  const all=stored('cr-best'),was=all[run.cls]||{floor:0},turns=run.log.reduce((a,x)=>a+x.turns,0),now={floor:Math.max(was.floor,run.stage+1),turns:was.turns,asc:was.asc||0};
+  // the summit on your highest open rung opens the next one
+  const up=top&&(run.asc||0)>=now.asc&&now.asc<LADDER.length?++now.asc:0;
   const better=top?!was.turns||turns<was.turns:run.stage+1>was.floor;
   if(top&&better)now.turns=turns;
   try{localStorage.setItem('cr-best',JSON.stringify({...all,[run.cls]:now}))}catch(e){}
-  return {was,better,turns};
+  return {was,better,turns,up};
 }
 // the whole climb in one table: each fight, its turns, the life it cost and its best beat; then the record to beat next time
 function recapHtml(run,top){
@@ -111,7 +119,8 @@ function recapHtml(run,top){
   return `<section class="pp recap"><h4 class="sh sm">这一局</h4>
     <p class="rsum">战斗 <b>${L.length}</b> 场${tries?`（重试 ${tries} 次）`:''} · 共 <b>${sum('turns')}</b> 回合 · 弹反 <b>${sum('parries')}</b> 次 · 最高一拍 <b>${peak}</b></p>
     <ol class="rlog">${L.map(x=>`<li class="${x.win?'':'lost'}"><em>${ROM[x.f+1]}</em><b>${x.foe}${x.elite?'<small>乱线</small>':''}</b><span>${x.turns} 回合</span><span>−${x.lost} 生命</span><span>${x.win?`最高 ${x.best}`:'倒下'}</span></li>`).join('')}</ol>
-    <p class="goal ${R.better?'new':''}">${SVG.KNOT}${goal}</p></section>`;
+    <p class="goal ${R.better?'new':''}">${SVG.KNOT}${goal}</p>
+    ${R.up?`<p class="goal new">${SVG.KNOT}解锁难度 · ${ascName(R.up)}：${LADDER[R.up-1]}</p>`:run.asc?`<p class="goal">${SVG.KNOT}这一局的难度：${ascName(run.asc)}</p>`:''}</section>`;
 }
 function showEnd(){
   if(!$('scr').hidden&&$('scr').dataset.end===String(S.uid))return;
