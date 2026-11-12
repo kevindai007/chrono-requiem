@@ -77,6 +77,7 @@ function showRules(intro){
     <div class="bmid">
       <section class="pp"><h4 class="sh">敌方行动</h4>${rulesList(F.rules)}<div class="preview">${first}</div></section>
       ${S.tw?`<section class="pp twbox"><h4 class="sh sm">异纹 · ${TWISTS[S.tw].n}</h4><p>这一只织得和别的不一样：${TWISTS[S.tw].d}</p></section>`:''}
+      ${S.kind==='patrol'?`<section class="pp twbox"><h4 class="sh sm">前哨</h4><p>它守在上楼的路上，生命 −${Math.round(100-100*PATROL_HP)}%。打赢了挑一张牌、照常回复生命，金线只有一半；然后才是这一层的${FOE[S.run.foes[S.stage]].name}。</p></section>`:''}
       ${S.run.asc?`<section class="pp twbox"><h4 class="sh sm">难度 · ${ascName(S.run.asc)}</h4><p>${LADDER.slice(0,S.run.asc).join('；')}。</p></section>`:''}
       <section class="pp"><h4 class="sh sm">你的职业</h4><div class="cls"><span class="crest">${crest(k,PICK[k].col)}</span><div><h3>${C.n}</h3><div class="sub">${SVG.SWORD}${C.sub}</div></div><p>${C.rule}</p></div></section>
       ${S.fate&&(fresh||S.fate.on)?`<section class="pp fatebox"><h4 class="sh sm">命运之线</h4><p>${FATES[S.fate.k].d(S.stage)}。接下它：${fateTerms(S.fate.k)}。</p>${fresh?`<button class="btn ${S.fate.on?'go':''}" id="fateBtn">${S.fate.on?'已接下（再点放弃）':'接下'}</button>`:''}</section>`:''}
@@ -99,7 +100,7 @@ function showRules(intro){
 // every fight of the run, kept for the recap on the defeat and summit pages
 function logFight(){
   if(S.logged)return;S.logged=true;const F=FL();
-  S.run.log.push({f:S.stage,foe:F.name,elite:!!S.foeKey,win:S.over==='win',turns:S.turn,lost:Math.max(0,S.hp0-S.hp),best:S.best?.d||0,parries:S.parries||0});
+  S.run.log.push({f:S.stage,foe:F.name,kind:S.kind,win:S.over==='win',turns:S.turn,lost:Math.max(0,S.hp0-S.hp),best:S.best?.d||0,parries:S.parries||0});
 }
 // the best climb per class, kept in this browser: the highest floor reached, and the fewest turns to the summit
 function bestRecord(run,top){
@@ -118,7 +119,7 @@ function recapHtml(run,top){
     :(R.better?`新纪录：${CLASSES[run.cls].n}走到了第 ${ROM[run.stage+1]} 层`:`${CLASSES[run.cls].n}最远走到过第 ${ROM[R.was.floor]} 层${R.was.turns?`，最快 ${R.was.turns} 回合登顶`:''}`);
   return `<section class="pp recap"><h4 class="sh sm">这一局</h4>
     <p class="rsum">战斗 <b>${L.length}</b> 场${tries?`（重试 ${tries} 次）`:''} · 共 <b>${sum('turns')}</b> 回合 · 弹反 <b>${sum('parries')}</b> 次 · 最高一拍 <b>${peak}</b></p>
-    <ol class="rlog">${L.map(x=>`<li class="${x.win?'':'lost'}"><em>${ROM[x.f+1]}</em><b>${x.foe}${x.elite?'<small>乱线</small>':''}</b><span>${x.turns} 回合</span><span>−${x.lost} 生命</span><span>${x.win?`最高 ${x.best}`:'倒下'}</span></li>`).join('')}</ol>
+    <ol class="rlog">${L.map(x=>`<li class="${x.win?'':'lost'}"><em>${ROM[x.f+1]}</em><b>${x.foe}${x.kind?`<small>${x.kind==='elite'?'乱线':'前哨'}</small>`:''}</b><span>${x.turns} 回合</span><span>−${x.lost} 生命</span><span>${x.win?`最高 ${x.best}`:'倒下'}</span></li>`).join('')}</ol>
     <p class="goal ${R.better?'new':''}">${SVG.KNOT}${goal}</p>
     ${R.up?`<p class="goal new">${SVG.KNOT}解锁难度 · ${ascName(R.up)}：${LADDER[R.up-1]}</p>`:run.asc?`<p class="goal">${SVG.KNOT}这一局的难度：${ascName(run.asc)}</p>`:''}</section>`;
 }
@@ -136,7 +137,7 @@ function showEnd(){
         ${recapHtml(S.run,false)}
         <div class="acts"><button class="btn" id="runBtn">${SVG.REDO}重新选职业</button><button class="btn red" id="retryBtn">${SVG.SHUTTLE}重试本层</button></div>
         <p class="coda">钟针仍在前行</p></div></div>`,'retryBtn');
-    $('retryBtn').onclick=()=>{closePanel();startFight(S.run,S.foeKey);render();fightIn();banner(FL().floor,FL().name)};
+    $('retryBtn').onclick=()=>{closePanel();startFight(S.run,S.foeKey,S.kind);render();fightIn();banner(FL().floor,FL().name)};
     $('runBtn').onclick=()=>showClassPick();
   }else if(last){
     const ks=[...new Set(S.run.deck)];
@@ -148,7 +149,7 @@ function showEnd(){
       ${recapHtml(S.run,true)}
       <div class="acts end"><button class="btn go" id="runBtn">${SVG.SHUTTLE}再登钟楼</button></div></div>`,'runBtn');
     $('runBtn').onclick=()=>showClassPick();
-  }else if(S.foeKey){
+  }else if(S.kind==='elite'){
     // an elite from the road: no heal and no card, its gold and a knot, then back onto the road
     const run=S.run,g=loot();
     openScr('road',pageHd('乱线解开了',run),`<div class="body"><h2 class="ttl">${F.name}倒下了</h2>
@@ -156,18 +157,18 @@ function showEnd(){
       <div class="acts end"><button class="btn go" id="goOn">${SVG.KNOT}挑一枚线结</button></div></div>`,'goOn');
     $('goOn').onclick=()=>{run.hp=S.hp;run.gold+=g;payFate(run);showKnotPick(run,()=>walk(run))};
   }else{
-    const N=FOE[S.run.foes[S.stage+1]],pool=rewardPool(S.run,F);if(S.run.rift){const x=shuffle(CLASSES[S.run.cls].pool.filter(k=>!pool.includes(k)&&!CARDS[k].ks))[0];if(x)pool.unshift(x)}
+    const pat=S.kind==='patrol',up=S.stage-(pat?1:0),N=FOE[S.run.foes[up+1]],pool=rewardPool(S.run,F);if(S.run.rift){const x=shuffle(CLASSES[S.run.cls].pool.filter(k=>!pool.includes(k)&&!CARDS[k].ks))[0];if(x)pool.unshift(x)}
     openScr('win',MAST(metaHtml()),`<div class="vban"><b>胜利</b><span>VICTORY</span></div><div class="body">
       <div class="hero-col"><div class="ip fig"><div class="pic" style="background-image:url(img/classes/body_${cls}.jpg)" role="img" aria-label="${CL().n}"></div></div>
         <div class="foecrest"><i style="background-image:url(${F.img})"></i></div>
         ${B?`<div class="best ip"><div class="v"><small>最高一拍</small><b>${B.d}</b><em>${bestAt}</em></div><div class="cards">${B.cards.length?B.cards.join('、'):'自动攻击'}</div></div>`:''}</div>
       <div class="vmain"><h2 class="ttl">${F.name}倒下了</h2><div class="seam"></div>
-        <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} → <em>${healTo()}</em>`,{sm:`上限 ${S.maxhp+5}`})}${stat(SVG.STAIRS,'ind','下一层',N.name,{zh:1})}</div>
+        <div class="stats">${stat(SVG.SAND,'','回合',S.turn)}${stat(SVG.HEART,'','生命',`${S.hp} → <em>${healTo()}</em>`,{sm:`上限 ${S.maxhp+floorUp()}`})}${stat(SVG.STAIRS,'ind',pat?'前哨之后':'下一层',N.name,{zh:1})}</div>
         <h4 class="sh">战利品</h4><p class="lead">挑一张牌加入牌组</p>
         <div class="rewards">${pool.map(k=>cardHtml(k,{cls:'rw',attr:`data-k="${k}"`})).join('')}
           ${WEAVES[F.key]&&!S.run.woven.includes(F.key)?`<button class="skipcard weave" id="weaveBtn"><span class="sk-ic"><i style="background-image:url(img/weaves/${F.key}.png)"></i></span><b>织入${F.lane}</b><i>不拿牌 · ${WEAVES[F.key].n}：${WEAVES[F.key].d}</i></button>`:''}
-          <button class="skipcard" id="skipBtn"><span class="sk-ic">${SVG.SKIP}</span><b>直接上楼</b><i>不拿牌</i></button></div>
-        <div class="journey ip">${S.run.foes.map((k,i)=>`<span class="jn ${i<=S.stage?'done':i===S.stage+1?'next':''}"><em>${ROM[i+1]}</em><i></i><span>${i<=S.stage+1?FOE[k].name:''}</span></span>`).join('')}</div>
+          <button class="skipcard" id="skipBtn"><span class="sk-ic">${SVG.SKIP}</span><b>${pat?'继续赶路':'直接上楼'}</b><i>不拿牌</i></button></div>
+        <div class="journey ip">${S.run.foes.map((k,i)=>`<span class="jn ${i<=up?'done':i===up+1?'next':''}"><em>${ROM[i+1]}</em><i></i><span>${i<=up+1?FOE[k].name:''}</span></span>`).join('')}</div>
         ${S.fate?.on?`<p class="lead fate">${fateRes()?`命运之线 · 完成：金线再 <b>+${fateGold(S.fate.k)}</b>`:`命运之线 · 没有完成：生命 <b>−${FATE_COST}</b>`}</p>`:''}
         <p class="lead"><span class="rwnote">当前牌组 ${S.run.deck.length} 张 · 金线 ${S.run.gold||0} <em>+${loot()}</em></span></p></div></div>`);
     const next=k=>nextFloor(k,true);
@@ -188,7 +189,8 @@ function nextFoe(run){
   const F=FOE[run.foes[run.stage]];
   return `<aside class="nfoe ip"><div class="pic" style="background-image:url(${F.portrait})" role="img" aria-label="${F.name}"></div>
     <div class="cap"><span class="fl">下一层 · 第 ${ROM[run.stage+1]} 层</span><h3>${F.name}</h3><small>${EN[F.key]}</small>
-      <span class="hp">${SVG.HEART}生命 <b>${F.hp}</b></span><p>${F.rules[0]}</p></div></aside>`;
+      <span class="hp">${SVG.HEART}生命 <b>${F.hp}</b></span><p>${F.rules[0]}</p>
+      ${run.road.includes('patrol')?`<p class="out">上楼的路上有前哨：<b>${FOE[run.outs[run.stage]].name}</b></p>`:''}</div></aside>`;
 }
 // what you carry: life, gold, the deck in short, knots and woven foes
 function pack(run){

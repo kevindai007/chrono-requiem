@@ -13,41 +13,53 @@ function newRun(stage,cls,key){
   const C=CLASSES[cls],lv=ascPick(cls);
   const run={stage,cls,asc:lv,maxhp:C.hp+5*stage,deck:GENERAL.concat(C.deck,lv>=2?['tangle']:[]),foes:rollFoes(),gold:0,road:[],sewn:0,cut:0,knots:[],woven:[],tales:[],log:[]};run.hp=run.maxhp;
   if(key)run.foes[stage]=key;
+  // run.outs: the outpost met on the road up to each floor that has one, another of that floor's foes
+  run.outs=TOWER.map((p,i)=>ROAD[i-1]?.includes('patrol')?shuffle(p.filter(k=>k!==run.foes[i]))[0]:null);
   startFight(run);
 }
-// key: an elite from the road (乱线) fought in place of the floor's foe, with 25% more life
-function startFight(run,key){
+// key: a foe met on the road, fought in place of the floor's own. kind 'elite' (乱线) has 25% more life;
+// kind 'patrol' (前哨) has less, and is won like a floor: a card, gold, the mending, but no climb
+const PATROL_HP=.7;
+function startFight(run,key,kind){
   const F=FOE[key||run.foes[run.stage]];
   S={run,stage:run.stage,beat:1,turn:1,hp:run.hp??run.maxhp,maxhp:run.maxhp,ehp:F.hp,emax:F.hp,sand:CLASSES[run.cls].sand||3,debt:0,shield:0,barrier:0,med:false,iceArmor:false,lastSpell:null,
      best:null,turnCards:[],parried:false,parriedPrev:false,foresight:false,rage:0,rageMax:15,combo:0,comboMax:8,poison:0,chain:0,frost:0,refund:0,cry:false,smoke:[],dmgLast:0,dmgThis:0,resThis:false,played:null,lastPlayed:null,drawN:5,
      deck:lead(shuffle(run.deck.slice())),hand:[],discard:[],events:[],genUpTo:0,uid:1,over:null,log:[],pending:null,busy:false,resolving:null,hist:[],doneUpTo:0,E:F.init()};
-  if(key){S.foeKey=key;S.emax=S.ehp=Math.round(F.hp*1.25)}
+  if(key){S.foeKey=key;S.kind=kind;S.emax=S.ehp=Math.round(F.hp*(kind==='patrol'?PATROL_HP:1.25))}
   const plain=F.boss||F.moods;S.ph=plain?0:Math.floor(Math.random()*6);S.tw=!plain&&Math.random()<(asc(1)?1:TWIST_ODDS)?shuffle(Object.keys(TWISTS))[0]:null;
   if(S.tw&&TWISTS[S.tw].hp)S.emax=S.ehp=Math.round(S.emax*TWISTS[S.tw].hp);
   if(asc(3))S.emax=S.ehp=Math.round(S.emax*1.12);
+  if(hasK('hourglass'))S.sand++;if(hasK('twin'))S.sand++;S.drawN=handN()+(hasK('spindle')?1:0);
+  if(hasK('dicer'))S.emax=S.ehp=Math.round(S.emax*1.1);if(hasK('bloodline')){S.hp=Math.max(1,S.hp-6);S.sand+=2}
+  if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
   if(hasK('black'))S.ehp=Math.round(S.emax*.9);
-  if(hasK('hourglass'))S.sand++;if(hasK('spindle'))S.drawN=6;if(hasK('rustnail'))S.rage=3;if(hasK('venomsac'))S.poison=5;
   S.shuttle=hasK('shuttle');S.mute=hasK('mute');S.star=hasK('starthread');
   S.totem=hasW('shaman')?10:0;S.hp0=S.hp;S.wfx={};S.fate=run.stage<TOWER.length-1?{k:shuffle(Object.keys(FATES))[0],on:false}:null;
   gen(S.beat+11);UNDO=[];UNDO_LOCK=false;
   F.turnStart?.call(F,true);
-  draw(S.drawN);S.drawN=5;
+  draw(S.drawN);S.drawN=handN();
   log(F.open);
 }
 // 引线 cards go on top of the shuffled deck, so the opening hand draws them
 const lead=d=>d.filter(k=>CARDS[k].st!=='lead').concat(d.filter(k=>CARDS[k].st==='lead'));
 // climb to the next floor with the HP this fight left you, taking card k (or none) and the gold thread the fight earned;
 // with ui, the steps of ROAD for this gap are walked before the next fight (the balance AI calls it without, straight to the fight)
-function nextFloor(k,ui){const run=S.run;if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.rift=false;run.maxhp+=5;run.hp=healTo();
-  payFate(run);run.stage++;if(!ui)return startFight(run);run.road=ROAD[run.stage-1].slice();walk(run)}
+function nextFloor(k,ui){const run=S.run,pat=S.kind==='patrol';if(k){run.deck.push(k);if(CARDS[k].a)(run.picks??=[]).push(k)}run.gold=(run.gold||0)+loot();run.hp=healTo();payFate(run);
+  // an outpost won: on along the road to the floor it guarded
+  if(pat)return ui?walk(run):startFight(run);
+  run.rift=false;run.maxhp+=5;run.stage++;
+  if(!ui)return run.outs[run.stage]?startFight(run,run.outs[run.stage],'patrol'):startFight(run);
+  run.road=ROAD[run.stage-1].slice();walk(run)}
 // gold thread for a win: a base that grows with the floor, one per 10 of the fight's best beat, two per parry
-const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(S.run.rift&&!S.foeKey?2:1)*(S.tw==='gilded'?1.5:1)*(asc(4)?.75:1));
+const loot=()=>Math.round((18+3*S.stage+Math.floor((S.best?.d||0)/10)+2*(S.parries||0)+(FL().key==='knight'?30:0))*(hasK('abacus')?1.3:1)*(hasK('dicer')?1.5:1)*(S.run.rift&&!S.foeKey?2:1)*(S.kind==='patrol'?.5:1)*(S.tw==='gilded'?1.5:1)*(asc(4)?.75:1));
 
 /* ---------- The road between floors: a queue of steps, so a longer journey is only a longer queue ---------- */
 // run.road holds the steps still to walk before the next fight. A step is a THREADS key, or 'fork': FORK_N different threads
 // drawn by weight from those whose ok(run) passes, and you walk the one you pick. A thread's go(run,done) runs its screen and
 // calls done() to walk on; it may push more steps onto run.road first (an event chain, a detour), and nothing knows where a step sits
-const ROAD=[['fork'],['fork'],['fork'],['fork'],['fork','fork'],['fork']];
+// 'patrol' is the outpost fight (run.outs) on the way up to floors 2-5
+const ROAD=[['fork','patrol'],['fork','patrol'],['fork','patrol'],['fork','patrol'],['fork','fork'],['fork']];
+const eliteKeys=run=>TOWER[run.stage].filter(k=>k!==run.foes[run.stage]&&k!==run.outs[run.stage]);
 const FORK_N=2;
 // to: the strand's button; tg: the ribbon on its picture; peek(run): what the strand promises, under its name on the fork
 const THREADS={
@@ -57,9 +69,9 @@ const THREADS={
     peek:run=>[wheelHeal(run)?`歇息：回复 ${wheelHeal(run)} 点生命`:'生命是满的，歇息没有用','或者织补：免费给一张牌加绣']},
   tale:{n:'线头',la:'A LOOSE THREAD',w:3,to:'拉一拉线头',tg:['未知','ind'],d:'一根垂下来的线头，拉一拉看会发生什么。',ok:run=>Object.values(TALES).some(t=>!t.ok||t.ok(run)),go:(run,done)=>showTale(run,done),
     peek:()=>['一件说不准的事：有得也有失','不想要的话，可以走开']},
-  elite:{n:'乱线',la:'A TANGLED FOE',w:2,to:'迎战乱线',tg:['危险','red'],d:'下一层的另一只怪织错了，生命 +25%。打赢它挑一枚线结。',ok:run=>run.stage>=1&&TOWER[run.stage].length>1&&knotPool(run).length>0,
-    go:run=>{startFight(run,shuffle(TOWER[run.stage].filter(k=>k!==run.foes[run.stage]))[0]);render();showRules(true);banner('乱线',FL().name,true)},
-    peek:run=>[`对手：${TOWER[run.stage].filter(k=>k!==run.foes[run.stage]).map(k=>FOE[k].name).join(' 或 ')}`,'打赢了：金线和一枚线结；不回血，不拿牌']},
+  elite:{n:'乱线',la:'A TANGLED FOE',w:2,to:'迎战乱线',tg:['危险','red'],d:'下一层的第三只怪织错了，生命 +25%。打赢它挑一枚线结。',ok:run=>run.stage>=1&&eliteKeys(run).length>0&&knotPool(run).length>0,
+    go:run=>{startFight(run,shuffle(eliteKeys(run))[0],'elite');render();showRules(true);banner('乱线',FL().name,true)},
+    peek:run=>[`对手：${eliteKeys(run).map(k=>FOE[k].name).join(' 或 ')}`,'打赢了：金线和一枚线结；不回血，不拿牌']},
   cache:{n:'宝线',la:'A GOLDEN KNOT',w:1,to:'取走宝线',tg:['奖励','gd'],d:'一束打好的金色线结，挑一枚带走。',ok:run=>run.stage>=2&&knotPool(run).length>0,go:(run,done)=>showKnotPick(run,done),
     peek:run=>['三枚线结里挑一枚，整局都在',`还有 ${knotPool(run).length} 枚你没拿过`]},
   spool:{n:'金线轴',la:'A SPOOL OF GOLD',w:1,to:'捡起金线轴',tg:['奖励','gd'],d:'路边一卷没人要的金线。',ok:()=>true,
@@ -71,6 +83,7 @@ function walk(run){
   const step=run.road.shift();delete run.offer;
   if(!step){startFight(run);render();showRules(true);return}
   if(step==='fork')return showFork(run,()=>walk(run));
+  if(step==='patrol'){startFight(run,run.outs[run.stage],'patrol');render();showRules(true);return banner('前哨',FL().name,true)}
   THREADS[step].go(run,()=>walk(run));
 }
 // run.ahead: the strands the last fork promised for this one (the fork shows, under each strand, the fork that follows it)
@@ -99,20 +112,21 @@ function rewardPool(run,F){
 // now and then a class card on offer comes already stitched, with a stitch drawn at random
 const STITCHED_ODDS=.25;
 // the life you climb to the next floor with: the floor raises your maximum by 5 and mends FLOOR_HEAL of it
-const healTo=()=>hasK('black')||asc(5)?S.hp:Math.min(S.maxhp+5,S.hp+Math.round((S.maxhp+5)*FLOOR_HEAL));
+const floorUp=()=>S.kind==='patrol'?0:5;
+const healTo=()=>hasK('black')||asc(5)?S.hp:Math.min(S.maxhp+floorUp(),S.hp+Math.round((S.maxhp+floorUp())*FLOOR_HEAL));
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function draw(n){for(let i=0;i<n;i++){if(!S.deck.length){if(!S.discard.length)return;S.deck=shuffle(S.discard);S.discard=[]}S.hand.push(S.deck.pop())}}
 function ev(o){if(S.edge&&o.dmg&&(o.side==='h'||o.side==='c'))o.dmg+=S.edge;if(o.fx&&hasK('whetstone')&&!S.whet){S.whet=true;o.dmg+=6}o.id=S.uid++;S.events.push(o);return o}
 function gen(h){
   const F=FL();
   for(let b=S.genUpTo+1;b<=h;b++){
-    const A=CL().atk;if(b%A.every===0)ev({beat:b,side:'h',dmg:A.dmg});
+    const A=CL().atk,hv=hasK('heavy')?1:0;if(b%(A.every+hv)===0)ev({beat:b,side:'h',dmg:A.dmg*(1+hv)});
     foeBeat(F,b);
   }
   S.genUpTo=h;F.fill?.call(F,h);
 }
 const baseView=()=>FL().view?FL().view():8;
-const W=()=>baseView()+(S.foresight?4:0)+(hasK('spyglass')?2:0)-(S.tw==='fog'?2:0);
+const W=()=>baseView()+(S.foresight?4:0)+(hasK('spyglass')?2:0)-(S.tw==='fog'?2:0)-(hasK('vigil')?2:0);
 const at=(b,side)=>S.events.filter(e=>e.beat===b&&(!side||e.side===side));
 // backstab: the assassin hits a beat where no enemy attack lands on them
 const openBeat=b=>!atkE(b).length||at(b,'d').length>0;
@@ -120,6 +134,7 @@ const low=()=>S.hp<S.maxhp*BLOOD_AT;
 function heroTotal(hs){
   if(!hs.length)return 0;const b=hs[0].beat;
   let x=hs.reduce((a,e)=>a+e.dmg+(S.cry&&b<S.beat+3?(e.fx?8:4):0),0);
+  if(hs.length===1&&hasK('chord'))x=Math.max(1,x-2);
   if(S.blood)x+=(low()?6:2)*hs.length;
   x+=((hasW('wolf')&&S.hp*10<S.maxhp*3?3:0)+(hasW('puppet')?S.windUp||0:0)+(hasW('golem')?S.heat||0:0))*hs.length;
   // the combo only sharpens the hits that land in a gap; on a clash the dagger is just a dagger
@@ -495,10 +510,10 @@ function nextTurn(){
   S.ripo=S.drain=S.venom=S.prism=S.flow=S.toxin=false;S.tideN=0;
   if(S.poison){S.poison=Math.floor(S.poison/2);log(`毒减半到 ${S.poison} 层。`)}
   const kept=hasK('jar')?Math.min(1,S.sand):0;S.shuttle=hasK('shuttle');S.whet=S.silked=false;
-  S.sand=(CL().sand||3)-S.debt+(S.med?1:0)+S.refund+kept;S.debt=0;S.med=false;S.refund=0;S.barrier=0;S.iceArmor=false;
+  S.sand=(CL().sand||3)+(hasK('twin')?1:0)-S.debt+(S.med?1:0)+S.refund+kept;S.debt=0;S.med=false;S.refund=0;S.barrier=0;S.iceArmor=false;
   F.turnStart?.call(F,false);
   S.sand=Math.max(0,S.sand);
-  draw(S.drawN);S.drawN=5;
+  draw(S.drawN);S.drawN=handN();
 }
 // how long the clock hand rests on a beat: the speed setting scales every wait, beats where nothing happens pass at half that,
 // and a parry, a clash, a banner, a heavy blow or the fight's end never drop below 60% of the full pause

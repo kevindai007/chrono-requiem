@@ -204,6 +204,6 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&
 $('speedBtn').addEventListener('click',()=>{SPEED.v={1:2,2:4,4:1}[SPEED.v];try{localStorage.setItem('cr-speed',SPEED.v)}catch(e){}applySpeed();SFX('tap')});
 applySpeed();
 $('rulesBtn').addEventListener('click',()=>showRules(false));
-$('resetBtn').addEventListener('click',()=>{startFight(S.run,S.foeKey);render();fightIn();banner('第 1 回合','HORA I')});
+$('resetBtn').addEventListener('click',()=>{startFight(S.run,S.foeKey,S.kind);render();fightIn();banner('第 1 回合','HORA I')});
 addEventListener('resize',()=>{if(S)renderBoard()});
 

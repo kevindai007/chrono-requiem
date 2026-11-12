@@ -500,7 +500,7 @@ button{font-family:var(--f-body);cursor:pointer;color:inherit}
 .nfoe small{display:block;font-family:var(--f-latin);font-size:10px;letter-spacing:.24em;color:var(--gold2)}
 .nfoe .hp{display:inline-flex;align-items:center;gap:6px;margin:10px 0 6px;font-size:14px;color:var(--flax2)}.nfoe .hp svg{width:16px;height:16px;color:var(--madder3)}
 .nfoe .hp b{color:var(--gold3)!important}
-.nfoe p{margin:0;font-size:13px;line-height:1.6;color:#d3d7da;text-align:left}.nfoe p b{color:var(--gold3)!important}
+.nfoe p{margin:0;font-size:13px;line-height:1.6;color:#d3d7da;text-align:left}.nfoe p.out{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(207,169,95,.5)}.nfoe p b{color:var(--gold3)!important}
 .fmain{display:flex;flex-direction:column;gap:10px;min-width:0}
 .strands{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:22px;width:min(100%,calc(var(--n) * 330px));margin:0 auto;padding-top:88px}
 .strands .spool{position:absolute;top:0;left:50%;width:34px;height:34px;margin-left:-17px;color:var(--madder);z-index:1}.strands .spool svg{width:100%;height:100%}

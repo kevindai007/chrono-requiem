@@ -167,6 +167,13 @@ const KNOTS={
   abacus:{n:'算盘线',d:'胜利拿到的金线 +30%。'},
   black:{n:'黑线',d:'每场战斗敌人开局少 10% 生命；但层与层之间不再回复生命。'},
   jar:{n:'沙罐',d:'回合结束时没用完的时之砂，留 1 粒到下回合。'},
+  // the six below trade one thing for another, and change how the whole climb is played
+  twin:{n:'双股线',d:'每回合 +1 时之砂，但每回合少抽 1 张牌。'},
+  vigil:{n:'守夜线',d:'每回合多抽 1 张牌，但时间轴视野 −2 拍。'},
+  heavy:{n:'沉线',d:'你的自动攻击伤害翻倍，但每次出手多隔 1 拍。'},
+  chord:{n:'和弦线',d:'共鸣的倍率 +0.5，但单独一次的攻击伤害 −2。'},
+  dicer:{n:'赌线',d:'胜利拿到的金线 +50%，但敌人生命 +10%。'},
+  bloodline:{n:'血线',d:'每场战斗第一回合 +2 时之砂，但开战时失去 6 点生命（不会致死）。'},
   rustnail:{n:'锈盾钉',cls:'warrior',d:'每场战斗开局有 3 点怒气。'},
   whetstone:{n:'磨石',cls:'warrior',d:'每回合你放下的第一次重击伤害 +6。'},
   venomsac:{n:'毒囊',cls:'rogue',d:'每场战斗开局敌人带 5 层毒。'},
@@ -283,7 +290,9 @@ const addPoison=n=>{S.poison=Math.min(S.plague?30:POISON_MAX,S.poison+n)};
 // every way the assassin's combo goes up runs through here (毒发 turns each step into poison)
 function addCombo(n){const was=S.combo;S.combo=Math.min(S.comboMax,S.combo+n);const up=S.combo-was;if(up>0&&S.toxin)addPoison(up);return up}
 const armored=x=>x<10?Math.floor(x/2):x;
-const mult=n=>n<=1?1:n===2?1.5:2;
+const mult=n=>n<=1?1:(n===2?1.5:2)+(hasK('chord')?.5:0);
+// cards drawn each turn
+const handN=()=>5+(hasK('vigil')?1:0)-(hasK('twin')?1:0);
 // "now" for mid-resolution changes: the beat being resolved, or just before this turn when a card triggers it
 const cur=()=>S.resolving||S.beat-1;
 const foeE=(f)=>S.events.filter(e=>e.side==='e'&&(!f||f(e)));
@@ -429,7 +438,7 @@ const FOES=[
   init:()=>({hush:0}),
   beat(b){const m=b%6;if(m===1||m===4||m===5)ev({beat:b,side:'e',label:'爪',dmg:9});else if(m===2)ev({beat:b,side:'e',label:'尖啸',dmg:14})},
   mod:(x,o)=>o.src==='poison'?x:Math.min(x,12),modNote:'虚体 · 穿透',modShort:'虚体',
-  onHeroHit(es,x){if(x>0&&!S.E.hush&&es.some(e=>e.label==='尖啸')){S.E.hush=1;S.drawN=4;flt('hero','尖啸','info');log('尖啸：你的耳朵嗡嗡作响，下回合少抽 1 张牌。')}},
+  onHeroHit(es,x){if(x>0&&!S.E.hush&&es.some(e=>e.label==='尖啸')){S.E.hush=1;S.drawN=handN()-1;flt('hero','尖啸','info');log('尖啸：你的耳朵嗡嗡作响，下回合少抽 1 张牌。')}},
   turnStart(first){if(!first)S.E.hush=0},
   status:()=>'<span class="tag">虚体 · 单次最多 12</span>'+(S.E.hush?'<span class="tag p2">下回合少抽 1</span>':'')},
 
