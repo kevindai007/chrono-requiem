@@ -228,6 +228,15 @@ function apply(key,target){
     case 'foresee':{draw(2);S.foresight=true;log('预知：看见了更远的时间。');break}
     case 'stop':{const es=foeE(e=>e.beat>=lo);es.forEach(e=>e.beat+=2);log(`时停：${FL().lane}的时间整体冻结 2 拍。`);flt('enemy','时停','info');banner('时停','TEMPUS · STOP');for(const e of es.filter(e=>!e.na)){if(S.over)break;delayed('stop')}break}
     case 'unity':{const hs=S.events.filter(e=>e.side==='h'&&e.beat>=lo&&e.beat<S.beat+3);if(!hs.length)return '本回合 3 拍内没有你的攻击';const sum=hs.reduce((a,e)=>a+e.dmg,0);const tot=sum*hs.length;S.events=S.events.filter(e=>!hs.includes(e));if(hs.length>=2)S.resThis=true;banner('万象归一',`${hs.length} 次攻击同时落下`);dealEnemy(tot,`万象归一（${hs.length} 次攻击）`,{src:'unity',res:hs.length>=2});break}
+    case 'replay':{if(!S.peakLast)return '上回合你没有打出伤害';const d=Math.min(30,S.peakLast);ev({beat:target,side:'h',dmg:d});log(`重演：第 ${roman(target)} 拍放下一次 ${d} 点攻击。`);break}
+    case 'bank':{if(!S.sand)return '没有剩下的时之砂';const n=Math.min(3,S.sand);S.sand-=n;S.refund+=n;log(`存时：${n} 粒时之砂留到下回合。`);break}
+    case 'encore':{const b=target;if(b+1>hi)return '下一拍不在视野内';const hs=at(b,'h'),cs=at(b,'c');if(!hs.length&&!cs.length)return '这一拍没有你的攻击或法术';
+      hs.forEach(e=>ev({beat:b+1,side:'h',dmg:e.dmg,ch:e.ch,fx:e.fx}));cs.forEach(c=>ev({beat:b+1,side:'c',from:b+1,el:c.el,dmg:c.dmg,hits:c.hits,n:c.n+'·回环',c:0,echo:true}));
+      log(`回环：第 ${roman(b)} 拍的${hs.length+cs.length} 次出手在第 ${roman(b+1)} 拍再来一遍。`);break}
+    case 'anchor':{if(target>=S.beat+3)return '时锚只能放在本回合的 3 拍内';if(S.events.some(e=>e.side==='a'))return '本回合已经放下时锚了';ev({beat:target,side:'a'});log(`时锚：落在第 ${roman(target)} 拍。`);break}
+    case 'prophecy':{if(at(target,'p').length)return '这一拍已经有预言了';ev({beat:target,side:'p'});log(`预言：第 ${roman(target)} 拍敌人出手而你不会受伤。`);break}
+    case 'split':{const e=find(target);if(e.na)return '选敌人的一次攻击';if(e.locked)return '这个行动被时间锁定，劈不开';if(e.half||e.dmg<2)return '它已经不能再劈了';
+      const h=Math.floor(e.dmg/2),l=e.label+'·半';ev({beat:e.beat+1,side:'e',label:l,dmg:h,half:true});e.dmg-=h;e.label=l;e.half=true;log(`裂时：${l}，${e.dmg} 点留在第 ${roman(e.beat)} 拍，${h} 点落到第 ${roman(e.beat+1)} 拍。`);break}
     case 'paradox':{S.sand+=2;S.debt+=3;log('悖论：借来 2 粒时之砂，下回合要还 3 粒。');break}
     case 'barrier':{if(S.barrier)return '本回合已经有屏障了';S.barrier=1;log('法力屏障：本回合的吟唱能挨一下。');break}
         case 'meditate':{if(S.med)return '本回合已经冥想过了';S.med=true;draw(1);log('冥想：下回合 +1 时之砂，抽 1 张牌。');break}
@@ -353,7 +362,7 @@ function stepBeat(b){
   const keep=FX;FX=r.fx;S.resolving=b;
   const by=[...new Set(at(b).flatMap(e=>e.by||[]).concat(S.turnCards))];
   try{resolveBeat(b)}finally{FX=keep}
-  S.doneUpTo=b;r.took=r.hp0-S.hp;r.net=r.ehp0-S.ehp;
+  S.doneUpTo=b;r.took=r.hp0-S.hp;r.net=r.ehp0-S.ehp;if(r.net>(S.peakThis||0))S.peakThis=r.net;
   if(r.net>(S.best?.d||0))S.best={d:r.net,b,cards:by};r.hp=S.hp;r.ehp=S.ehp;r.over=S.over;
   return r;
 }
@@ -392,7 +401,7 @@ function resolveTarget(i,slot,chip){
 }
 function resolveBeat(b){
   const F=FL();
-  S.hurt=false;let hs=at(b,'h');let es=atkE(b);const ehp0=S.ehp;
+  S.hurt=false;let hs=at(b,'h');let es=atkE(b);const ehp0=S.ehp,foeUp=es.length>0;
   // 蓄力 lands on the foe's next attack
   if(S.wound&&es.length){es[0].dmg+=S.wound;S.wound=0}
   const g=at(b,'g').length>0,dodge=at(b,'d').length>0,shield=at(b,'w').length>0;
@@ -462,6 +471,10 @@ function resolveBeat(b){
   for(const a of at(b,'e').filter(e=>e.act)){if(S.over)break;const d=ehp0-S.ehp;
     if(d>=a.brk){flt('enemy',`断 · ${a.label}`,'info');log(`第 ${roman(b)} 拍：你打出 ${d} 点，打断了${F.lane}的${a.label}。`)}else ACTS[a.act].go(a)}
   if(!S.over)F.afterBeat?.call(F,b);
+  // 预言 pays if the foe struck on its beat and you took nothing; 时锚 marks your life, and the turn's last beat brings it back
+  if(at(b,'p').length&&!S.over){if(foeUp&&!S.hurt){S.refund+=2;flt('hero','预言 +2','info');log(`预言应验：下回合 +2 时之砂。`)}else log('预言落空。')}
+  if(at(b,'a').length)S.anchor=S.hp;
+  if(b===S.beat+2&&S.anchor!=null){if(!S.over&&S.hp<S.anchor){const h=S.anchor-S.hp;S.hp=S.anchor;flt('hero','+'+h,'heal');log(`时锚：生命回到 ${S.hp}。`)}S.anchor=null}
   // 不动如山: what a shield blocked is banked for your next hit
   if(S.steady&&blkd>0)S.bank=(S.bank||0)+blkd;
   // 死兆: a mark you dealt damage on moves on to the next beat
@@ -505,7 +518,7 @@ function nextTurn(){
   if(hasW('mirror')&&!S.dmgThis&&S.hp<S.maxhp){S.hp=Math.min(S.maxhp,S.hp+4);wvFx('mirror',S.beat-1)}
   if(hasW('golem'))S.heat=Math.min(5,(S.heat||0)+1);
   S.webbed=S.split=S.stole=false;S.windUp=0;
-  S.dmgLast=S.dmgThis;S.dmgThis=0;S.foresight=false;
+  S.dmgLast=S.dmgThis;S.dmgThis=0;S.foresight=false;S.peakLast=S.peakThis||0;S.peakThis=0;
   S.lastPlayed=S.played;S.played=null;S.turnCards=[];S.resThis=false;S.cry=false;S.smoke=[];
   S.ripo=S.drain=S.venom=S.prism=S.flow=S.toxin=false;S.tideN=0;
   if(S.poison){S.poison=Math.floor(S.poison/2);log(`毒减半到 ${S.poison} 层。`)}

@@ -15,6 +15,12 @@ const CARDS={
   stop:{n:'时停',c:3,t:'禁术',d:'敌人的时间轴整体冻结 2 拍，锁定的行动也不例外。',x:1},
   unity:{n:'万象归一',c:2,t:'禁术',d:'本回合 3 拍内你的全部攻击立刻一起结算，每多一次伤害再 +100%。',x:1},
   paradox:{n:'悖论',c:0,t:'禁术',d:'本回合 +2 时之砂，下回合 −3。'},
+  replay:{n:'重演',c:2,t:'共鸣',d:'在一拍放一次攻击，伤害等于你上回合打得最高的那一拍（最多 30）。',tg:'any'},
+  bank:{n:'存时',c:0,t:'节奏',d:'本回合剩下的时之砂留到下回合（最多 3 粒）。'},
+  encore:{n:'回环',c:2,t:'禁术',d:'选一拍：把这一拍你的全部攻击和法术复制到下一拍。',tg:'any',x:1},
+  anchor:{n:'时锚',c:2,t:'守御',d:'在本回合的一拍放下时锚。本回合结束时，你的生命回到那一拍结束时的数值。',tg:'any'},
+  prophecy:{n:'预言',c:1,t:'守御',d:'指定一拍。那一拍敌人出手而你没有受伤，下回合 +2 时之砂。',tg:'any'},
+  split:{n:'裂时',c:1,t:'挪移',d:'选择敌人的一次攻击，劈成两半，后一半落在下一拍。',tg:'e'},
   // a curse from the road: it only clogs the hand, and paying 1 sand clears it for the rest of the fight
   tangle:{n:'乱线',c:1,t:'诅咒',d:'没有效果。打出后本场战斗不再出现。',x:1,glyph:'KNOT'},
   // warrior: rage (r) is spent instead of, or as well as, sand
@@ -129,7 +135,7 @@ const CLASSES={
 // base: the card it was stitched from (its art and rules), st: its stitch. A card takes one stitch at most.
 // Every stitch pays for what it gives in a different coin (uses, draws, sand), so which one is best depends on the card and the build;
 // and a weaver only has STITCH_OFFER of them on hand each visit (run.offer), so the choice is never the same twice
-const EDGE=['echo','shadow','clone','boomerang','cleave','skybreaker','quake','bash','grudge','frenzy','finisher','detonate'];
+const EDGE=['echo','replay','shadow','clone','boomerang','cleave','skybreaker','quake','bash','grudge','frenzy','finisher','detonate'];
 // 魂线 feeds the class's own resource each time the card is played
 const KIN={warrior:{d:'打出时 +2 怒气',f:()=>gainRage(2)},rogue:{d:'打出时连击 +1',f:()=>addCombo(1)},mage:{d:'打出时霜冻 +1',f:()=>addFrost(1)}};
 const STITCH={
@@ -561,6 +567,8 @@ const twD=d=>{const x=(S.tw&&TWISTS[S.tw].dd||0)+(asc(6)?2:0);return x?Math.max(
 /* Tapestry art (tools/art/tapestry_art_brief.md): img/foes/<key>.jpg is the right half of the arena frieze (2:1), img/foes/<key>_p.jpg the briefing hunt scene */
 FOES.forEach(f=>{f.img=`img/foes/${f.key}.jpg`;f.portrait=`img/foes/${f.key}_p.jpg`});
 const TOWER=[['wolf','bat','skeleton'],['beetle','spider','gargoyle'],['slime','mirror','puppet'],['treant','ogre','banshee'],['shaman','thief','golem'],['knight'],['king']];
+// the newer time cards: every foe of a floor adds these to its own reward list
+[['split','prophecy'],['split','prophecy','anchor'],['anchor','replay','bank'],['replay','bank','encore'],['encore','anchor','replay'],['encore','bank']].forEach((ks,i)=>TOWER[i].forEach(f=>FOE[f].reward.push(...ks)));
 const rollFoes=()=>TOWER.map(p=>p[Math.floor(Math.random()*p.length)]);
 const FL=()=>FOE[S.foeKey||S.run.foes[S.stage]];
 // between floors: max HP +5, and only 15% of it comes back; the rest is for the spinning wheel and the weavery to mend

@@ -115,7 +115,7 @@ function liveSlot(b,o){
   const ech=ae.map(e=>{const warn=e.kind==='j'&&b-S.beat<3;return `<div class="chip e ${e.kind==='j'?'j':''} ${e.na?(e.sh?'sh':'na'):''} ${e.fin?'fin':''} ${warn?'warn':''} ${windOn(e)?'up':''} ${tg==='e'&&!e.locked?'pick':''}" data-id="${e.id}">${foeTxt(e)}${e.locked?'<span class="lock">锁</span>':''}</div>`}).join('')
     +gs.map(()=>`<div class="chip g">残影</div>`).join('')+ws.map(w=>`<div class="chip w">${SVG.SHIELD}${w.v?'塔盾':'盾'} −${w.v||SHIELD}</div>`).join('')+ds.map(()=>`<div class="chip d">闪身</div>`).join('')+ms.map(()=>`<div class="chip e mir">镜影</div>`).join('');
   const hch=hs.map(e=>`<div class="chip h ${e.ch?'ch':''} ${e.fx?'fx':''} ${e.rev?'rev':''} ${tg==='h'?'pick':''}" data-id="${e.id}">${e.rev?'':SVG.SWORD}${e.rev?'逆':e.fx?'重击':'击'} <b>${e.dmg}</b></div>`).join('')
-    +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')
+    +ks.map(k=>`<div class="chip k">${k.v?'破绽':'标记'} ×${k.v||2}</div>`).join('')+at(b,'a').map(()=>'<div class="chip k">时锚</div>').join('')+at(b,'p').map(()=>'<div class="chip k">预言</div>').join('')
     +cs.map(e=>`<div class="chip sp ${tg==='sp'?'pick':''}" data-el="${e.el}" data-id="${e.id}">${EL[e.el]}${e.n} <b>${e.dmg}${e.hits>1?'×'+e.hits:''}</b></div>`).join('')+cw.map(e=>`<div class="chip spw" data-el="${e.el}">吟唱·${e.n}</div>`).join('');
   const m=now?midRec(o.rec,o.bs):guessMid(b,F);
   return `<div class="slot ${now?'now':'fut'} ${far?'far':''} ${S.smoke.includes(b)?'smk':''} ${S.resolving===b?'hit':''} ${tgt?'tgt':''} ${o.hov?'hov':''} ${o.no?'no':''}" data-b="${b}">${wvHtml(b)}
